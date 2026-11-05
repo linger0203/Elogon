@@ -1,17 +1,31 @@
-# 自检产物（截图为重，约 62MB，不上仓库）
-_check/
-_backup/
-_archive_prev_chain/
+# ===== 自检产物与备份（约 62MB，不上仓库）=====
+_proto/_check/
+_proto/_backup/
+_proto/_archive_prev_chain/
+_proto/mac/_备份/
+_proto/mac/_过程产物/
 
-# 历史备份文件
+# ===== 内部文档（公开仓库不发布）=====
+README.md
+_spec/
+_evidence/
+
+# ===== 共享资源目录里的调试与过程文件 =====
+# 只发布被页面实际引用的：iconfont/、icons/、logo.png、bg.png
+_assets/_*
+_assets/bg-raw.png
+_assets/company-logo.png
+
+# ===== 历史备份文件 =====
 *.bak
 *.bak_*
 _bak_*
 *_bak_*.html
 *_bak_*.js
 *_bak_*.css
+_proto/client/_glyphtest.html
 
-# 系统与临时文件
+# ===== 系统与临时文件 =====
 .DS_Store
 Thumbs.db
 desktop.ini
