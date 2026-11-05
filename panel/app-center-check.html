@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-page-node-id="rXk0qcD3nFqWgMHOyuDDmF">
+<head data-page-node-id="72v83cy2A7AXctIeZvXYUF">
+<meta charset="utf-8" data-page-node-id="Kri6wBcSLEnaF0LVWfe3Ns">
+<meta name="viewport" content="width=device-width,initial-scale=1" data-page-node-id="jE7a1VEog6vdiPhayvo1nd">
+<title>E登录 · 应用中心 · 应用访问检查</title>
+<style>
+:root{
+  --blue:#00A1E9; --blue-d:#0074A8; --blue-l:#EAF7FE; --blue-b:#CDEAF9;
+  --ink:#262626; --ink2:#5F6672; --ink3:#98A1AD; --line:#E8EBF0; --line2:#F0F2F5;
+  --ok:#12B76A; --ok-l:#F1FBF5; --ok-b:#C6EFD8;
+  --warn:#F79009; --warn-l:#FFF9F0; --warn-b:#FCE3BC;
+  --err:#F04438; --err-l:#FEF4F3; --err-b:#F9D5D1;
+  --card:#FFFFFF; --bg:#EDF0F4;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-font-smoothing:antialiased}
+html,body{height:100%}
+body{
+  background:radial-gradient(1200px 700px at 50% 30%, #F7F9FB 0%, #E4E9EF 100%);
+  font:14px/1.5 "Microsoft YaHei","PingFang SC","Source Han Sans CN",sans-serif;
+  color:var(--ink);display:flex;align-items:center;justify-content:center;overflow:hidden;
+}
+.stage{
+  width:1440px;height:860px;flex:0 0 auto;display:flex;gap:10px;
+  padding:30px;transform-origin:center center;
+}
+.win{
+  background:var(--card);border-radius:14px;overflow:hidden;display:flex;
+  box-shadow:0 18px 48px rgba(23,43,64,.14),0 2px 6px rgba(23,43,64,.06);
+}
+
+/* ============ 左：客户端主窗口 ============ */
+.main{width:978px;height:800px}
+.rail{
+  width:60px;flex:0 0 auto;background:linear-gradient(180deg,#25B0EC 0%,#0C93D6 100%);
+  display:flex;flex-direction:column;align-items:center;padding:14px 0 16px;gap:4px;
+}
+.rail .logo{
+  width:30px;height:30px;border-radius:8px;background:rgba(255,255,255,.16);
+  display:flex;align-items:center;justify-content:center;margin-bottom:16px;
+}
+.rail a{
+  width:52px;padding:10px 0 7px;border-radius:8px;display:flex;flex-direction:column;
+  align-items:center;gap:5px;color:rgba(255,255,255,.82);text-decoration:none;font-size:10.5px;
+  line-height:1.15;cursor:pointer;transition:.15s;position:relative;
+}
+.rail a svg{width:19px;height:19px;display:block}
+.rail a:hover{background:rgba(255,255,255,.14);color:#fff}
+.rail a.on{background:rgba(255,255,255,.2);color:#fff}
+.rail a .dot{position:absolute;top:5px;right:13px;width:5px;height:5px;border-radius:50%;background:#FFC000}
+
+.mbody{flex:1;min-width:0;display:flex;flex-direction:column}
+.titlebar{height:44px;flex:0 0 auto;display:flex;align-items:center;justify-content:flex-end;
+  gap:16px;padding:0 16px;border-bottom:1px solid transparent}
+.titlebar svg{width:15px;height:15px;color:#9AA3AF;cursor:pointer}
+.titlebar svg:hover{color:var(--ink2)}
+
+.tabs{
+  height:46px;flex:0 0 auto;display:flex;align-items:center;gap:30px;padding:0 24px;
+  border-bottom:1px solid var(--line);
+}
+.tabs b{
+  font-size:13.5px;font-weight:400;color:var(--ink2);cursor:pointer;height:46px;
+  display:flex;align-items:center;position:relative;transition:.15s;
+}
+.tabs b:hover{color:var(--blue-d)}
+.tabs b.on{color:var(--blue);font-weight:600}
+.tabs b.on::after{content:"";position:absolute;left:50%;transform:translateX(-50%);
+  bottom:-1px;width:100%;height:2px;border-radius:2px;background:var(--blue)}
+
+.content{flex:1;min-height:0;overflow:auto;padding:20px 24px 26px}
+
+/* 顶部诊断横幅 */
+.banner{
+  background:#F5FAFE;border:1px solid #E3F2FC;border-radius:10px;
+  padding:16px 20px;display:flex;align-items:center;gap:16px;
+}
+.banner .tx{flex:1;min-width:0}
+.banner h3{font-size:15px;font-weight:600;color:#1D2B3A;letter-spacing:.2px}
+.banner p{margin-top:6px;font-size:12.5px;color:#8B95A4}
+.banner p a{color:var(--blue);text-decoration:none;border-bottom:1px solid rgba(0,161,233,.35);
+  padding-bottom:1px;cursor:pointer}
+.banner .btn{
+  height:34px;padding:0 18px;border:0;border-radius:7px;background:var(--blue);color:#fff;
+  font-size:13px;font-family:inherit;cursor:pointer;white-space:nowrap;font-weight:500;
+  box-shadow:0 2px 8px rgba(0,161,233,.28);transition:.15s;
+}
+.banner .btn:hover{background:#0090D2}
+.banner .btn:disabled{background:#9FD9F2;box-shadow:none;cursor:default}
+
+/* 检查项分组 */
+.grp{margin-top:22px}
+.grp h4{
+  font-size:13px;font-weight:600;color:#33405A;display:flex;align-items:center;gap:7px;
+  margin-bottom:6px;
+}
+.grp h4 svg{width:14px;height:14px;color:var(--blue)}
+.item{
+  display:flex;align-items:center;gap:9px;height:34px;padding:0 8px 0 4px;border-radius:6px;
+  font-size:13px;color:#3A4457;transition:background .2s;
+}
+.item:hover{background:#F7F9FB}
+.item .qi{
+  width:15px;height:15px;flex:0 0 auto;border-radius:50%;background:#C6CCD6;color:#fff;
+  font-size:10.5px;line-height:15px;text-align:center;font-weight:700;
+}
+
+/* ============ 右：应用中心 ============ */
+.center{width:400px;height:800px;flex-direction:column;position:relative}
+.chd{
+  flex:0 0 auto;height:52px;display:flex;align-items:center;gap:8px;padding:0 16px;
+}
+.chd .lg{
+  width:18px;height:18px;border-radius:4px;flex:0 0 auto;
+  background:linear-gradient(135deg,#77BC28 0%,#00A1E9 100%);
+  display:flex;align-items:center;justify-content:center;
+}
+.chd .lg::after{content:"";width:7px;height:7px;border-radius:2px;background:#fff;opacity:.92}
+.chd h2{font-size:14.5px;font-weight:600;letter-spacing:.2px;flex:1}
+.chd .x{width:22px;height:22px;display:flex;align-items:center;justify-content:center;
+  border-radius:5px;cursor:pointer;color:#8B95A4}
+.chd .x:hover{background:#F2F4F7;color:var(--ink)}
+
+.search{padding:0 16px 12px;flex:0 0 auto}
+.search .box{
+  height:34px;border:1px solid var(--line);border-radius:7px;display:flex;align-items:center;
+  gap:7px;padding:0 10px;background:#fff;transition:.15s;
+}
+.search .box:focus-within{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,161,233,.1)}
+.search .box svg{width:13px;height:13px;color:#AEB6C2;flex:0 0 auto}
+.search input{border:0;outline:0;flex:1;min-width:0;font:13px/1 inherit;font-family:inherit;color:var(--ink)}
+.search input::placeholder{color:#B4BCC8}
+
+.ctabs{
+  flex:0 0 auto;display:flex;align-items:center;gap:20px;padding:0 16px;height:38px;
+  border-bottom:1px solid var(--line2);
+}
+.ctabs b{
+  font-size:12.5px;font-weight:400;color:var(--ink2);height:38px;display:flex;align-items:center;
+  cursor:pointer;position:relative;white-space:nowrap;
+}
+.ctabs b.on{color:var(--blue);font-weight:600}
+.ctabs b.on::after{content:"";position:absolute;left:50%;transform:translateX(-50%);bottom:0;
+  width:100%;height:2px;border-radius:2px;background:var(--blue)}
+
+.clist{flex:1;min-height:0;overflow:auto;padding:6px 8px 14px}
+.clist::-webkit-scrollbar{width:6px}
+.clist::-webkit-scrollbar-thumb{background:#DDE2E9;border-radius:3px}
+
+.ghead{
+  display:flex;align-items:center;gap:6px;height:36px;padding:0 10px 0 8px;
+  font-size:12.5px;color:#66707F;cursor:pointer;user-select:none;border-radius:6px;
+}
+.ghead:hover{background:#F7F9FB}
+.ghead .arw{width:12px;height:12px;margin-left:auto;color:#B4BCC8;transition:transform .2s}
+.grpclosed .arw{transform:rotate(-90deg)}
+.grpclosed .app{display:none}
+
+.app{
+  display:flex;align-items:center;gap:11px;height:50px;padding:0 8px 0 10px;border-radius:8px;
+  cursor:pointer;transition:background .15s;
+}
+.app:hover{background:#F5F9FC}
+.app .ico{
+  width:30px;height:30px;border-radius:8px;flex:0 0 auto;display:flex;align-items:center;
+  justify-content:center;overflow:hidden;
+}
+.app .nm{
+  font-size:13.5px;color:#2A3240;flex:1;min-width:0;white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis;
+}
+.app .acts{display:flex;align-items:center;gap:4px}
+.ibtn{
+  width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:.15s;flex:0 0 auto;
+}
+.app .ibtn.chk,.app .ibtn.more{opacity:0}
+.app:hover .ibtn.chk,.app:hover .ibtn.more{opacity:1}
+.app.first .ibtn.chk{opacity:.9}
+.ibtn svg{width:16px;height:16px}
+.ibtn.chk{color:var(--blue)}
+.ibtn.chk:hover{background:var(--blue-l)}
+.ibtn.more{color:var(--blue)}
+.ibtn.more:hover{background:var(--blue-l)}
+.ibtn.star{color:#2A3240}
+.ibtn.star:hover{background:#F2F4F7}
+.ibtn.star.on{color:#FFC000}
+.ibtn.star.on svg path{fill:#FFC000;stroke:#FFC000}
+
+/* 应用行右键菜单 */
+.menu{
+  position:fixed;z-index:60;min-width:158px;background:#fff;border:1px solid var(--line);
+  border-radius:9px;box-shadow:0 10px 28px rgba(23,43,64,.16);padding:5px;display:none;
+}
+.menu.on{display:block;animation:pop .14s ease}
+.menu i{
+  display:flex;align-items:center;gap:9px;height:33px;padding:0 10px;border-radius:6px;
+  font-size:12.5px;color:#2A3240;font-style:normal;cursor:pointer;transition:.12s;
+}
+.menu i:hover{background:#F2F8FC;color:var(--blue-d)}
+.menu i svg{width:14px;height:14px;color:#8B95A4;flex:0 0 auto}
+.menu i.hi{color:var(--blue-d);font-weight:500}
+.menu i.hi svg{color:var(--blue)}
+.menu .sep{height:1px;background:var(--line2);margin:4px 8px}
+
+/* ============ 遮罩 + 弹框 ============ */
+.mask{
+  position:fixed;inset:0;background:rgba(16,28,40,.34);backdrop-filter:blur(1.5px);
+  display:none;align-items:center;justify-content:center;z-index:50;
+}
+.mask.on{display:flex;animation:fade .18s ease}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.dlg{
+  width:468px;max-height:calc(100vh - 44px);background:#fff;border-radius:14px;
+  display:flex;flex-direction:column;overflow:hidden;
+  box-shadow:0 24px 60px rgba(10,22,35,.28);animation:pop .22s cubic-bezier(.2,.9,.3,1.1);
+}
+@keyframes pop{from{opacity:0;transform:translateY(10px) scale(.97)}to{opacity:1;transform:none}}
+
+.dhd{display:flex;align-items:center;gap:11px;padding:18px 20px 14px;flex:0 0 auto}
+.dhd .ico{width:36px;height:36px;border-radius:9px;flex:0 0 auto;display:flex;align-items:center;justify-content:center}
+.dhd .tt{flex:1;min-width:0}
+.dhd .tt h3{font-size:15px;font-weight:600;color:#1D2B3A;display:flex;align-items:center;gap:7px}
+.dhd .tt p{font-size:11.5px;color:#9AA3AF;margin-top:3px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:Consolas,Monaco,monospace}
+.dhd .x{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;
+  justify-content:center;color:#9AA3AF;cursor:pointer}
+.dhd .x:hover{background:#F2F4F7;color:var(--ink)}
+
+/* 结论条 */
+.verdict{
+  margin:0 20px;border-radius:10px;padding:14px 16px;display:flex;align-items:flex-start;gap:12px;
+  border:1px solid transparent;transition:.2s;flex:0 0 auto;
+}
+.verdict .vi{width:22px;height:22px;flex:0 0 auto;border-radius:50%;display:flex;
+  align-items:center;justify-content:center;color:#fff;margin-top:1px}
+.verdict .vt{flex:1;min-width:0}
+.verdict .vt b{font-size:14.5px;font-weight:600;display:block;letter-spacing:.2px}
+.verdict .vt span{font-size:12px;display:block;margin-top:4px;line-height:1.6;color:#7A8494}
+.verdict .rt{font-size:11.5px;color:#9AA3AF;white-space:nowrap;margin-top:2px;
+  font-family:Consolas,Monaco,monospace}
+.v-ok{background:var(--ok-l);border-color:var(--ok-b)}
+.v-ok .vi{background:var(--ok)}
+.v-ok .vt b{color:#0B7A47}
+.v-warn{background:var(--warn-l);border-color:var(--warn-b)}
+.v-warn .vi{background:var(--warn)}
+.v-warn .vt b{color:#94570A}
+.v-err{background:var(--err-l);border-color:var(--err-b)}
+.v-err .vi{background:var(--err)}
+.v-err .vt b{color:#A62A20}
+.v-run{background:#F3FAFE;border-color:var(--blue-b)}
+.v-run .vi{background:var(--blue)}
+.v-run .vt b{color:var(--blue-d)}
+
+/* 检查项 */
+.list{margin:14px 20px 0;border-top:1px solid var(--line2);overflow:auto;flex:1;min-height:0}
+.list::-webkit-scrollbar{width:6px}
+.list::-webkit-scrollbar-thumb{background:#DDE2E9;border-radius:3px}
+.row{
+  display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--line2);
+}
+.row:last-child{border-bottom:0}
+.row .st{width:15px;height:15px;flex:0 0 auto;margin-top:2px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:700}
+.row .st.wait{background:#E4E7EC;color:#98A1AD}
+.row .st.ok{background:var(--ok)}
+.row .st.warn{background:var(--warn)}
+.row .st.err{background:var(--err)}
+.row .st.skip{background:#EDEFF2;color:#98A1AD}
+.row .st.run{background:var(--blue);position:relative;overflow:hidden}
+.row .st.run::after{
+  content:"";position:absolute;inset:0;border-radius:50%;
+  border:2px solid rgba(255,255,255,.55);border-top-color:#fff;animation:spin .7s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.row .bd{flex:1;min-width:0}
+.row .l1{display:flex;align-items:center;gap:8px}
+.row .nm{font-size:13px;color:#2A3240}
+.row .rs{font-size:12px;color:#8B95A4;margin-left:auto;text-align:right;white-space:nowrap}
+.row .rs.ok{color:#0B7A47}
+.row .rs.warn{color:#B26A05}
+.row .rs.err{color:#C0392B}
+.row .rs.run{color:var(--blue)}
+.row .rs.skip{color:#A6AEBA}
+.row .why{
+  margin-top:6px;font-size:12px;color:#6B7484;background:#FAFBFC;border-radius:6px;
+  padding:8px 10px;line-height:1.65;display:none;
+}
+.row .why.show{display:block}
+.row .why em{font-style:normal;color:var(--err);font-weight:600}
+.row .why a{color:var(--blue);cursor:pointer;text-decoration:none;border-bottom:1px solid rgba(0,161,233,.35)}
+.row .why .act{display:inline-block;margin-top:2px}
+
+.dft{display:flex;align-items:center;gap:12px;padding:16px 20px 18px;flex:0 0 auto}
+.dft .hint{font-size:11.5px;color:#A6AEBA;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.btn{
+  height:32px;padding:0 15px;border-radius:7px;border:1px solid var(--line);background:#fff;
+  color:var(--ink2);font:13px/1 inherit;font-family:inherit;cursor:pointer;transition:.15s;
+  display:inline-flex;align-items:center;gap:6px;flex:0 0 auto;white-space:nowrap;
+}
+.btn:hover{border-color:#C8D2DC;color:var(--ink)}
+.btn:disabled{opacity:.5;cursor:default}
+.btn.pri{background:var(--blue);border-color:var(--blue);color:#fff;font-weight:500}
+.btn.pri:hover{background:#0090D2;border-color:#0090D2;color:#fff}
+.btn.pri:disabled{background:#9FD9F2;border-color:#9FD9F2;color:#fff}
+.btn.txt{border-color:transparent;background:transparent;color:#8B95A4;padding:0 8px}
+.btn.txt:hover{color:var(--blue);border-color:transparent}
+.btn svg{width:13px;height:13px}
+
+/* 演示状态切换 */
+.demo{
+  position:fixed;right:18px;bottom:16px;display:flex;align-items:center;gap:6px;
+  background:rgba(255,255,255,.9);border:1px solid var(--line);border-radius:999px;
+  padding:6px 8px;box-shadow:0 6px 20px rgba(23,43,64,.1);z-index:80;backdrop-filter:blur(6px);
+}
+.demo span{font-size:11px;color:#A6AEBA;padding:0 4px}
+.demo button{
+  border:0;background:transparent;color:#7A8494;font:11.5px/1 inherit;font-family:inherit;
+  padding:5px 10px;border-radius:999px;cursor:pointer;transition:.15s;
+}
+.demo button:hover{background:#F2F4F7}
+.demo button.on{background:var(--blue);color:#fff}
+</style>
+</head>
+<body data-page-node-id="GRG0ks1jY3QzgwfzujsOEs">
+
+<div class="stage" id="stage" data-page-node-id="QMAwriU9sPHdxNriPIX5YT">
+
+  <!-- ============ 客户端主窗口 ============ -->
+  <section class="win main" data-page-node-id="aUe5S8gCAHiWkBs5Bt4pAV">
+    <nav class="rail" data-page-node-id="7HoaUrH1UQarHB8Pq6fzdQ">
+      <div class="logo" data-page-node-id="k07xVP4QFZm5tiTX9xJDD8">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" data-page-node-id="iSzrFCQBbTI1NEvCt78QI5">
+          <path d="M12 3l7 3.5v5c0 4.2-2.9 7.9-7 9.5-4.1-1.6-7-5.3-7-9.5v-5L12 3z" data-page-node-id="JgGF87iWzaCeDwTXkppNte"/>
+          <path d="M9 12l2 2 4-4" data-page-node-id="zCZCFQUxz4Uig2E9RINMhz"/>
+        </svg>
+      </div>
+      <a class="on" data-page-node-id="DcDsS2ad5oFXcyaztHuZNb">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" data-page-node-id="scD49DzqJlelwbmMdCfjb8"><path d="M12 3l7 3.5v5c0 4.2-2.9 7.9-7 9.5-4.1-1.6-7-5.3-7-9.5v-5L12 3z" data-page-node-id="BJHNzDQufM1p6wtqBnROUD"/></svg>
+        <span data-page-node-id="2abIRNj62j8KyEhdqDvmU1">连接</span>
+      </a>
+      <a data-page-node-id="syKIuMXesKppThqGi2JZTB">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" data-page-node-id="72b1mwJAyuB9jENCjmFwEb"><rect x="3" y="4" width="18" height="12" rx="2" data-page-node-id="hwoDUzKbT9N7vxNMcG22pg"/><path d="M8 20h8" data-page-node-id="ORN7Msp7sFAwgZYGjklTgT"/></svg>
+        <span data-page-node-id="KhUp3fJY9dUTUqCeevLbYs">设备</span>
+      </a>
+      <a data-page-node-id="rPdFWpLRBVj5w9kWEEhjzF"><i class="dot" data-page-node-id="F8rwMVHpKMoEe6wAgbXrlu"></i>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" data-page-node-id="knCbYQw9zmL9pQLGHsH7p4"><path d="M18 8a6 6 0 10-12 0c0 6-2 7-2 7h16s-2-1-2-7" data-page-node-id="Za2sFFStYsnSv6bBgexoa8"/><path d="M10.5 20a2 2 0 003 0" data-page-node-id="x6xYXlKt9DTZWj0FfSqrG6"/></svg>
+        <span data-page-node-id="1lxXudM0eWrk4zg4LkZ5jj">通知</span>
+      </a>
+      <a class="on" style="background:rgba(255,255,255,.2)" data-page-node-id="CmL7ZHbuLDjf7QRDT3brj7">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" data-page-node-id="hnpQq68x7KnDgH2gSKWo61"><circle cx="12" cy="12" r="3" data-page-node-id="Vdp8lPiPopzZDJuTNPZQiC"/><path d="M19.4 15a1.7 1.7 0 00.3 1.9l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-2.9 1.2V21a2 2 0 11-4 0v-.1A1.7 1.7 0 006 19.4a1.7 1.7 0 00-1.9.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1A1.7 1.7 0 002.6 14H2a2 2 0 110-4h.1A1.7 1.7 0 004.6 6a1.7 1.7 0 00-.3-1.9l-.1-.1a2 2 0 112.8-2.8l.1.1A1.7 1.7 0 0010 2.6V2a2 2 0 114 0v.1A1.7 1.7 0 0018 4.6a1.7 1.7 0 001.9-.3l.1-.1a2 2 0 112.8 2.8l-.1.1A1.7 1.7 0 0021.4 10H22a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z" data-page-node-id="yAIAy3MTSstcwXk7yXChZb"/></svg>
+        <span data-page-node-id="pjLyVyq2CiS2hqLq5Gdtaz">设置</span>
+      </a>
+      <a data-page-node-id="OCsFnl3orH8x3rAgVwwbzO">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" data-page-node-id="dnYIiAQqySO4PsZazB2JnF"><circle cx="12" cy="12" r="9" data-page-node-id="t6LteQA76XB2QeAfQHCC7C"/><path d="M12 16v-4M12 8h.01" data-page-node-id="4IKxLrMCpADJxiu6qiF7hM"/></svg>
+        <span data-page-node-id="vWscp8Xoojii9kYpkPL7iv">关于</span>
+      </a>
+    </nav>
+
+    <div class="mbody" data-page-node-id="waI7l4wzSPPDFQRSxAthi5">
+      <div class="titlebar" data-page-node-id="kJ7habhJlUmnw1h7F3a2DD">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" data-page-node-id="zZCYLf7r4ECEQmHZ2SMeyt"><rect x="3" y="3" width="7" height="7" rx="1.5" data-page-node-id="U4FFmuZQDTKFHMAsQkYrUD"/><rect x="14" y="3" width="7" height="7" rx="1.5" data-page-node-id="khDYjBbKyufuqWzdTEX6sk"/><rect x="3" y="14" width="7" height="7" rx="1.5" data-page-node-id="6wPMpAXDUnEtYukRqfhtqv"/><rect x="14" y="14" width="7" height="7" rx="1.5" data-page-node-id="YHb3SDLBTIXYwANN55ZPOf"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" data-page-node-id="gfrf2lmdGHN3Xj2wp5q6qe"><path d="M5 12h14" data-page-node-id="3Tv9ar8ZxiWHv2qUOEdkc3"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" data-page-node-id="jOQjrPZdMB4wtGHZKE2uQg"><path d="M6 6l12 12M18 6L6 18" data-page-node-id="2DmqZpM8A5bqbcnya4IPKW"/></svg>
+      </div>
+
+      <div class="tabs" data-page-node-id="50kTLnSKdgV0ldcEAoCX56">
+        <b data-page-node-id="LD9G1iGRVoBzgpBSbqxrdN">基础设置</b><b data-page-node-id="LHEXZvAZKRnpxn0ZbXmxCS">显示设置</b><b data-page-node-id="keh18suXKVHQ5BqMR166lA">消息通知</b><b class="on" data-page-node-id="Zs7ODiOzsaH7qd7kGGvrHk">诊断修复</b><b data-page-node-id="NUgnGM1SayXkRsiUcH9cfA">日志上报</b>
+      </div>
+
+      <div class="content" data-page-node-id="hZueoXeYeQzXjbwW2nrnK2">
+        <div class="banner" data-page-node-id="5QPDLZIR1Bic5j3Q8TmUKY">
+          <div class="tx" data-page-node-id="3BPeU7iFvkkwd9vzSK91vd">
+            <h3 data-page-node-id="Dr6QjcPS5uPFTaXrurWke7">设备连接诊断，为你的访问安全提供保障</h3>
+            <p data-page-node-id="rFmjVYVeYvlp9rxBgSNnCS">如果软件使用仍出现异常，请根据 <i style="font-style:normal;color:#B4BCC8" data-page-node-id="FxDCzdth5fYm6OMBZJLSTW">ⓘ</i> 建议尝试手工修复，更多问题请参考 <a data-page-node-id="2gTYDp9cf5IUYAmdf4RIy1">FAQ</a></p>
+          </div>
+          <button class="btn" id="btnAll" data-page-node-id="tMSauIWxAd5Tmo9US6AEDJ">开始检测</button>
+        </div>
+
+        <div class="grp" data-page-node-id="Pn2ReslVyQzsFreUmRDViJ">
+          <h4 data-page-node-id="d7HwxGthiCaBdWN3AP17uC">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" data-page-node-id="gK0EHEs2bk3X4GQrZWURYP"><path d="M14.7 6.3a4 4 0 105.66 5.66l-1.4 1.4a1 1 0 01-1.42 0L10.6 6.6a1 1 0 010-1.42l1.4-1.4-3.3 3.3z" data-page-node-id="iHYZ26s1ullgMXTsmYUjCU"/><path d="M6 18l4-4" data-page-node-id="ORSHtzBJdfClALbHqLJX9l"/></svg>
+            基础检测
+          </h4>
+          <div class="item" data-k="cfg" data-page-node-id="vYUyoitVAeqrOwQDJbIP3L"><i class="qi" data-page-node-id="uKQfNk5sb9k9rR2PWJ5DCL">?</i>安装配置文件是否完整</div>
+          <div class="item" data-k="svc" data-page-node-id="hG6MB5gLGI25eEzgQqC27b"><i class="qi" data-page-node-id="cZx9iwmAAPOSnrY420tLgl">?</i>服务程序是否正常运行</div>
+          <div class="item" data-k="fw" data-page-node-id="IAjfpjsPEx2Z0ShyKv9Lw7"><i class="qi" data-page-node-id="5JUSWpbcsaYeNazBdbj4iS">?</i>防火墙是否开启并允许服务运行</div>
+          <div class="item" data-k="nic" data-page-node-id="L4W2iDd8r3GuFjh8nAq96R"><i class="qi" data-page-node-id="xOxFxGWWdjLuPScG4KG9z0">?</i>虚拟网卡设备是否成功创建</div>
+          <div class="item" data-k="nic2" data-page-node-id="2mEuQHmAzVzGlFmXUQozuN"><i class="qi" data-page-node-id="DCeyqgyeVpknbXmYbZqI3Q">?</i>虚拟网卡设备参数是否成功设置、正常运行</div>
+          <div class="item" data-k="route" data-page-node-id="BhAnUHGyQvOIMUeCDXe9vG"><i class="qi" data-page-node-id="qNPMftg7gEWY7KHdBf4fik">?</i>本地路由是否正确配置</div>
+        </div>
+
+        <div class="grp" data-page-node-id="dpSSq1CKffBjaAsrt9o6KD">
+          <h4 data-page-node-id="K0qqn8mBldcOx0wRhc1g6r">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" data-page-node-id="MBIZseonFk3vA48OTCYAG2"><circle cx="12" cy="12" r="9" data-page-node-id="TPHDGj8cpdvk9CH8lV3kRH"/><path d="M3 12h18M12 3c2.5 2.4 3.7 5.6 3.7 9S14.5 18.6 12 21c-2.5-2.4-3.7-5.6-3.7-9S9.5 5.4 12 3z" data-page-node-id="qARO8XPrcKlF8rI9YNmijz"/></svg>
+            网络检测
+          </h4>
+          <div class="item" data-k="inet" data-page-node-id="p3r0rWoseNnFcvnz6NWzvc"><i class="qi" data-page-node-id="mUJGzk8QwVSbsJtk3EkvC6">?</i>是否正常访问互联网</div>
+          <div class="item" data-k="time" data-page-node-id="yAP2bu24eBWVmAcxB9MQHn"><i class="qi" data-page-node-id="fjJmleyyT6tslUgAEYCUHu">?</i>本地时间是否准确</div>
+          <div class="item" data-k="proxy" data-page-node-id="coGs1fp5mFQ3mGiDz4ALu8"><i class="qi" data-page-node-id="c2Br0eICaOaTwVXkgls6Ca">?</i>是否设置本地代理（Proxy）</div>
+          <div class="item" data-k="port" data-page-node-id="EjL5qzaCA7fCJDOiqTFhVX"><i class="qi" data-page-node-id="RJejmWHxA0nrIolig6xnGD">?</i>服务端口是否被占用</div>
+          <div class="item" data-k="fakedns" data-page-node-id="LWwH2B1IIQPlFwGmW3DR6P"><i class="qi" data-page-node-id="yqXixkjLeXJMsQS5GgDDEc">?</i>Fake DNS是否正常工作</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 应用中心 ============ -->
+  <section class="win center" data-page-node-id="FGtDw5eyiF2fvYIcx6rJRl">
+    <div class="chd" data-page-node-id="TGvJRY5tsWBCA7zTOyhwTA">
+      <div class="lg" data-page-node-id="KupZVsXyNBIYTGiVUUBIJw"></div>
+      <h2 data-page-node-id="suc6ND9OBTMqwqNRDHD0zZ">欢迎进入应用中心</h2>
+      <div class="x" data-page-node-id="eQ6ThssvcO6dlhnJJAbv73">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" data-page-node-id="p3YD6BH0YbCDi6KANJPxJZ"><path d="M6 6l12 12M18 6L6 18" data-page-node-id="j4g2lTGiT6jBV5v2FcX1WQ"/></svg>
+      </div>
+    </div>
+
+    <div class="search" data-page-node-id="NdcFuK1hIs3FpBcXClHT6J">
+      <label class="box" data-page-node-id="prXMjLkGpLGNX60I9VeHgK">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="c1FyRP0T9SAjAeHmshxqFs"><circle cx="11" cy="11" r="7" data-page-node-id="OHR5Zvji0oFh4eEJq5FkT1"/><path d="M16.5 16.5L21 21" data-page-node-id="AoYsbqvaIlVy31TsxVJmbW"/></svg>
+        <input placeholder="搜索应用、系统" data-page-node-id="O9kVY7i4qL5i2zqiTEQYnK">
+      </label>
+    </div>
+
+    <div class="ctabs" data-page-node-id="ivhcrddJvCNdIK2RcjUCRg">
+      <b class="on" data-page-node-id="MNGiC5duAEAb27NSefL9SE">我的应用</b><b data-page-node-id="l404C4GjnS4MomAoq1IlGD">我的收藏</b><b data-page-node-id="2PmO4dZuMvHq9lBXECukBh">最近使用</b><b data-page-node-id="W9qfg0GkKab80TX6QeLzHu">安全</b>
+    </div>
+
+    <div class="clist" id="clist" data-page-node-id="focGLsZnwGyxhxIpruLFWk"></div>
+  </section>
+</div>
+
+<!-- ============ 应用访问检查弹框 ============ -->
+<div class="mask" id="mask" data-page-node-id="uB6WHcEGCh3iHb88jUUU1e">
+  <div class="dlg" role="dialog" aria-modal="true" data-page-node-id="JHL4CDmLCEO7PKotJNBY3h">
+    <div class="dhd" data-page-node-id="b95FqKQ2LSmI6cp5Aadwjq">
+      <div class="ico" id="dIco" data-page-node-id="yxjs48iFxBWpMuzvVBrpki"></div>
+      <div class="tt" data-page-node-id="nM040RXPtfnERPAhlQJvK9">
+        <h3 id="dName" data-page-node-id="EqrGQYPE06Ex5bWhL2r0t1">零信任</h3>
+        <p id="dUrl" data-page-node-id="wtyfqpSL9GVzmaPhtnP5A9">https://zt.zhuyun.cn:8443</p>
+      </div>
+      <div class="x" id="dClose" data-page-node-id="eJrrKjH09tVRbUT3Y7Giv0">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" data-page-node-id="FRXbgw853xXOgDhrorHwUe"><path d="M6 6l12 12M18 6L6 18" data-page-node-id="ttBjheGLjfrL5NGezwRoxu"/></svg>
+      </div>
+    </div>
+
+    <div class="verdict v-run" id="verdict" data-page-node-id="JYQ9rZqHua5IYE3tfWKFPr">
+      <div class="vi" id="vIco" data-page-node-id="r86vaIYieFSWj0AfZbLGQX">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" data-page-node-id="ooGUQUiI0QBwNHjZiePvjf"><path d="M20 6L9 17l-5-5" data-page-node-id="yqYFh1k051LhcFAOGlqiOc"/></svg>
+      </div>
+      <div class="vt" data-page-node-id="fz04Tml3LYilUaQLIgBS41">
+        <b id="vTitle" data-page-node-id="kOhrL8KjwJhrxuUhyyLDDo">正在检查…</b>
+        <span id="vDesc" data-page-node-id="6DJqEZtfJDmYbCHFsq1dac">正在逐项检测该应用的访问链路</span>
+      </div>
+      <div class="rt" id="vTime" data-page-node-id="IUA0RdFF4Ik0gANRuKYZFA"></div>
+    </div>
+
+    <div class="list" id="dList" data-page-node-id="YTkoVFxOiQzobSNn12vXJl"></div>
+
+    <div class="dft" data-page-node-id="aRamAvGuwC82H7hncFaxBN">
+      <span class="hint" id="dHint" data-page-node-id="qw7zmLkycVk3fr8mLpHHvj"></span>
+      <button class="btn" id="bRetry" data-page-node-id="NLdAz3ZnRO3ZwNBHfd1aFV">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" data-page-node-id="vYFt7Zs3TtbFlASDzoG4Y6"><path d="M21 12a9 9 0 11-3.5-7.1" data-page-node-id="bHN8dBEFbLUinuyR4lJxqF"/><path d="M21 3v6h-6" data-page-node-id="MjYe3oPlZX5ro5OEVkorpE"/></svg>
+        重新检测
+      </button>
+      <button class="btn pri" id="bOpen" data-page-node-id="5VrbjEW2p8CzLiFeCNKhgG">打开应用</button>
+    </div>
+  </div>
+</div>
+
+<!-- 原型演示控件 -->
+<div class="demo" data-page-node-id="w7R6ogUMvULjeUaQjMFLH0">
+  <span data-page-node-id="nhD18f2XnK9XVGgqyBY1zL">演示</span>
+  <button data-s="ok" class="on" data-page-node-id="74ADRtkL0CHvStvRCX77cF">可访问</button>
+  <button data-s="warn" data-page-node-id="vYTo666pajxD7CK4oETvuI">部分异常</button>
+  <button data-s="err" data-page-node-id="DBhIOUrnrCJi3Q6fLEdjx3">无法访问</button>
+</div>
+
+<script>
+/* ================= 应用数据 ================= */
+const ICONS = {
+  trust: '<div class="ico" style="background:#3BC17F"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><rect x="4" y="4" width="16" height="16" rx="3"/><circle cx="12" cy="12" r="2.6"/><path d="M12 7v1.5M12 15.5V17M7 12h1.5M15.5 12H17"/></svg></div>',
+  policy: '<div class="ico" style="background:#9B6BFF"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9"><circle cx="12" cy="12" r="8"/><path d="M4 12h16M12 4c2.2 2.2 3.3 5 3.3 8s-1.1 5.8-3.3 8c-2.2-2.2-3.3-5-3.3-8s1.1-5.8 3.3-8z"/></svg></div>',
+  center: '<div class="ico" style="background:#fff"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="8" cy="8" r="3.2" stroke="#4C8DFF" stroke-width="1.9"/><rect x="14" y="4.8" width="6.4" height="6.4" rx="1.6" stroke="#4C8DFF" stroke-width="1.9"/><circle cx="8" cy="16" r="3.2" stroke="#4C8DFF" stroke-width="1.9"/><circle cx="17.2" cy="16" r="3.2" fill="#4C8DFF"/></svg></div>',
+  iam: '<div class="ico" style="background:#77BC28"><svg width="24" height="24" viewBox="0 0 24 24"><text x="12" y="16.2" font-size="8.6" font-weight="700" fill="#fff" text-anchor="middle" font-family="Arial,Helvetica,sans-serif">IAM</text></svg></div>',
+  kms: '<div class="ico" style="background:#E8F1FE"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#1F7AE0" stroke-width="3.4" stroke-linecap="round"><path d="M7 7l10 10M17 7L7 17"/></svg></div>',
+  redmine: '<div class="ico" style="background:#fff"><svg width="19" height="19" viewBox="0 0 24 24"><path d="M4 14a8 8 0 0116 0z" fill="#D93025"/><rect x="3" y="14" width="18" height="3" rx="1.5" fill="#B3271E"/><circle cx="12" cy="9" r="1.6" fill="#fff"/></svg></div>',
+  priv: '<div class="ico" style="background:#2E7CF6"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round"><rect x="4" y="6" width="16" height="13" rx="2.5"/><path d="M4 10h16"/><circle cx="12" cy="14.5" r="2.2"/></svg></div>'
+};
+
+/* health：该应用在当前网络下的检查结果，原型按应用预设，便于演示三种结论 */
+const GROUPS = [
+  { name:'零信任应用', apps:[
+    { id:'trust',  name:'零信任',              ico:'trust',  url:'https://zt.zhuyun.cn:8443',        note:'统一身份接入入口', health:'ok' },
+    { id:'policy', name:'零信任安全策略中心',   ico:'policy', url:'https://policy.zhuyun.cn:8443',    note:'策略配置与下发',   health:'ok' },
+    { id:'center', name:'应用中心',            ico:'center', url:'https://app.zhuyun.cn',            note:'应用导航门户',     health:'ok' }
+  ]},
+  { name:'日常办公', apps:[
+    { id:'iam',    name:'IAM系统',             ico:'iam',    url:'https://iam.zhuyun.cn',            note:'账号与权限管理',   health:'warn' },
+    { id:'kms',    name:'KMS',                 ico:'kms',    url:'https://kms.zhuyun.cn:8443',       note:'密钥管理服务',     health:'err' },
+    { id:'redmine',name:'Redmine',             ico:'redmine',url:'http://redmine.zhuyun.local',      note:'研发项目管理',     health:'warn' }
+  ]},
+  { name:'特权系统平台', apps:[
+    { id:'priv',   name:'特权系统',            ico:'priv',   url:'https://pam.zhuyun.cn:8443',       note:'特权账号运维',     health:'ok' }
+  ]}
+];
+
+/* ================= 渲染应用列表 ================= */
+const listEl = document.getElementById('clist');
+let fav = new Set(['trust']);
+
+function render(){
+  listEl.innerHTML = GROUPS.map((g, gi) => `
+    <div class="grpbox" data-gi="${gi}">
+      <div class="ghead">
+        <span>${g.name}</span>
+        <svg class="arw" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+      ${g.apps.map((a, ai) => `
+        <div class="app${gi === 0 && ai === 0 ? ' first' : ''}" data-id="${a.id}">
+          ${ICONS[a.ico]}
+          <span class="nm">${a.name}</span>
+          <span class="acts">
+            <span class="ibtn chk" data-act="check" title="访问检查">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="7"/><path d="M11 7.6v2.2l2.1 1.5"/><path d="M16.6 16.6L21 21"/>
+              </svg>
+            </span>
+            <span class="ibtn more" data-act="more" title="更多">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <circle cx="12" cy="12" r="9"/><circle cx="8.4" cy="12" r="1.15" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.15" fill="currentColor" stroke="none"/><circle cx="15.6" cy="12" r="1.15" fill="currentColor" stroke="none"/>
+              </svg>
+            </span>
+            <span class="ibtn star ${fav.has(a.id)?'on':''}" data-act="star" title="收藏">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round">
+                <path d="M12 3.6l2.6 5.3 5.8.85-4.2 4.1 1 5.8-5.2-2.75L6.8 19.7l1-5.8-4.2-4.1 5.8-.85L12 3.6z"/>
+              </svg>
+            </span>
+          </span>
+        </div>`).join('')}
+    </div>`).join('');
+}
+render();
+
+listEl.addEventListener('click', e => {
+  const head = e.target.closest('.ghead');
+  if (head){ head.parentElement.classList.toggle('grpclosed'); return; }
+
+  const app = e.target.closest('.app');
+  if (!app) return;
+  const id = app.dataset.id;
+  const data = findApp(id);
+  const act = e.target.closest('[data-act]');
+
+  if (act){
+    const k = act.dataset.act;
+    if (k === 'star'){
+      fav.has(id) ? fav.delete(id) : fav.add(id);
+      act.classList.toggle('on', fav.has(id));
+    }
+    if (k === 'check') openCheck(data, data.health || 'ok');
+    if (k === 'more')  showMenu(act, data);
+    e.stopPropagation();
+    return;
+  }
+});
+
+/* ================= 「更多」菜单 ================= */
+const menuEl = document.createElement('div');
+menuEl.className = 'menu';
+document.body.appendChild(menuEl);
+
+function showMenu(anchor, app){
+  const isFav = fav.has(app.id);
+  menuEl.innerHTML = `
+    <i data-m="open">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M14 4h6v6"/><path d="M20 4l-8.5 8.5"/><path d="M18 14v5a1 1 0 01-1 1H5a1 1 0 01-1-1V7a1 1 0 011-1h5"/></svg>
+      打开应用
+    </i>
+    <i data-m="check" class="hi">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M11 7.6v2.2l2.1 1.5"/><path d="M16.6 16.6L21 21"/></svg>
+      访问检查
+    </i>
+    <i data-m="star">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M12 3.6l2.6 5.3 5.8.85-4.2 4.1 1 5.8-5.2-2.75L6.8 19.7l1-5.8-4.2-4.1 5.8-.85L12 3.6z"/></svg>
+      ${isFav ? '取消收藏' : '添加到收藏'}
+    </i>`;
+
+  const r = anchor.getBoundingClientRect();
+  menuEl.classList.add('on');
+  const mw = menuEl.offsetWidth, mh = menuEl.offsetHeight;
+  menuEl.style.left = Math.min(r.left - mw + 24, innerWidth - mw - 12) + 'px';
+  menuEl.style.top  = Math.min(r.bottom + 6, innerHeight - mh - 12) + 'px';
+
+  menuEl.querySelectorAll('i').forEach(it => {
+    it.onclick = e => {
+      e.stopPropagation();
+      const m = it.dataset.m;
+      hideMenu();
+      if (m === 'check') openCheck(app, app.health || 'ok');
+      if (m === 'star'){
+        fav.has(app.id) ? fav.delete(app.id) : fav.add(app.id);
+        render();
+      }
+    };
+  });
+}
+function hideMenu(){ menuEl.classList.remove('on'); }
+addEventListener('click', hideMenu);
+addEventListener('scroll', hideMenu, true);
+
+function findApp(id){
+  for (const g of GROUPS){ const a = g.apps.find(x => x.id === id); if (a) return a; }
+  return GROUPS[0].apps[0];
+}
+
+/* ================= 检查项定义 ================= */
+/* 检查项：只查「应用侧」链路——设备侧诊断已全部通过，不再重复检查设备项 */
+const CHECKS = [
+  {
+    key:'auth', name:'访问授权策略',
+    ok:  { t:'账号在该应用的授权范围内' },
+    warn:{ t:'策略未匹配到该账号，按默认拒绝',
+           why:'当前账号不在「零信任安全策略中心」为该应用配置的允许名单中，<em>访问请求会被拒绝</em>。',
+           fix:'请联系管理员为你的账号或所属用户组授权后重新检测。' },
+    err: { t:'访问被策略拒绝',
+           why:'账号或当前设备状态不满足该应用的访问条件，<em>策略判定为拒绝</em>。',
+           fix:'请联系管理员确认授权范围，并在策略中心查看拒绝原因。' }
+  },
+  {
+    key:'dns', name:'应用域名解析',
+    ok:  { t:'已解析到应用网关 10.20.8.31' },
+    warn:{ t:'解析到备用网关 10.20.8.44，与原网关不一致',
+           why:'该应用域名对应了多个网关地址，当前命中的不是主网关，<em>可能出现会话不一致</em>。',
+           fix:'请联系管理员核对该应用在应用清单中的网关配置。' },
+    err: { t:'域名未加入应用清单，解析失败',
+           why:'客户端网络组件本身正常，但该应用的域名没有配置在零信任应用清单里，<em>请求无法被代理接管</em>。',
+           fix:'请联系管理员将该应用域名加入零信任应用清单后重新检测。' }
+  },
+  {
+    key:'gw', name:'应用网关连通（TCP 443）',
+    ok:  { t:'已连接，往返延迟 23ms' },
+    warn:{ t:'已连接，延迟偏高（486ms）',
+           why:'到该应用网关的往返延迟明显高于正常值（>300ms），<em>打开应用会卡顿甚至超时</em>。',
+           fix:'可切换网络后重新检测；若持续偏高，请联系管理员检查网关负载。' },
+    err: { t:'连接超时（10s 无响应）',
+           why:'到应用网关的 TCP 443 端口无法建立连接，<em>请求到不了应用</em>。',
+           fix:'请联系管理员确认该应用网关是否在线、端口是否对外开放。' }
+  },
+  {
+    key:'cert', name:'应用证书',
+    ok:  { t:'证书有效，剩余 218 天' },
+    warn:{ t:'证书将在 7 天后到期',
+           why:'该应用使用的 HTTPS 证书即将到期，<em>到期后浏览器会拦截访问</em>。',
+           fix:'请联系应用管理员及时续期证书。' },
+    err: { t:'证书已过期 / 与域名不匹配',
+           why:'应用出示的证书已过期或与访问域名不一致，<em>浏览器会直接拦截</em>。',
+           fix:'请联系应用管理员更换证书，或确认该应用的访问地址是否变更。' }
+  },
+  {
+    key:'sso', name:'单点票据',
+    ok:  { t:'已签发，有效期 8 小时' },
+    warn:{ t:'票据即将过期（剩余 4 分钟）',
+           why:'该应用的单点票据将在 4 分钟后失效，<em>期间访问可能被要求重新认证</em>。',
+           fix:'重新打开应用即可自动刷新票据。' },
+    err: { t:'票据签发失败',
+           why:'客户端未取得该应用的单点票据，<em>访问会被重定向到登录页</em>。',
+           fix:'请退出后重新登录该应用；若仍失败，联系管理员检查应用的单点对接配置。' }
+  },
+  {
+    key:'resp', name:'应用服务响应',
+    ok:  { t:'HTTP 200，首包 186ms' },
+    warn:{ t:'HTTP 200，首包 2.4s',
+           why:'应用有响应但首包时间过长，<em>可能是应用侧负载过高</em>。',
+           fix:'可稍后重试；持续过慢请联系应用管理员排查服务状态。' },
+    err: { t:'HTTP 502，应用无响应',
+           why:'网关能连通，但后端应用没有返回正常内容，<em>问题出在应用本身</em>。',
+           fix:'请联系应用管理员检查后端服务是否正常运行。' }
+  }
+];
+
+const VERD = {
+  ok:  { cls:'v-ok',   title:'可正常访问',   desc:'6 项检查全部通过，应用当前可以正常打开' },
+  warn:{ cls:'v-warn', title:'部分异常，可能无法正常访问', desc:'{n} 项检查未通过，建议先处理下方问题再打开应用' },
+  err: { cls:'v-err',  title:'无法访问',     desc:'{n} 项关键检查未通过，应用当前打不开' }
+};
+
+/* ================= 弹框逻辑 ================= */
+const mask    = document.getElementById('mask');
+const dIco    = document.getElementById('dIco');
+const dName   = document.getElementById('dName');
+const dUrl    = document.getElementById('dUrl');
+const dList   = document.getElementById('dList');
+const verdict = document.getElementById('verdict');
+const vTitle  = document.getElementById('vTitle');
+const vDesc   = document.getElementById('vDesc');
+const vTime   = document.getElementById('vTime');
+const dHint   = document.getElementById('dHint');
+const bOpen   = document.getElementById('bOpen');
+const bRetry  = document.getElementById('bRetry');
+
+let curApp = null, curScene = 'ok', timers = [];
+
+function clearTimers(){ timers.forEach(clearTimeout); timers = []; }
+
+function openCheck(app, scene){
+  curApp = app; curScene = scene || app.health || 'ok';
+  clearTimers();
+
+  dIco.innerHTML = ICONS[app.ico];
+  dIco.style.cssText = 'width:36px;height:36px;border-radius:9px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;overflow:hidden';
+  dName.textContent = app.name;
+  dUrl.textContent  = app.url;
+  document.querySelectorAll('.demo button').forEach(x => x.classList.toggle('on', x.dataset.s === curScene));
+  mask.classList.add('on');
+  run();
+}
+
+function run(){
+  clearTimers();
+
+  // 1) 运行态
+  verdict.className = 'verdict v-run';
+  document.getElementById('vIco').innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>';
+  vTitle.textContent = '正在检查…';
+  vDesc.textContent  = '正在逐项检测该应用的访问链路';
+  vTime.textContent  = '';
+  dHint.textContent  = '';
+  bOpen.disabled = true;
+  bRetry.disabled = true;
+
+  // 2) 逐项
+  dList.innerHTML = CHECKS.map(c => `
+    <div class="row" data-k="${c.key}">
+      <span class="st wait">·</span>
+      <div class="bd">
+        <div class="l1"><span class="nm">${c.name}</span><span class="rs">等待检测</span></div>
+        <div class="why"></div>
+      </div>
+    </div>`).join('');
+
+  const plan = buildPlan();
+  plan.forEach((step, i) => {
+    timers.push(setTimeout(() => {
+      const row = dList.querySelector('[data-k="'+step.key+'"]');
+      if (!row) return;
+      row.querySelector('.st').className = 'st run';
+      row.querySelector('.st').textContent = '';
+      row.querySelector('.rs').className = 'rs run';
+      row.querySelector('.rs').textContent = '检测中…';
+    }, step.start));
+    timers.push(setTimeout(() => {
+      const row = dList.querySelector('[data-k="'+step.key+'"]');
+      if (!row) return;
+      const st = row.querySelector('.st');
+      st.className = 'st ' + step.state;
+      st.textContent = step.state === 'ok' ? '✓'
+                     : step.state === 'warn' ? '!'
+                     : step.state === 'skip' ? '–' : '✕';
+      const rs = row.querySelector('.rs');
+      rs.className = 'rs ' + step.state;
+      rs.textContent = step.text;
+      if (step.state !== 'ok' && step.why){
+        const w = row.querySelector('.why');
+        w.className = 'why show';
+        w.innerHTML = step.why + '<br><span class="act">建议：' + step.fix + '</span>';
+      }
+    }, step.end));
+  });
+
+  const total = plan[plan.length - 1].end + 120;
+  timers.push(setTimeout(finish, total));
+}
+
+function buildPlan(){
+  // 场景决定每一项的状态；同一场景下不同应用的故障点也不同，贴近真实
+  const st = {};
+  CHECKS.forEach(c => st[c.key] = 'ok');
+
+  const WARN = {
+    iam:     { auth:'warn', resp:'warn' },
+    redmine: { dns:'warn', cert:'warn' },
+    _default:{ gw:'warn', resp:'warn' }
+  };
+  const ERR = {
+    kms:     { gw:'err', resp:'err' },
+    _default:{ auth:'err', dns:'err', gw:'err', resp:'err' }
+  };
+
+  const id = curApp ? curApp.id : '_default';
+  const map = curScene === 'warn' ? (WARN[id] || WARN._default)
+            : curScene === 'err'  ? (ERR[id]  || ERR._default)
+            : {};
+  Object.keys(map).forEach(k => st[k] = map[k]);
+
+  // 网关都连不上时，不再重复检查应用响应，避免同一件事报两遍
+  if (st.gw === 'err') st.resp = 'skip';
+
+  let t = 160;
+  return CHECKS.map(c => {
+    const s = st[c.key];
+    const data = s === 'skip' ? null : c[s];
+    const dur = s === 'ok' ? 200 : (s === 'skip' ? 120 : 420);
+    const step = {
+      key:c.key, state:s,
+      text: s === 'skip' ? '未检测（网关未连通）' : data.t,
+      why:  data ? data.why : '',
+      fix:  data ? data.fix : '',
+      start:t, end:t + dur
+    };
+    t = t + dur + 60;
+    return step;
+  });
+}
+
+function finish(){
+  const rows = [...dList.querySelectorAll('.row')];
+  const skipped = rows.filter(r => r.querySelector('.st.skip')).length;
+  const bad = rows.filter(r => !r.querySelector('.st.ok') && !r.querySelector('.st.skip'));
+  const nErr = bad.filter(r => r.querySelector('.st.err')).length;
+  const nWarn = bad.filter(r => r.querySelector('.st.warn')).length;
+  const scene = nErr ? 'err' : (nWarn ? 'warn' : 'ok');
+  const v = VERD[scene];
+
+  verdict.className = 'verdict ' + v.cls;
+  document.getElementById('vIco').innerHTML =
+    '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round">' +
+    (scene === 'ok'
+      ? '<path d="M20 6L9 17l-5-5"/>'
+      : (scene === 'warn'
+        ? '<path d="M12 8v5M12 16.5h.01"/>'
+        : '<path d="M12 8v6M12 17h.01"/>')) + '</svg>';
+  vTitle.textContent = v.title;
+  vDesc.textContent  = scene === 'ok'
+    ? (rows.length - skipped - bad.length) + ' 项检查全部通过，应用当前可以正常打开'
+    : v.desc.replace('{n}', bad.length);
+  vTime.textContent  = (Math.random() * .6 + 1.1).toFixed(1) + 's';
+
+  bRetry.disabled = false;
+  bOpen.disabled  = scene === 'err';
+  bOpen.textContent = scene === 'err' ? '无法打开' : '打开应用';
+  if (scene === 'err'){ bOpen.className = 'btn'; bOpen.style.cssText = 'opacity:.55;cursor:default'; }
+  else { bOpen.className = 'btn pri'; bOpen.style.cssText = ''; }
+  dHint.textContent = scene === 'ok' ? '结果仅供参考' : '多与应用侧配置有关，请联系管理员';
+
+  bOpen.onclick = () => {
+    if (scene === 'err') return;
+    // 原型：模拟打开
+    bOpen.textContent = '正在打开…';
+    setTimeout(() => { bOpen.textContent = scene === 'err' ? '无法打开' : '打开应用'; }, 900);
+  };
+}
+
+/* ================= 交互绑定 ================= */
+document.getElementById('dClose').onclick = close;
+mask.addEventListener('click', e => { if (e.target === mask) close(); });
+addEventListener('keydown', e => { if (e.key === 'Escape' && mask.classList.contains('on')) close(); });
+function close(){ clearTimers(); mask.classList.remove('on'); }
+
+bRetry.onclick = () => run();
+
+/* 演示态切换 */
+document.querySelectorAll('.demo button').forEach(b => {
+  b.onclick = () => {
+    document.querySelectorAll('.demo button').forEach(x => x.classList.toggle('on', x === b));
+    curScene = b.dataset.s;
+    if (mask.classList.contains('on')) run();
+  };
+});
+
+/* 左侧「开始检测」：整体设备诊断（示意） */
+document.getElementById('btnAll').onclick = function(){
+  const btn = this;
+  btn.disabled = true; btn.textContent = '检测中…';
+  setTimeout(() => { btn.disabled = false; btn.textContent = '重新检测'; }, 1200);
+};
+
+/* 自适应缩放 */
+function fit(){
+  const s = Math.min(innerWidth / 1440, innerHeight / 860, 1);
+  document.getElementById('stage').style.transform = 'scale(' + s + ')';
+}
+addEventListener('resize', fit); fit();
+
+/* 快捷演示：?open=1&app=trust&scene=warn 直接打开检查弹框；?menu=trust 展开更多菜单 */
+(function(){
+  const q = new URLSearchParams(location.search);
+  if (q.get('open') === '1'){
+    const app = findApp(q.get('app') || 'trust');
+    openCheck(app, q.get('scene') || app.health || 'ok');
+  }
+  if (q.get('menu')){
+    const row = document.querySelector('.app[data-id="' + q.get('menu') + '"]');
+    if (row) showMenu(row.querySelector('.more'), findApp(q.get('menu')));
+  }
+})();
+</script>
+</body>
+</html>

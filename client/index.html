@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-page-node-id="OKgXwbiWpOIaFbUF8qz0mB">
+<head data-page-node-id="FnzIjdFFKhx0sSsawv8598">
+<meta charset="utf-8" data-page-node-id="XYwWYPovAWj7fQsrGoAf60">
+<meta name="viewport" content="width=device-width,initial-scale=1" data-page-node-id="UeaYyGLWnnmeCG7OFYHTRE">
+<title>E登录 客户端原型 · 页面总览</title>
+<style>
+:root{
+  --blue:#00A1E9; --blue-d:#0074A8; --ink:#1f2329; --ink2:#5f6672;
+  --line:#e6e9ee; --bg:#f5f6f8; --card:#fff;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-font-smoothing:antialiased}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);
+  font:14px/1.5 "PingFang SC","Microsoft YaHei","Source Han Sans CN",sans-serif;
+  display:flex;overflow:hidden}
+
+/* ============ 左侧目录 ============ */
+#side{width:286px;flex:0 0 auto;background:var(--card);border-right:1px solid var(--line);
+  display:flex;flex-direction:column;height:100%}
+#side .hd{padding:18px 18px 14px;border-bottom:1px solid var(--line)}
+#side .hd h1{font-size:16px;font-weight:600;letter-spacing:.2px}
+#side .hd h1 b{color:var(--blue)}
+#side .hd p{margin-top:5px;font-size:12px;color:var(--ink2);line-height:1.6}
+#side .hd .meta{margin-top:10px;display:flex;gap:6px;flex-wrap:wrap}
+#side .hd .tag{font-size:11px;color:var(--blue-d);background:#eaf7fe;border:1px solid #d3edfb;
+  border-radius:4px;padding:2px 6px}
+#list{flex:1;overflow:auto;padding:8px 0 24px}
+#list .g{padding:12px 18px 6px;font-size:11px;color:#98a1ad;letter-spacing:.6px}
+#list a{display:flex;align-items:center;gap:8px;padding:8px 18px 8px 16px;
+  border-left:2px solid transparent;color:var(--ink);text-decoration:none;font-size:13px}
+#list a:hover{background:#f6f9fb}
+#list a.on{background:#eef8fe;border-left-color:var(--blue);color:var(--blue-d);font-weight:600}
+#list a i{font-style:normal;font-size:11px;color:#aab3bf;min-width:18px;font-variant-numeric:tabular-nums}
+#list a.on i{color:var(--blue)}
+#side .ft{padding:10px 18px;border-top:1px solid var(--line);font-size:11.5px;color:#98a1ad;line-height:1.6}
+
+/* ============ 右侧预览 ============ */
+#main{flex:1;min-width:0;display:flex;flex-direction:column;height:100%}
+#bar{height:56px;flex:0 0 auto;background:var(--card);border-bottom:1px solid var(--line);
+  display:flex;align-items:center;gap:12px;padding:0 16px}
+#bar .t{font-size:14px;font-weight:600}
+#bar .f{font-size:11.5px;color:#98a1ad;font-family:Consolas,Monaco,monospace}
+#bar .sp{flex:1}
+#bar button{height:30px;padding:0 12px;border:1px solid var(--line);background:var(--card);
+  color:var(--ink2);border-radius:5px;font-size:12.5px;cursor:pointer;font-family:inherit}
+#bar button:hover{border-color:var(--blue);color:var(--blue-d)}
+#bar button.pri{background:var(--blue);border-color:var(--blue);color:#fff}
+#bar button.pri:hover{background:var(--blue-d);border-color:var(--blue-d);color:#fff}
+#wrap{flex:1;min-height:0;padding:14px;background:
+  repeating-conic-gradient(#eef0f4 0% 25%, #f5f6f8 0% 50%) 50%/18px 18px}
+#frameBox{width:100%;height:100%;border-radius:8px;overflow:hidden;background:#0b1a26;
+  box-shadow:0 8px 28px rgba(31,35,41,.14);border:1px solid #dde2e8}
+iframe{width:100%;height:100%;border:0;display:block}
+#none{padding:40px;color:var(--ink2);font-size:13px}
+
+/* ============ 全屏预览：右栏铺满，左栏收成抽屉 ============ */
+body.fs #side{position:fixed;left:0;top:0;bottom:0;z-index:60;width:286px;
+  transform:translateX(-100%);transition:transform .22s ease;
+  box-shadow:0 0 44px rgba(0,0,0,.3)}
+body.fs #side.open{transform:none}
+body.fs #bar{display:none}
+body.fs #wrap{padding:0;background:#0b1a26}
+body.fs #frameBox{border-radius:0;border:0;box-shadow:none}
+#fsBar{display:none}
+body.fs #fsBar{display:flex;position:fixed;right:16px;top:16px;z-index:70;gap:8px}
+#fsBar button{height:32px;padding:0 12px;border-radius:6px;cursor:pointer;
+  border:1px solid rgba(255,255,255,.26);background:rgba(12,26,38,.6);color:#fff;
+  font-size:12.5px;font-family:inherit;backdrop-filter:blur(6px)}
+#fsBar button:hover{background:rgba(12,26,38,.86);border-color:rgba(255,255,255,.5)}
+#fsMask{display:none;position:fixed;inset:0;z-index:55;background:rgba(0,0,0,.42)}
+body.drawerOpen #fsMask{display:block}
+</style>
+</head>
+<body data-page-node-id="ApcehCEAHnURZWo9ho7yuM">
+
+<div id="fsMask"></div>
+<aside id="side" data-page-node-id="EEDBaTXdUposBaEerAzkGs">
+  <div class="hd" data-page-node-id="Qvj0rJuFP1Z0Dq9fxVGiho">
+    <h1 data-page-node-id="l4F8SO5vi3FE7GNcL8sVhg">E登录 <b data-page-node-id="gMOmfPYiWBa6AkL9b6VMkJ">客户端原型</b></h1>
+    <p data-page-node-id="SglYVhJlRf3BdsoOF1nFeG">Windows 全屏登录 · 1920×1080 自适应缩放</p>
+    <div class="meta" data-page-node-id="03fJzS6m6zE2vEXrdgOWqG">
+      <span class="tag" data-page-node-id="cGgQNuLcc6NkHXzhE4Zm3p">v2.3</span>
+      <span class="tag" data-page-node-id="LjRD8wXKCBiZ3KZmhnyq1H">40 个页面</span>
+      <span class="tag" data-page-node-id="F8CIFlz1NFoTXfvK4Le0nO">单页可编辑</span>
+    </div>
+  </div>
+  <nav id="list" data-page-node-id="CYN3kZeWR95tEasOdGCska"></nav>
+  <div class="ft" data-page-node-id="mWgdXKq4TwmwtLyFKv1uBq">左侧点击切换页面；右侧为真实可交互原型（F 全屏）。<br data-page-node-id="v6cW0XEO7edBTxeMcvDfWP">每页对应 <code data-page-node-id="3v95JT5Dm9WkVNd3ymmrwe">pages/</code> 下的一个 html。</div>
+</aside>
+
+<main id="main" data-page-node-id="g33xAjhfZTBGssY5HyUkdL">
+  <div id="bar" data-page-node-id="3MullayqeLjrtpWoVojOSj">
+    <span class="t" id="bT" data-page-node-id="CjGmJSH6FPeFpOZASQrfir">—</span>
+    <span class="f" id="bF" data-page-node-id="R1yLAGG7B5wZUCblmFRMKE"></span>
+    <span class="sp" data-page-node-id="K1kXqY5WpELSYYijVs6uej"></span>
+    <button id="bReset" title="回到该页初始状态" data-page-node-id="nu3sCOJQ4pYKZDhcummGq0">重置本页</button>
+    <button id="bNew" title="在新窗口打开" data-page-node-id="xtIXoVAq6WD8JdbMDznBS3">新窗口打开</button>
+    <button id="bFs" title="右侧原型全屏预览（F）">全屏预览</button>
+    <button class="pri" id="bAll" title="按顺序逐页查看" data-page-node-id="DYF7JruA6B3LZpaHB71qjQ">自动巡览</button>
+  </div>
+  <div id="wrap" data-page-node-id="WfF4rs9I3LtJ1Fn5ml4rEY"><div id="frameBox" data-page-node-id="Ph8l6mAUkTJ46o9ZEhj56z"><iframe id="fr" src="pages/first-pwd.html" data-page-node-id="Hcg7nwSnGHHoH01GBrprBz"></iframe></div></div>
+  <div id="fsBar">
+    <button id="bDrawer" title="展开页面列表（Tab）">页面</button>
+    <button id="bFsReset" title="回到该页初始状态（R）">重置</button>
+    <button id="bExitFs" title="退出全屏（Esc）">退出全屏</button>
+  </div>
+</main>
+
+<script>
+/* 页面清单：新增页面时在这里加一行即可（分组名、显示名、文件名） */
+const PAGES = [
+  ['首次登录', '首次登录 · 账号密码',        'first-pwd'],
+  ['首次登录', '首次登录 · 注册绑定（加域设备）', 'first-domain'],
+  ['首次登录', '首次登录 · 扫码',           'first-qr'],
+  ['首次登录', '首次登录 · 短信',           'first-sms'],
+  ['首次登录', '首次登录 · 人脸识别',        'first-face'],
+  ['首次登录', '首次登录 · 动态口令',        'first-otp'],
+  ['首次登录', '首次登录 · 指纹识别',        'first-finger'],
+  ['首次登录', '首次登录 · 自动创建预览确认',  'first-os-preview'],
+  ['首次登录', '首次登录 · 绑定操作系统账号', 'first-bind-os'],
+  ['首次登录', '首次登录 · 修改初始密码',     'first-setpw'],
+  ['首次登录', '首次登录 · 二次验证（第二因素）','first-second-verify'],
+  ['首次登录', '首次登录 · 新账号注册',       'first-register'],
+
+  ['日常登录', '日常登录 · 账号密码',        'daily-pwd'],
+  ['日常登录', '日常登录 · 加域设备（域账号）', 'daily-domain'],
+  ['日常登录', '日常登录 · 扫码',           'daily-qr'],
+  ['日常登录', '日常登录 · 短信',           'daily-sms'],
+  ['日常登录', '日常登录 · 人脸识别',        'daily-face'],
+  ['日常登录', '日常登录 · 人脸识别失败',     'daily-face-error'],
+  ['日常登录', '日常登录 · 动态口令',        'daily-otp'],
+  ['日常登录', '日常登录 · 指纹识别',        'daily-finger'],
+  ['日常登录', '日常登录 · 多用户（公共设备）', 'daily-multi-user'],
+  ['日常登录', '密码即将过期',              'daily-pwd-expiring'],
+  ['日常登录', '密码已过期',                'daily-pwd-expired'],
+  ['日常登录', '密码错误',                  'daily-pwd-wrong'],
+  ['日常登录', '策略二次验证',              'daily-second-verify'],
+  ['日常登录', '忘记登录密码（单页）',        'daily-forgot'],
+  ['日常登录', '账号设置 · 密码安全',        'daily-pwd-security'],
+  ['日常登录', '代填失败 · 重新关联 OS 凭证',  'daily-rebind-os'],
+  ['日常登录', '代填失败 · 统一改密',         'daily-os-unify'],
+
+  ['离线登录', '离线登录 · 账密',            'offline-pwd'],
+  ['离线登录', '离线登录 · 动态口令',         'offline-otp'],
+  ['离线登录', '离线登录 · 短信（取码失败）',   'offline-sms'],
+  ['离线登录', '离线登录 · 扫码（拉取失败）',   'offline-qr'],
+  ['离线登录', '离线登录 · 人脸（可用）',       'offline-face'],
+  ['离线登录', '离线登录 · 指纹（可用）',       'offline-finger'],
+  ['离线登录', '离线登录 · 账密（无可用凭据）',  'offline-pwd-unavail'],
+
+  ['浮层与系统页', '账号设置面板',           'panel-account'],
+  ['浮层与系统页', '换肤面板',               'panel-skin'],
+  ['浮层与系统页', '逃生授权返回',           'panel-escape'],
+  ['浮层与系统页', '桌面（已进入系统）',      'desktop']
+];
+
+const list = document.getElementById('list');
+const fr   = document.getElementById('fr');
+const bT   = document.getElementById('bT');
+const bF   = document.getElementById('bF');
+
+let html = '', g = '';
+PAGES.forEach(([group, title, file], i) => {
+  if (group !== g){ g = group; html += `<div class="g">${group}</div>`; }
+  html += `<a href="#${file}" data-k="${file}"><i>${String(i+1).padStart(2,'0')}</i><span>${title}</span></a>`;
+});
+list.innerHTML = html;
+
+function open(k){
+  const p = PAGES.find(x => x[2] === k) || PAGES[0];
+  fr.src = 'pages/' + p[2] + '.html';
+  bT.textContent = p[1];
+  bF.textContent = 'pages/' + p[2] + '.html';
+  if (inFs()) closeDrawer();
+  list.querySelectorAll('a').forEach(a => a.classList.toggle('on', a.dataset.k === p[2]));
+  const on = list.querySelector('a.on');
+  if (on){
+    const r = on.getBoundingClientRect(), lr = list.getBoundingClientRect();
+    if (r.top < lr.top || r.bottom > lr.bottom) on.scrollIntoView({block:'center'});
+  }
+  document.title = 'E登录 · ' + p[1];
+}
+/* —— 全屏预览（沁 2026-11-02）—— */
+const side = document.getElementById('side'), fsMask = document.getElementById('fsMask');
+const inFs = () => document.body.classList.contains('fs');
+function enterFs(){
+  document.body.classList.add('fs');
+  try {
+    if (!document.fullscreenElement && document.documentElement.requestFullscreen)
+      document.documentElement.requestFullscreen();
+  } catch (e) {}
+}
+function closeDrawer(){
+  side.classList.remove('open');
+  document.body.classList.remove('drawerOpen');
+}
+function exitFs(){
+  document.body.classList.remove('fs');
+  closeDrawer();
+  try { if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen(); }
+  catch (e) {}
+}
+const toggleDrawer = () => {
+  const on = side.classList.toggle('open');
+  document.body.classList.toggle('drawerOpen', on);
+};
+document.getElementById('bFs').onclick = enterFs;
+document.getElementById('bExitFs').onclick = exitFs;
+document.getElementById('bFsReset').onclick = () => document.getElementById('bReset').click();
+document.getElementById('bDrawer').onclick = toggleDrawer;
+fsMask.onclick = closeDrawer;
+document.addEventListener('fullscreenchange', () => {
+  if (!document.fullscreenElement && inFs()){ document.body.classList.remove('fs'); closeDrawer(); }
+});
+addEventListener('keydown', e => {
+  if (/INPUT|TEXTAREA|SELECT/.test((e.target || {}).tagName || '')) return;
+  if (e.key === 'f' || e.key === 'F') inFs() ? exitFs() : enterFs();
+  else if (e.key === 'Tab' && inFs()){ e.preventDefault(); toggleDrawer(); }
+  else if (e.key === 'Escape' && inFs()){
+    document.body.classList.contains('drawerOpen') ? closeDrawer() : exitFs();
+  }
+});
+
+addEventListener('hashchange', () => open(location.hash.slice(1)));
+
+document.getElementById('bReset').onclick = () => {
+  const k = location.hash.slice(1) || 'first-pwd';
+  fr.src = 'pages/' + k + '.html';
+};
+document.getElementById('bNew').onclick = () => {
+  const k = location.hash.slice(1) || 'first-pwd';
+  window.open('pages/' + k + '.html', '_blank');
+};
+
+/* 自动巡览：3 秒一页，再点一次停止 */
+let tour = null;
+const bAll = document.getElementById('bAll');
+bAll.onclick = () => {
+  if (tour){ clearInterval(tour); tour = null; bAll.textContent = '自动巡览'; return; }
+  bAll.textContent = '停止巡览';
+  let i = PAGES.findIndex(x => x[2] === (location.hash.slice(1) || 'first-pwd'));
+  if (i < 0) i = 0;
+  const step = () => { i = (i + 1) % PAGES.length; location.hash = PAGES[i][2]; };
+  step();
+  tour = setInterval(step, 3000);
+};
+
+open(location.hash.slice(1) || 'first-pwd');
+</script>
+</body>
+</html>

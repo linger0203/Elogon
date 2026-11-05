@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-page-node-id="NIWCO9i72J8DDLVpWgnSnq">
+<head data-page-node-id="RIzBBF4o6789djilKJ38ko">
+<meta charset="UTF-8" data-page-node-id="zSdKdnrEX5tdMN4tJjNjNk">
+<meta name="viewport" content="width=device-width, initial-scale=1" data-page-node-id="3rmUXjPKmAu18xXgnCBeS6">
+<title>管理操作日志 - E登录管理后台</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",system-ui,sans-serif;font-size:13px;color:#1F2329;background:#fff;overflow:hidden;-webkit-font-smoothing:antialiased}
+.app{display:flex;height:100%}
+
+.sidebar{width:168px;flex:none;border-right:1px solid #EBEDF0;display:flex;flex-direction:column;background:#fff}
+.logo{height:48px;flex:none;display:flex;align-items:center;gap:8px;padding:0 16px;border-bottom:1px solid #F2F3F5}
+.logo-mark{width:18px;height:18px;border-radius:5px;background:#1B74F0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:600}
+.logo-text{font-size:14px;font-weight:600;letter-spacing:.2px}
+.nav{flex:1;overflow-y:auto;padding:8px 0 12px}
+.nav-group{height:34px;display:flex;align-items:center;gap:7px;padding:0 16px;color:#1F2329;cursor:pointer;user-select:none}
+.nav-group:hover{background:#F7F8FA}
+.nav-caret{width:10px;height:10px;flex:none;color:#8F959E;transition:transform .15s}
+.nav-caret.closed{transform:rotate(-90deg)}
+.nav-ico{width:14px;height:14px;flex:none;color:#8F959E}
+.nav-sub{padding:2px 0}
+.nav-sub.hide{display:none}
+.nav-item{height:32px;display:flex;align-items:center;padding:0 16px 0 38px;color:#4E5969;cursor:pointer;position:relative}
+.nav-item:hover{background:#F7F8FA;color:#1F2329}
+.nav-item.active{background:#EAF3FF;color:#1B74F0;font-weight:500}
+.nav-item.active::before{content:"";position:absolute;left:0;top:6px;bottom:6px;width:2px;background:#1B74F0;border-radius:0 2px 2px 0}
+.side-foot{flex:none;border-top:1px solid #F2F3F5;padding:10px 16px 12px;color:#8F959E;font-size:12px}
+.side-foot .ver{display:flex;align-items:center;justify-content:space-between}
+
+.main{flex:1;min-width:0;display:flex;flex-direction:column;background:#fff}
+.tabs{height:44px;flex:none;display:flex;align-items:stretch;gap:28px;padding:0 20px;border-bottom:1px solid #EBEDF0}
+.tab{display:flex;align-items:center;font-size:13px;color:#4E5969;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tab:hover{color:#1B74F0}
+.tab.active{color:#1B74F0;font-weight:500;border-bottom-color:#1B74F0}
+
+.filters{flex:none;padding:14px 20px 10px}
+.frow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.ctl{height:32px;border:1px solid #DCDFE6;border-radius:4px;background:#fff;font-size:13px;color:#1F2329;font-family:inherit;padding:0 10px;outline:none}
+.ctl:focus{border-color:#1B74F0}
+.ctl::placeholder{color:#B4B9C2}
+select.ctl{appearance:none;background-image:url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23B4B9C2' stroke-width='1.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 9px center;padding-right:26px;color:#4E5969;min-width:132px}
+.date-range{display:flex;align-items:center;height:32px;border:1px solid #DCDFE6;border-radius:4px;padding:0 8px;gap:6px;background:#fff}
+.date-range input{border:0;outline:none;font-family:inherit;font-size:13px;color:#1F2329;width:138px;background:transparent}
+.date-range input::placeholder{color:#B4B9C2}
+.date-range .sep{color:#C4C9D1}
+.date-range .cal{width:13px;height:13px;color:#8F959E;flex:none}
+.btn{height:32px;border-radius:4px;font-size:13px;font-family:inherit;cursor:pointer;padding:0 16px;display:inline-flex;align-items:center;gap:4px;border:1px solid transparent}
+.btn-primary{background:#1B74F0;color:#fff}
+.btn-primary:hover{background:#1565DE}
+.btn-ghost{background:#fff;color:#1B74F0;border-color:#A9CBFB}
+.btn-ghost:hover{background:#F5F9FF}
+.more{display:inline-flex;align-items:center;gap:4px;height:32px;color:#4E5969;cursor:pointer;padding:0 8px;border-radius:4px;user-select:none}
+.more:hover{background:#F7F8FA}
+.more svg{width:10px;height:10px;color:#8F959E;transition:transform .15s}
+.more.open svg{transform:rotate(180deg)}
+.spacer{flex:1}
+.frow2{display:none;margin-top:10px}
+.frow2.show{display:flex}
+
+.table-area{flex:1;min-height:0;display:flex;flex-direction:column;padding:0 20px}
+.twrap{flex:1;min-height:0;overflow:auto}
+table{width:100%;border-collapse:collapse;table-layout:fixed}
+thead th{position:sticky;top:0;z-index:2;height:38px;background:#F7F8FA;font-size:13px;font-weight:400;color:#646A73;text-align:center;border-bottom:1px solid #EBEDF0}
+tbody td{height:34px;text-align:center;border-bottom:1px solid #F2F3F5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#1F2329}
+tbody tr:hover td{background:#F7FAFF}
+th:first-child,td:first-child{text-align:left}
+.res{display:inline-flex;align-items:center;gap:5px}
+.dot{width:5px;height:5px;border-radius:50%;flex:none}
+.dot.ok{background:#00A870}
+.dot.partial{background:#FF8A00}
+.dot.fail{background:#F54A45}
+.res.ok{color:#00A870}
+.res.partial{color:#FF8A00}
+.res.fail{color:#F54A45}
+.link{color:#1B74F0;cursor:pointer}
+.link:hover{text-decoration:underline}
+.tag-new{display:inline-block;font-size:10px;color:#1B74F0;background:#EAF3FF;border-radius:2px;padding:0 4px;margin-left:6px;line-height:15px;vertical-align:1px}
+
+.pager{flex:none;height:52px;display:flex;align-items:center;justify-content:flex-end;gap:8px;color:#4E5969;font-size:13px}
+.pg{min-width:28px;height:28px;border-radius:4px;border:1px solid #EBEDF0;background:#fff;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:#1F2329;padding:0 6px;font-family:inherit}
+.pg:hover{border-color:#1B74F0;color:#1B74F0}
+.pg.active{background:#1B74F0;border-color:#1B74F0;color:#fff}
+.pg.dots{border-color:transparent;cursor:default}
+.pg.dots:hover{border-color:transparent;color:#1F2329}
+.pgsel{height:28px;border:1px solid #EBEDF0;border-radius:4px;font-size:13px;color:#4E5969;padding:0 6px;font-family:inherit;background:#fff}
+.jump{width:44px;height:28px;border:1px solid #EBEDF0;border-radius:4px;text-align:center;font-size:13px;font-family:inherit;outline:none;color:#1F2329}
+
+.mask{position:fixed;inset:0;background:rgba(15,23,42,.45);opacity:0;pointer-events:none;transition:opacity .2s;z-index:20}
+.mask.on{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:800px;max-width:94vw;background:#fff;transform:translateX(100%);transition:transform .24s cubic-bezier(.4,0,.2,1);z-index:21;display:flex;flex-direction:column;box-shadow:-4px 0 24px rgba(15,23,42,.08)}
+.drawer.on{transform:none}
+.dr-head{flex:none;height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;border-bottom:1px solid #EBEDF0}
+.dr-title{font-size:14px;font-weight:600}
+.dr-close{width:24px;height:24px;display:flex;align-items:center;justify-content:center;border-radius:4px;cursor:pointer;color:#8F959E}
+.dr-close:hover{background:#F2F3F5;color:#1F2329}
+.dr-body{flex:1;overflow-y:auto;padding:16px 20px 28px}
+.sect{margin-bottom:20px}
+.sect-t{font-size:13px;font-weight:600;color:#1F2329;margin-bottom:10px;padding-left:8px;position:relative}
+.sect-t::before{content:"";position:absolute;left:0;top:2px;bottom:2px;width:2px;background:#1B74F0;border-radius:2px}
+.kv{border:1px solid #EBEDF0;border-radius:6px;overflow:hidden}
+.kv-row{display:flex;border-bottom:1px solid #F2F3F5}
+.kv-row:last-child{border-bottom:0}
+.kv-row .k{width:96px;flex:none;background:#FAFBFC;color:#646A73;padding:8px 12px;font-size:12px}
+.kv-row .v{flex:1;padding:8px 12px;font-size:12px;color:#1F2329;word-break:break-all}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px}
+.sect-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:10px}
+.sect-head .sect-t{margin-bottom:0}
+.sect-sub{font-size:12px;color:#646A73;flex:none}
+.hint{font-size:12px;color:#8F959E;line-height:1.6;margin-top:8px}
+.dtable{width:100%;border-collapse:collapse;table-layout:fixed;border:1px solid #EBEDF0;border-radius:6px;overflow:hidden}
+.dtable th{height:34px;background:#FAFBFC;font-size:12px;font-weight:400;color:#646A73;text-align:left;padding:0 10px;border-bottom:1px solid #EBEDF0}
+.dtable td{height:38px;font-size:12px;padding:0 10px;border-bottom:1px solid #F2F3F5;color:#1F2329;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dtable tr:last-child td{border-bottom:0}
+.dtable .fp{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;color:#646A73}
+.badge{display:inline-block;font-size:11px;border-radius:3px;padding:1px 6px;line-height:16px}
+.badge.ok{color:#00875A;background:#E8F7F0}
+.badge.cleared{color:#185FA5;background:#EAF3FF}
+.badge.pending{color:#B85C00;background:#FFF4E6}
+.empty{font-size:12px;color:#8F959E;padding:10px 0}
+
+</style>
+</head>
+<body data-page-node-id="mPUJ9lJhgH6MAnjiLGoYYN">
+<div class="app" data-page-node-id="vccd2gHTQvxTKMZF3Ga1UY">
+
+  <aside class="sidebar" data-page-node-id="RG6QHXMmjLaQgAODCNdAck">
+    <div class="logo" data-page-node-id="vZGQarkR1IJeDIeO6bFrBN"><div class="logo-mark" data-page-node-id="GtKut5MmJNNCQDI7xHZRD7">E</div><div class="logo-text" data-page-node-id="AFjEVHvB9t0aby7pFUIDGF">E登录管理后台</div></div>
+    <nav class="nav" data-page-node-id="BdbFG71VmCeXaW4dnFmX69">
+      <div class="nav-group" onclick="toggleGroup(this)" data-page-node-id="5Pkq6RPgX7yJHzBc7S9y3e">
+        <svg class="nav-caret" viewBox="0 0 10 10" fill="none" data-page-node-id="WyQrmFDp77a4n87juFPYIy"><path d="M2 3.5l3 3 3-3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" data-page-node-id="BeJbpBkZV9tujSqiHRnXTC"/></svg>
+        <svg class="nav-ico" viewBox="0 0 14 14" fill="none" data-page-node-id="mr9UrrPUKfo2CXg5GLJk1d"><rect x="1.5" y="1.5" width="11" height="11" rx="2.5" stroke="currentColor" stroke-width="1.1" data-page-node-id="zpYQ0qvsnJRXQMOfUGphm4"/><path d="M4.5 7h5" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" data-page-node-id="5mnPPQru4OCPD328WbeZti"/></svg>
+        <span data-page-node-id="RCk64OQCUq5sinGIjyS0q1">策略管理</span>
+      </div>
+      <div class="nav-sub hide" data-page-node-id="2w69HkEEZs6qPBnAYVlHPF">
+        <div class="nav-item" data-page-node-id="3DeKB3JqBFKArzLFov71K1">信任评估</div>
+        <div class="nav-item" data-page-node-id="EUJpvqNqS3urikFSILZZNS">E登录管理</div>
+        <div class="nav-item" data-page-node-id="eosHoOClfzrOZQnPeiNKAE">沙箱管理</div>
+      </div>
+
+      <div class="nav-group" onclick="toggleGroup(this)" data-page-node-id="yfgf8WGG6eSA7j2jBau8jM">
+        <svg class="nav-caret" viewBox="0 0 10 10" fill="none" data-page-node-id="aK69VfeY3f68J3KuY1Fi5U"><path d="M2 3.5l3 3 3-3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" data-page-node-id="wIGBNw9oZGSYP0ObvXDBE5"/></svg>
+        <svg class="nav-ico" viewBox="0 0 14 14" fill="none" data-page-node-id="cP7MPHRAj1LCcFbxKx9x5G"><circle cx="7" cy="4.8" r="2.3" stroke="currentColor" stroke-width="1.1" data-page-node-id="4XwZ6LdlsfPasLSlV5XfGk"/><path d="M2.5 12c0-2.2 2-3.6 4.5-3.6S11.5 9.8 11.5 12" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" data-page-node-id="GP1UXS66FHTmTVF0AL0HPd"/></svg>
+        <span data-page-node-id="jj4LYoRlk9GuSFTcQXfnMI">用户管理</span>
+      </div>
+      <div class="nav-sub" data-page-node-id="QXEa8ZFcIo7rFGD3ktsJvY">
+        <div class="nav-item" data-page-node-id="q9SEUxoTF1HQEAF4dIfWmh">用户管理</div>
+        <div class="nav-item" data-page-node-id="EqejjNWVoC6uz6RSOoMN9E">组织管理</div>
+        <div class="nav-item" data-page-node-id="lX7byynoZzrMse3ElrOpAP">应用管理</div>
+        <div class="nav-item" data-page-node-id="ly2FjlSLgAddWuEQTF9eyQ">认证管理</div>
+      </div>
+
+      <div class="nav-group" onclick="toggleGroup(this)" data-page-node-id="NqlqTADyj6Itg5kTQJTipp">
+        <svg class="nav-caret" viewBox="0 0 10 10" fill="none" data-page-node-id="G9SKEgpgLXKsYOyF6vY958"><path d="M2 3.5l3 3 3-3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" data-page-node-id="A054HctgOZ97Es0ijD4z4B"/></svg>
+        <svg class="nav-ico" viewBox="0 0 14 14" fill="none" data-page-node-id="zs8QqvptSsF35ETkdXixln"><path d="M2.5 4h9M2.5 7h9M2.5 10h5.5" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" data-page-node-id="RttffosU9PKEnChki2dUEV"/></svg>
+        <span data-page-node-id="PSPzYE6A6avmZwkxPz4icc">审计日志</span>
+      </div>
+      <div class="nav-sub" data-page-node-id="hX6ryLjWXRN4tVmswVzOwa">
+        <div class="nav-item" data-page-node-id="qAAIRz0HCZzauTKft8i9F7">终端操作日志</div>
+        <div class="nav-item" data-page-node-id="uBA0ZLsmsAm5NbhsEtFWxx">用户访问日志</div>
+        <div class="nav-item active" data-page-node-id="M1qHsXjtY2bF1zIzsEZPun">管理操作日志</div>
+        <div class="nav-item" data-page-node-id="af79cFGaxsv2bDHjGac1IN">准入策略日志</div>
+        <div class="nav-item" data-page-node-id="uRiLQ2Vva4xnT0eqQ72wyJ">访问策略日志</div>
+        <div class="nav-item" data-page-node-id="p1Fvuvpj85xBeGlwk1xnDO">身份同步日志</div>
+        <div class="nav-item" data-page-node-id="Onq6c1DL1T0U1rRyAXW3Y9">API调用日志</div>
+      </div>
+
+      <div class="nav-group" data-page-node-id="ktte9MxKamgmM7EO8RmZcg">
+        <svg class="nav-caret closed" viewBox="0 0 10 10" fill="none" data-page-node-id="zVS29n2DY8dVUDx0WOG8wQ"><path d="M2 3.5l3 3 3-3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" data-page-node-id="0AgZbKE4VZtLU6P4d4HxtN"/></svg>
+        <svg class="nav-ico" viewBox="0 0 14 14" fill="none" data-page-node-id="j2bdQA51qiYP2PYeXEuLhF"><circle cx="7" cy="7" r="2" stroke="currentColor" stroke-width="1.1" data-page-node-id="MiHwqH2Icnshf2pTHaew7A"/><path d="M7 1.5v1.6M7 10.9v1.6M1.5 7h1.6M10.9 7h1.6M3.1 3.1l1.1 1.1M9.8 9.8l1.1 1.1M10.9 3.1l-1.1 1.1M4.2 9.8l-1.1 1.1" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" data-page-node-id="qo9GTeHbl5CtbUSErNNwzc"/></svg>
+        <span data-page-node-id="kkswKTfEy5zNyz8i2nVUu2">系统设置</span>
+      </div>
+    </nav>
+    <div class="side-foot" data-page-node-id="usswWzn4iXjqZWXTsP9ndT">
+      <div class="ver" data-page-node-id="0IHTEL8V3pfGZMpqGza34w"><span data-page-node-id="JFOH2vBAItheY2VDqJoEWg">Version 1.8.4.0</span><span style="cursor:pointer" data-page-node-id="Xp900ejsAa1kzwNmzuTyiT">折叠菜单</span></div>
+    </div>
+  </aside>
+
+  <main class="main" data-page-node-id="ISYylnAG1Iu3t9aAda7OSk">
+    <div class="tabs" data-page-node-id="6tD8xSohTdoFnwujSWS3VB">
+      <div class="tab" data-page-node-id="sRCNaybAHsHYRBaEGNkURp">访问策略</div>
+      <div class="tab" data-page-node-id="7Vu91nN1YsR88KVTY0umBF">概况统计</div>
+      <div class="tab active" data-page-node-id="oz7PO9cQ1yCotPC6bHaXDF">管理操作日志</div>
+      <div class="tab" data-page-node-id="ddXBiHUi2iMv1txbzVssom">准入策略日志</div>
+      <div class="tab" data-page-node-id="FG7g5pcC4pUEsOl2UhDVtM">访问策略日志</div>
+      <div class="tab" data-page-node-id="Fkl6fFOeIWAzwtK8Jongr6">身份同步日志</div>
+      <div class="tab" data-page-node-id="S8IeL7sQsX6C1GHUaHUNJZ">API调用日志</div>
+    </div>
+
+    <div class="filters" data-page-node-id="zBE5xCQm2PDHWFdFe4XKWi">
+      <div class="frow" data-page-node-id="foDrAQPRR0GQdBP4fhyIop">
+        <div class="date-range" data-page-node-id="Y45uYbHcDBxDX7pr0Dfsuz">
+          <svg class="cal" viewBox="0 0 14 14" fill="none" data-page-node-id="lVEpBZV88ageCTlLCtZAoB"><rect x="1.5" y="2.5" width="11" height="10" rx="1.6" stroke="currentColor" stroke-width="1.1" data-page-node-id="xwQu096D6gAy5Lz5lFnp8g"/><path d="M1.5 5.6h11M4.6 1.4v2.2M9.4 1.4v2.2" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" data-page-node-id="rnLhuwjlQV0BjH0PAgfSfF"/></svg>
+          <input value="2026-10-29 10:06:02" data-page-node-id="QmQtaBmSSCePKDy3Ri6z2q">
+          <span class="sep" data-page-node-id="DekVUr2wqipnfipxLywWzk">~</span>
+          <input value="2026-11-05 10:06:02" data-page-node-id="hzUE6UKKVCtADOPk7LJ2pa">
+        </div>
+        <select class="ctl" data-page-node-id="dIOWVt9Iqd4MOznEkFlAkB"><option data-page-node-id="CfO1B2r3uGJNHKrseUoH4b">请选择操作用户</option><option data-page-node-id="GSFvNCNXrUd7i4UPLkdqYM">iamadmin</option><option data-page-node-id="EYgAusTeji7j2fDuRZcQpK">sys</option></select>
+        <select class="ctl" data-page-node-id="yk2jAdyE7a3yo3urpib3Ds"><option data-page-node-id="EdaSrNppZ4S6aYY7oAdSOG">请选择所属机构</option><option data-page-node-id="iNJXSBNhpSl0r1DH03rNVW">xxx组织</option></select>
+        <select class="ctl" id="evtFilter" data-page-node-id="FNA3dAdBqwbII5Igtyy2JA"><option data-page-node-id="ehNu3QBQycKhWoIZsVQLgz">请选择操作事件</option><option data-page-node-id="U3Rp6axepAMVaHvGmucFC5">删除用户</option><option data-page-node-id="ok0rrZRywRBZP2WthEdP6A">用户变更</option><option data-page-node-id="5EEYAFnSGcgmINiMwwDnqT">删除密钥</option><option data-page-node-id="oUl6sOAtg0u7mOgp7JsyH4">新增密钥</option><option data-page-node-id="Id9ECnJ2C5yVwLgk5bQYab">更改字典详情</option><option data-page-node-id="hYtzPag7oxZb1sK7DxIuTS">密码规则配置</option><option data-page-node-id="Te4WsboOCFXuikmTIq9p2n">应用权限</option></select>
+        <select class="ctl" data-page-node-id="mS8MnHti5ijbB4bOqQpjgK"><option data-page-node-id="l4aqHQIHqLLf9jRXUn8VrX">请选择操作结果</option><option data-page-node-id="b3332lDGMj2e5iqP52mMEn">成功</option><option data-page-node-id="2Gp7qXIBosXBnURNeAvVKF">部分成功</option><option data-page-node-id="DnO7w9OYXMzWi627UOAPbt">失败</option></select>
+        <div class="more" id="moreBtn" onclick="toggleMore()" data-page-node-id="PsMek5loX3RJDtK0EGQ7tM">
+          <span data-page-node-id="P79Z0Mwt8cvsOeWG4yQKL5">更多筛选</span>
+          <svg viewBox="0 0 10 10" fill="none" data-page-node-id="sszaKRidbDqPQHDhrn6FgU"><path d="M2 3.5l3 3 3-3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" data-page-node-id="uVvjQm9bnsrbEGW2eXyeCH"/></svg>
+        </div>
+        <div class="spacer" data-page-node-id="JMBbDaKobI4QGTSduSCPuB"></div>
+        <button class="btn btn-ghost" data-page-node-id="M50s0DA7CLnDcQFFAz3m7z">重置</button>
+        <button class="btn btn-primary" data-page-node-id="4vi9u893XCZ7RUDnX61mVD">查询</button>
+      </div>
+      <div class="frow frow2" id="frow2" data-page-node-id="sWdJMyR19I5PpLc8Nf4m8Y">
+        <select class="ctl" data-page-node-id="vm4tBxA2bo6R5OcetIawPA"><option data-page-node-id="TvOq13ygHwxiSCK87rJiHV">请选择操作对象</option><option data-page-node-id="CeAToBBYHU7NoRsyRUKevb">用户管理</option><option data-page-node-id="57qZuNXE5sxndjHg4urWfu">平台权限</option><option data-page-node-id="g27BaEFPXPZprnw595EuS8">系统设置</option><option data-page-node-id="JmvnwqQIu27ApWXhaULjTu">认证策略</option><option data-page-node-id="bd3gvGkjLWoeTicR9QH787">其它</option></select>
+        <input class="ctl" placeholder="IP 地址" style="width:150px" data-page-node-id="175WEWpCLYC4yK9QPcDzhL">
+        <input class="ctl" placeholder="操作流水号" style="width:230px" data-page-node-id="SGCfddlf6n97glPVDpGDjp">
+        <input class="ctl" placeholder="操作对象名称（如被删用户账号）" style="width:250px" data-page-node-id="bG25EmNdguZZC6nZYPjosk">
+      </div>
+    </div>
+
+    <div class="table-area" data-page-node-id="NWG36yGZjSEyrvEBTTGWBj">
+      <div class="twrap" data-page-node-id="JpBO56jSPeDVNmAzIbvrV5">
+        <table data-page-node-id="o6JSbjaMtKlLgpMozjSxhP">
+          <colgroup data-page-node-id="kYhWY8YhUsE8Nj653JoWz5">
+            <col style="width:150px" data-page-node-id="fm2ntzDgHtXBFrcJz8HMlp"><col style="width:96px" data-page-node-id="9eoGuCDAq2qvyZOjUcKx1j"><col style="width:100px" data-page-node-id="NwS02TaDWDMoB42pLy6Eix"><col style="width:100px" data-page-node-id="BUQEUKpIAHxNXCkZv4qFLH">
+            <col style="width:104px" data-page-node-id="fSjnCJcSE2jpRjWxAFIQdF"><col style="width:100px" data-page-node-id="7Snqyn09gnc8Mr6DFJCAie"><col style="width:96px" data-page-node-id="w2ixxkkyQSVRuWqNOUZT1q"><col style="width:64px" data-page-node-id="atP6dDhRfgOiZOFnOgqr7v">
+          </colgroup>
+          <thead data-page-node-id="AM40lrkTmUhBH6eSkZLEvR">
+            <tr data-page-node-id="7TDUXBVNnTfmsP1DfHvlj7">
+              <th style="text-align:left;padding-left:20px" data-page-node-id="jHhmuUHCEcqqoHqbiZtpAI">时间</th>
+              <th data-page-node-id="X5PWcjS6I2tw8TEqTj0ASL">操作用户</th><th data-page-node-id="cIThUpSLr84DWXexQFBI7D">所属机构</th><th data-page-node-id="pCG2ezwD4rEOjyMyJp8Wyu">IP地址</th>
+              <th data-page-node-id="sxncJ4JGL3x2i71kRLEGFM">操作事件</th><th data-page-node-id="wVdvpNlBFhpWOdhU1H29y8">操作对象</th><th data-page-node-id="i0eBEZq9X8pRYCCnT7PCxh">结果</th><th data-page-node-id="0qyyQwXuN9LQHDNPp6nUNA">操作</th>
+            </tr>
+          </thead>
+          <tbody id="tbody" data-page-node-id="atSQVuFO6cyA2bBdYuqF4U"></tbody>
+        </table>
+      </div>
+      <div class="pager" data-page-node-id="UxxSFopfCEaAKVdkFEXC6D">
+        <span data-page-node-id="CqgrYSecVR3LtjtQVRUsi5">共 10000 条</span>
+        <button class="pg" data-page-node-id="OtsbietF4F1A9sjroMytYe">‹</button>
+        <button class="pg active" data-page-node-id="lWhdz5DbWH6Bl8kDgR7Ltp">1</button>
+        <button class="pg" data-page-node-id="QOgRzvUkQjU91BwGKdT2CR">2</button>
+        <button class="pg" data-page-node-id="1SFCtQMdNte4hujNu4AAnn">3</button>
+        <button class="pg" data-page-node-id="Yr7tOzcBCHDE7Q3ZwFKfbJ">4</button>
+        <button class="pg dots" data-page-node-id="gMHAvNLknnUE26VBBeFGhO">···</button>
+        <button class="pg" data-page-node-id="36Tu4mzludLN690D7MAzTA">1000</button>
+        <button class="pg" data-page-node-id="OxctjZP2cayCw2hhWAqTAM">›</button>
+        <select class="pgsel" data-page-node-id="G2wbbF1cGwlM0HrJZYwbzS"><option data-page-node-id="JuyELZajd3qmt6754anTIj">10条/页</option><option data-page-node-id="Q0Fx8PTaQn8rwjhfEfvSRw">20条/页</option><option data-page-node-id="nmVLZBDFHhljasJ7iE6v5B">50条/页</option></select>
+        <span data-page-node-id="eVKjo1jAvLihTgwKfyRHCJ">前往</span>
+        <input class="jump" value="1" data-page-node-id="K5jBGTYd5WfJZDZxuBzdIQ">
+        <span data-page-node-id="bqZ2MpQ2lxL5dKaNVqpWsc">页</span>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="mask" id="mask" onclick="closeDrawer()" data-page-node-id="Yancc2cq0VO7HvNgwYFCZS"></div>
+<div class="drawer" id="drawer" data-page-node-id="oTHvK2Xg3K8SiXqNuEepZ3">
+  <div class="dr-head" data-page-node-id="SkEOFNdB40Mrrj6DzCvtRT">
+    <div class="dr-title" data-page-node-id="HHVwMc6BazIwBfy7GpJWPC">操作日志详情</div>
+    <div class="dr-close" onclick="closeDrawer()" data-page-node-id="bImSGuCzFFgjUDsQOXBapj">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" data-page-node-id="5Q6G8auPwEjP4S30ncKSqA"><path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" data-page-node-id="JxFMjHcIXaqb8TpsWXJkKZ"/></svg>
+    </div>
+  </div>
+  <div class="dr-body" id="drBody" data-page-node-id="DlwGUFdgn95tN3STKzIIOA"></div>
+</div>
+
+<script>
+var records = [
+  {
+    t:'2026-11-05 10:06:18', user:'iamadmin', org:'xxx组织', ip:'10.51.9.34',
+    evt:'删除用户', obj:'用户管理', res:'success', isNew:true,
+    detail:{
+      no:'OP20261105100618-001',
+      target:{acc:'zhangsan', name:'张三', empNo:'E10023', org:'xxx组织 / 研发部'},
+      summary:{total:3, ok:3, pending:0},
+      devices:[
+        {name:'ZHANGSAN-PC', fp:'9F3A-71C4-88B2-C21D', os:'Windows 11 23H2', last:'2026-11-05 09:42:11', un:'2026-11-05 10:06:18', res:'ok'},
+        {name:'MacBook-Pro-张三', fp:'4B7E-2D19-5F60-88A0', os:'macOS 15.2', last:'2026-11-04 18:20:36', un:'2026-11-05 10:06:18', res:'ok'},
+        {name:'DESKTOP-7K2M', fp:'C1D9-88F3-3A07-5E43', os:'Windows 10 22H2', last:'2026-11-05 08:57:02', un:'2026-11-05 10:06:18', res:'ok'}
+      ],
+    }
+  },
+  {
+    t:'2026-11-05 10:06:18', user:'iamadmin', org:'xxx组织', ip:'10.51.9.34',
+    evt:'删除用户', obj:'用户管理', res:'partial', isNew:true,
+    detail:{
+      no:'OP20261105100618-002',
+      target:{acc:'lisi', name:'李四', empNo:'E10088', org:'xxx组织 / 市场部'},
+      summary:{total:3, ok:2, pending:1},
+      devices:[
+        {name:'LISI-LAPTOP', fp:'9F3A-71C4-88B2-C21D', os:'Windows 11 23H2', last:'2026-11-05 09:42:11', un:'2026-11-05 10:06:18', res:'ok'},
+        {name:'MacBook-Pro-李四', fp:'4B7E-2D19-5F60-88A0', os:'macOS 15.2', last:'2026-11-04 18:20:36', un:'2026-11-05 10:06:18', res:'ok'},
+        {name:'DESKTOP-LS88', fp:'5E71-A0C6-2B94-77D2', os:'Windows 10 22H2', last:'2026-10-28 16:11:44', un:'2026-11-05 10:06:47', res:'cleared'}
+      ],
+    }
+  },
+  {
+    t:'2026-11-05 10:06:05', user:'sys', org:'-', ip:'10.51.9.45',
+    evt:'删除用户', obj:'用户管理', res:'success', isNew:true,
+    detail:{
+      no:'OP20261105100605-001',
+      target:{acc:'wangwu', name:'王五', empNo:'E10132', org:'xxx组织 / 财务部'},
+      summary:{total:1, ok:1, pending:0},
+      devices:[
+        {name:'WANGWU-PC', fp:'A72B-05D8-11E4-9C67', os:'Windows 11 23H2', last:'2026-11-03 14:05:20', un:'2026-11-05 10:06:05', res:'ok'}
+      ],
+
+      source:'身份同步任务（IAM → E登录）'
+    }
+  },
+  { t:'2026-11-05 10:05:51', user:'iamadmin', org:'xxx组织', ip:'10.51.9.34', evt:'删除密钥', obj:'平台权限', res:'success', detail:{no:'OP20261105100551-003', noCascade:true} },
+  { t:'2026-11-05 10:05:50', user:'iamadmin', org:'xxx组织', ip:'10.51.9.34', evt:'新增密钥', obj:'平台权限', res:'success', detail:{no:'OP20261105100550-002', noCascade:true} },
+  { t:'2026-11-05 10:05:39', user:'iamadmin', org:'xxx组织', ip:'10.51.9.34', evt:'更改字典详情', obj:'系统设置', res:'success', detail:{no:'OP20261105100539-007', noCascade:true} },
+  { t:'2026-11-05 10:05:39', user:'sys', org:'-', ip:'10.51.9.45', evt:'用户变更', obj:'其它', res:'success', detail:{no:'OP20261105100539-006', noCascade:true} },
+  { t:'2026-11-05 10:05:39', user:'sys', org:'-', ip:'10.51.9.45', evt:'用户变更', obj:'其它', res:'success', detail:{no:'OP20261105100539-005', noCascade:true} },
+  { t:'2026-11-05 10:05:39', user:'iamadmin', org:'xxx组织', ip:'10.51.9.34', evt:'更改字典详情', obj:'系统设置', res:'success', detail:{no:'OP20261105100539-004', noCascade:true} },
+  { t:'2026-11-05 10:05:39', user:'iamadmin', org:'xxx组织', ip:'10.51.9.34', evt:'删除密钥', obj:'平台权限', res:'success', detail:{no:'OP20261105100539-003', noCascade:true} },
+  { t:'2026-11-05 10:05:38', user:'iamadmin', org:'xxx组织', ip:'10.51.9.34', evt:'新增密钥', obj:'平台权限', res:'success', detail:{no:'OP20261105100538-002', noCascade:true} },
+  { t:'2026-11-05 10:05:27', user:'iamadmin', org:'xxx组织', ip:'10.51.9.34', evt:'密码规则配置', obj:'认证策略', res:'success', detail:{no:'OP20261105100527-002', noCascade:true} },
+  { t:'2026-11-05 10:05:27', user:'sys', org:'-', ip:'10.51.9.45', evt:'应用权限', obj:'其它', res:'success', detail:{no:'OP20261105100527-001', noCascade:true} }
+];
+
+var resMap = {
+  success:{cls:'ok', text:'成功'},
+  partial:{cls:'partial', text:'部分成功'},
+  fail:{cls:'fail', text:'失败'}
+};
+
+function renderTable(){
+  var tb = document.getElementById('tbody');
+  var html = '';
+  for(var i=0;i<records.length;i++){
+    var r = records[i], m = resMap[r.res];
+    html += '<tr>'
+      + '<td style="padding-left:20px">' + r.t + '</td>'
+      + '<td>' + r.user + '</td>'
+      + '<td>' + r.org + '</td>'
+      + '<td>' + r.ip + '</td>'
+      + '<td>' + r.evt + (r.isNew ? '<span class="tag-new">新增</span>' : '') + '</td>'
+      + '<td>' + r.obj + '</td>'
+      + '<td><span class="res ' + m.cls + '"><span class="dot ' + m.cls + '"></span>' + m.text + '</span></td>'
+      + '<td><span class="link" onclick="openDrawer(' + i + ')">查看</span></td>'
+      + '</tr>';
+  }
+  tb.innerHTML = html;
+}
+renderTable();
+
+function openDrawer(i){
+  var r = records[i], m = resMap[r.res], d = r.detail;
+  var h = '';
+  h += '<div class="sect"><div class="sect-t">操作信息</div><div class="kv">';
+  h += row('操作时间', r.t);
+  h += row('操作用户', r.user + (d.source ? '（系统任务）' : ''));
+  h += row('所属机构', r.org);
+  h += row('IP 地址', r.ip);
+  h += row('操作事件', r.evt);
+  h += row('操作对象', r.obj);
+  h += row('操作结果', '<span class="res ' + m.cls + '"><span class="dot ' + m.cls + '"></span>' + m.text + '</span>');
+  h += row('操作流水号', '<span class="mono">' + d.no + '</span>');
+  h += '</div></div>';
+
+  if(!d.noCascade){
+    h += '<div class="sect"><div class="sect-t">删除对象</div><div class="kv">';
+    h += row('用户账号', d.target.acc);
+    h += row('姓名', d.target.name);
+    h += row('工号', d.target.empNo);
+    h += row('所属组织', d.target.org);
+    h += '</div><div class="hint">用户已删除，以上为删除时刻的快照</div></div>';
+
+    var sub = '共 ' + d.summary.total + ' 台，已解绑 ' + d.summary.ok + ' 台';
+    if(d.summary.pending > 0){ sub += '，待清理 ' + d.summary.pending + ' 台'; }
+    h += '<div class="sect"><div class="sect-head"><div class="sect-t">连带删除的终端绑定</div><div class="sect-sub">' + sub + '</div></div>';
+    h += '<table class="dtable"><colgroup><col style="width:130px"><col style="width:150px"><col style="width:118px"><col style="width:126px"><col style="width:126px"><col style="width:100px"><\/colgroup>';
+    h += '<thead><tr><th>终端名称</th><th>设备指纹</th><th>操作系统</th><th>最近登录</th><th>解绑时间</th><th>解绑结果</th></tr></thead><tbody>';
+    for(var k=0;k<d.devices.length;k++){
+      var dv = d.devices[k];
+      var badge = dv.res === 'ok' ? '<span class="badge ok">已解绑</span>'
+        : dv.res === 'cleared' ? '<span class="badge cleared">已补清</span>'
+        : '<span class="badge pending">待清理</span>';
+      h += '<tr><td>' + dv.name + '</td><td class="fp">' + dv.fp + '</td><td>' + dv.os + '</td><td>' + fmtMin(dv.last) + '</td><td>' + fmtMin(dv.un) + '</td><td>' + badge + '</td></tr>';
+    }
+    h += '</tbody></table>';
+    h += '<div class="hint">' + (d.summary.pending > 0
+      ? '终端离线时解绑指令无法送达，标记为待清理，上线后自动补清。'
+      : '解绑同时清除终端本地的登录态与免登凭据，用户下次访问业务系统需重新认证。') + '</div>';
+    h += '</div>';
+  } else {
+    h += '<div class="sect"><div class="sect-t">连带删除</div><div class="empty">该操作未连带删除终端绑定数据。</div></div>';
+  }
+
+  document.getElementById('drBody').innerHTML = h;
+  document.getElementById('mask').classList.add('on');
+  document.getElementById('drawer').classList.add('on');
+}
+
+function fmtMin(s){
+  return (s && s.length > 16) ? s.substring(0, 16) : s;
+}
+
+function row(k,v){
+  return '<div class="kv-row"><div class="k">' + k + '</div><div class="v">' + v + '</div></div>';
+}
+
+function closeDrawer(){
+  document.getElementById('mask').classList.remove('on');
+  document.getElementById('drawer').classList.remove('on');
+}
+
+function toggleMore(){
+  var b = document.getElementById('moreBtn'), f = document.getElementById('frow2');
+  b.classList.toggle('open'); f.classList.toggle('show');
+}
+
+function toggleGroup(el){
+  var sub = el.nextElementSibling;
+  var caret = el.querySelector('.nav-caret');
+  if(sub && sub.classList.contains('nav-sub')){
+    sub.classList.toggle('hide');
+    if(caret) caret.classList.toggle('closed', sub.classList.contains('hide'));
+  }
+}
+
+document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeDrawer(); });
+</script>
+</body>
+</html>

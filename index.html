@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>E登录 · 原型发布站</title>
+<style>
+:root{
+  --blue:#00A1E9; --blue-d:#0074A8; --ink:#1f2329; --ink2:#5f6672;
+  --ink3:#98a1ad; --line:#e6e9ee; --bg:#f5f6f8; --card:#fff;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-font-smoothing:antialiased}
+body{background:var(--bg);color:var(--ink);
+  font:14px/1.6 "PingFang SC","Microsoft YaHei","Source Han Sans CN",sans-serif;
+  min-height:100vh;padding:56px 24px 72px}
+.wrap{max-width:960px;margin:0 auto}
+
+.hd{margin-bottom:36px}
+.hd h1{font-size:26px;font-weight:600;letter-spacing:.3px}
+.hd h1 b{color:var(--blue);font-weight:600}
+.hd p{margin-top:10px;font-size:13.5px;color:var(--ink2);max-width:640px}
+.hd .meta{margin-top:16px;display:flex;gap:8px;flex-wrap:wrap}
+.hd .tag{font-size:11.5px;color:var(--blue-d);background:#eaf7fe;
+  border:1px solid #d3edfb;border-radius:5px;padding:3px 9px}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+
+.card{display:flex;flex-direction:column;background:var(--card);
+  border:1px solid var(--line);border-radius:14px;padding:22px 22px 18px;
+  text-decoration:none;color:inherit;
+  transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease}
+.card:hover{transform:translateY(-2px);border-color:#cfe8f7;
+  box-shadow:0 10px 28px rgba(31,35,41,.09)}
+
+.card .ico{width:40px;height:40px;border-radius:11px;
+  background:linear-gradient(135deg,#00A1E9,#0074A8);
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:17px;font-weight:600;margin-bottom:16px}
+.card.alt .ico{background:linear-gradient(135deg,#7f8b9c,#5f6672)}
+.card h2{font-size:15.5px;font-weight:600;letter-spacing:.1px}
+.card .desc{margin-top:7px;font-size:12.5px;color:var(--ink2);line-height:1.65;flex:1}
+.card .go{margin-top:16px;padding-top:13px;border-top:1px solid var(--line);
+  display:flex;align-items:center;justify-content:space-between;
+  font-size:12px;color:var(--blue-d)}
+.card .go .n{font-variant-numeric:tabular-nums;color:var(--ink3)}
+.card:hover .go{color:var(--blue)}
+
+.ft{margin-top:40px;padding-top:20px;border-top:1px solid var(--line);
+  font-size:12px;color:var(--ink3);display:flex;gap:16px;flex-wrap:wrap}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hd">
+    <h1>E登录 · <b>原型发布站</b></h1>
+    <p>终端统一身份登录系统的高保真交互原型。所有页面为纯静态 HTML，点开即看，无需安装环境。</p>
+    <div class="meta">
+      <span class="tag">Windows 客户端</span>
+      <span class="tag">管理后台</span>
+      <span class="tag">MCP 面板</span>
+    </div>
+  </div>
+
+  <div class="grid">
+
+    <a class="card" href="client/index.html">
+      <div class="ico">C</div>
+      <h2>客户端原型</h2>
+      <div class="desc">Windows 客户端全部界面，含首次登录、日常登录、离线登录与快捷面板四类场景，左侧目录可逐页切换。</div>
+      <div class="go"><span>进入总览</span><span class="n">40 页</span></div>
+    </a>
+
+    <a class="card" href="admin/管理操作日志.html">
+      <div class="ico">A</div>
+      <h2>管理后台 · 管理操作日志</h2>
+      <div class="desc">操作日志列表与详情抽屉，包含删除用户级联解绑日志，支持条件筛选与分页。</div>
+      <div class="go"><span>进入页面</span><span class="n">1 页</span></div>
+    </a>
+
+    <a class="card alt" href="panel/app-center-check.html">
+      <div class="ico">P</div>
+      <h2>面板 · 应用中心校验</h2>
+      <div class="desc">应用中心准入校验流程原型，用于验证核验环节的交互与状态反馈。</div>
+      <div class="go"><span>进入页面</span><span class="n">1 页</span></div>
+    </a>
+
+  </div>
+
+  <div class="ft">
+    <span>竹云 · E登录产品线</span>
+    <span>静态托管：GitHub Pages</span>
+  </div>
+
+</div>
+</body>
+</html>
