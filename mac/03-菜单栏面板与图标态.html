@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>菜单栏面板与图标态 · E登录 Mac版</title>
+<style>
+:root{
+  --brand:#007AFF; --brand-soft:#EAF3FF;
+  --bg-page:#F4F5F7; --bg-card:#FFFFFF; --bg-field:#F7F8FA; --bg-hover:#F0F1F4;
+  --border-card:#E8EAED; --border-field:#DDE0E4;
+  --text-1:#1A1D21; --text-2:#6B7280; --text-3:#9CA3AF;
+  --success:#34C759; --success-soft:#EAF9EE;
+  --warning:#FF9500; --warning-soft:#FFF4E5;
+  --danger:#FF3B30; --danger-soft:#FFEDEC;
+  --r-field:10px; --r-pop:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:-apple-system,"SF Pro Text","PingFang SC","Helvetica Neue",Arial,sans-serif;
+  background:var(--bg-page); color:var(--text-1); font-size:13px; line-height:1.6;
+  padding:40px 20px; display:flex; flex-direction:column; align-items:center; gap:20px;
+  -webkit-font-smoothing:antialiased;
+}
+.col{width:820px;display:flex;flex-direction:column;gap:12px}
+.panel-title{font-size:14px;font-weight:500;color:var(--text-1)}
+.panel-title .sub{font-size:11.5px;color:var(--text-3);font-weight:400;margin-left:8px}
+.stage{background:#fff;border:1px solid var(--border-card);border-radius:16px;
+  overflow:hidden;width:820px}
+.menubar{
+  height:26px;background:#F6F6F6;border-bottom:1px solid #E4E4E4;
+  display:flex;align-items:center;padding:0 12px;gap:16px;font-size:11px;color:#4A4A4A;
+}
+.menubar .left{display:flex;gap:16px;align-items:center}
+.menubar .right{margin-left:auto;display:flex;gap:12px;align-items:center}
+.menubar .mb-icon{display:flex;align-items:center;gap:4px}
+.desktop{
+  height:400px;background:#EDEFF2;position:relative;
+  background-image:radial-gradient(circle at 20% 25%,#E3E8EE 0%,transparent 55%),
+                   radial-gradient(circle at 78% 68%,#E7EBF0 0%,transparent 50%);
+}
+.pop{
+  position:absolute;top:16px;right:48px;width:320px;
+  background:#fff;border:1px solid var(--border-card);
+  border-radius:var(--r-pop);overflow:hidden;
+}
+/* 只读绑定关系区 */
+.bindrow{display:flex;align-items:center;gap:10px;padding:12px 14px;background:#FCFCFD}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--brand);
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:13px;font-weight:500;flex:0 0 auto}
+.bindrow .meta{flex:1;min-width:0}
+.bindrow .meta .hi{font-size:12.5px;font-weight:500;color:var(--text-1);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bindrow .meta .id{font-size:10.5px;color:var(--text-3);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.badge-ok{font-size:10px;color:#248A3D;background:var(--success-soft);
+  padding:1px 6px;border-radius:5px;font-weight:500;flex:0 0 auto}
+.sep{height:1px;background:var(--border-card)}
+.mi{display:flex;align-items:center;gap:10px;padding:8px 13px;
+  font-size:13px;color:var(--text-1);cursor:pointer;
+  white-space:nowrap}
+.mi:hover{background:var(--bg-hover)}
+.mi .ico{flex:0 0 auto;display:flex;width:16px;justify-content:center}
+.mi .txt{flex:0 0 auto;white-space:nowrap}
+.mi .spacer{flex:1 1 auto;min-width:0}
+.mi .badge{flex:0 0 auto;font-size:11px;color:var(--brand);background:var(--brand-soft);
+  padding:1px 6px;border-radius:6px;font-weight:500}
+/* 危险操作：图标保留红色描边作轻提示，文字回到常规色 */
+.mi.danger{color:var(--text-1)}
+.mi.danger:hover{background:var(--bg-hover)}
+.mi.danger .ico svg *{stroke:var(--danger)}
+.icostates{display:flex;gap:32px;justify-content:center;flex-wrap:wrap}
+.ico{text-align:center;font-size:11px;color:var(--text-2);width:180px}
+.ico .box{height:60px;display:flex;align-items:center;justify-content:center;
+  background:#F0F2F5;border:1px solid var(--border-card);border-radius:var(--r-field);
+  margin-bottom:8px}
+.ico .t{color:var(--text-1);font-weight:500;font-size:12px;display:block}
+.ico .d{font-size:11px;color:var(--text-3);line-height:1.5}
+.note{
+  width:820px;background:#fff;border:1px dashed #C9CDD3;border-radius:var(--r-field);
+  padding:14px 18px;font-size:11.5px;color:var(--text-2);line-height:1.85;
+}
+.note b{color:var(--text-1);font-weight:500}
+.note .id{font-family:ui-monospace,Menlo,Consolas,monospace;color:var(--brand)}
+.note .new{background:var(--warning-soft);color:#633806;padding:1px 5px;border-radius:4px}
+.note .q{background:var(--success-soft);color:#1D6B32;padding:1px 5px;border-radius:4px}
+</style>
+</head>
+<body>
+
+<div class="col">
+  <div class="panel-title">状态一 · 面板展开<span class="sub">注销绑定账号直接平铺在一级</span></div>
+  <div class="stage">
+    <div class="menubar">
+      <div class="left"><span>&#63743;</span><span>访达</span><span>文件</span><span>编辑</span><span>显示</span></div>
+      <div class="right">
+        <div class="mb-icon">
+          <img src="assets/logo-color-128.png" width="15" height="15" alt="E登录" />
+        </div>
+        <span>100%</span><span>14:25</span>
+      </div>
+    </div>
+    <div class="desktop">
+      <div class="pop">
+        <div class="bindrow">
+          <div class="avatar">张</div>
+          <div class="meta">
+            <div class="hi">您好，zhangsan</div>
+            <div class="id">已绑定本机 · MacBook Pro</div>
+          </div>
+          <span class="badge-ok">已登录</span>
+        </div>
+        <div class="sep"></div>
+        <div class="mi">
+          <span class="ico">
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+              <rect x="1.8" y="1.8" width="5" height="5" rx="1.2" stroke="#6B7280" stroke-width="1.3"/>
+              <rect x="8.2" y="1.8" width="5" height="5" rx="1.2" stroke="#6B7280" stroke-width="1.3"/>
+              <rect x="1.8" y="8.2" width="5" height="5" rx="1.2" stroke="#6B7280" stroke-width="1.3"/>
+              <rect x="8.2" y="8.2" width="5" height="5" rx="1.2" stroke="#6B7280" stroke-width="1.3"/>
+            </svg>
+          </span>
+          <span class="txt">访问应用门户</span>
+          <span class="spacer"></span>
+          <span class="badge">12</span>
+        </div>
+        <div class="mi">
+          <span class="ico">
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+              <circle cx="7.5" cy="7.5" r="2.2" stroke="#6B7280" stroke-width="1.3"/>
+              <path d="M7.5 1.6v1.8M7.5 11.6v1.8M1.6 7.5h1.8M11.6 7.5h1.8M3.3 3.3l1.3 1.3M10.4 10.4l1.3 1.3M11.7 3.3l-1.3 1.3M4.6 10.4l-1.3 1.3"
+                stroke="#6B7280" stroke-width="1.3" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <span class="txt">设置</span>
+        </div>
+        <div class="mi danger">
+          <span class="ico">
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+              <circle cx="7.5" cy="7.5" r="5.8" stroke="#FF3B30" stroke-width="1.3"/>
+              <path d="M4.3 4.3l6.4 6.4" stroke="#FF3B30" stroke-width="1.3" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <span class="txt">注销绑定账号</span>
+        </div>
+        <div class="sep"></div>
+        <div class="mi danger">
+          <span class="ico">
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+              <path d="M5.6 2.2H3.4a1 1 0 00-1 1v8.6a1 1 0 001 1h2.2" stroke="#FF3B30"
+                stroke-width="1.3" stroke-linecap="round"/>
+              <path d="M9.4 4.8L12.6 8l-3.2 3.2M12.6 8H6" stroke="#FF3B30"
+                stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+          <span class="txt">退出登录</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="col">
+  <div class="panel-title">状态二 · 后台关闭「访问应用门户」<span class="sub">该入口整行不渲染</span></div>
+  <div class="stage">
+    <div class="menubar">
+      <div class="left"><span>&#63743;</span><span>访达</span><span>文件</span><span>编辑</span><span>显示</span></div>
+      <div class="right">
+        <div class="mb-icon">
+          <img src="assets/logo-color-128.png" width="15" height="15" alt="E登录" />
+        </div>
+        <span>100%</span><span>14:25</span>
+      </div>
+    </div>
+    <div class="desktop">
+      <div class="pop">
+        <div class="bindrow">
+          <div class="avatar">张</div>
+          <div class="meta">
+            <div class="hi">您好，zhangsan</div>
+            <div class="id">已绑定本机 · MacBook Pro</div>
+          </div>
+          <span class="badge-ok">已登录</span>
+        </div>
+        <div class="sep"></div>
+        <div class="mi">
+          <span class="ico">
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+              <circle cx="7.5" cy="7.5" r="2.2" stroke="#6B7280" stroke-width="1.3"/>
+              <path d="M7.5 1.6v1.8M7.5 11.6v1.8M1.6 7.5h1.8M11.6 7.5h1.8M3.3 3.3l1.3 1.3M10.4 10.4l1.3 1.3M11.7 3.3l-1.3 1.3M4.6 10.4l-1.3 1.3"
+                stroke="#6B7280" stroke-width="1.3" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <span class="txt">设置</span>
+        </div>
+        <div class="mi danger">
+          <span class="ico">
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+              <circle cx="7.5" cy="7.5" r="5.8" stroke="#FF3B30" stroke-width="1.3"/>
+              <path d="M4.3 4.3l6.4 6.4" stroke="#FF3B30" stroke-width="1.3" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <span class="txt">注销绑定账号</span>
+        </div>
+        <div class="sep"></div>
+        <div class="mi danger">
+          <span class="ico">
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+              <path d="M5.6 2.2H3.4a1 1 0 00-1 1v8.6a1 1 0 001 1h2.2" stroke="#FF3B30"
+                stroke-width="1.3" stroke-linecap="round"/>
+              <path d="M9.4 4.8L12.6 8l-3.2 3.2M12.6 8H6" stroke="#FF3B30"
+                stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+          <span class="txt">退出登录</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="col">
+  <div class="panel-title">状态三 · 未登录（本机已绑定）<span class="sub">退出登录后的面板 · 可一键登录</span></div>
+  <div class="stage">
+    <div class="menubar">
+      <div class="left"><span>&#63743;</span><span>访达</span><span>文件</span><span>编辑</span><span>显示</span></div>
+      <div class="right">
+        <div class="mb-icon">
+          <img src="assets/logo-mono-black-128.png" width="15" height="15" style="opacity:.35" alt="E登录" />
+        </div>
+        <span>100%</span><span>14:25</span>
+      </div>
+    </div>
+    <div class="desktop">
+      <div class="pop">
+        <div class="bindrow">
+          <div class="avatar" style="background:#C9CDD3">
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+              <circle cx="7.5" cy="5.4" r="2.6" stroke="#fff" stroke-width="1.4"/>
+              <path d="M2.6 13c0-2.3 2.2-3.6 4.9-3.6s4.9 1.3 4.9 3.6" stroke="#fff"
+                stroke-width="1.4" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="meta">
+            <div class="hi" style="color:var(--text-2)">未登录</div>
+            <div class="id">已绑定 zhangsan，可一键登录</div>
+          </div>
+        </div>
+        <div class="sep"></div>
+        <div class="mi">
+          <span class="ico">
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+              <path d="M5.6 2.2H3.4a1 1 0 00-1 1v8.6a1 1 0 001 1h2.2" stroke="#6B7280"
+                stroke-width="1.3" stroke-linecap="round"/>
+              <path d="M9.4 4.8L12.6 8l-3.2 3.2M12.6 8H6" stroke="#6B7280"
+                stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+          <span class="txt">登录统一身份</span>
+          <span class="spacer"></span>
+          <span class="badge">1</span>
+        </div>
+        <div class="mi">
+          <span class="ico">
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+              <circle cx="7.5" cy="7.5" r="2.2" stroke="#6B7280" stroke-width="1.3"/>
+              <path d="M7.5 1.6v1.8M7.5 11.6v1.8M1.6 7.5h1.8M11.6 7.5h1.8M3.3 3.3l1.3 1.3M10.4 10.4l1.3 1.3M11.7 3.3l-1.3 1.3M4.6 10.4l-1.3 1.3"
+                stroke="#6B7280" stroke-width="1.3" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <span class="txt">设置</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="col">
+  <div class="panel-title">状态四 · 全新机器，从未绑定<span class="sub">面板引导去绑定，不进登录页</span></div>
+  <div class="stage">
+    <div class="menubar">
+      <div class="left"><span>&#63743;</span><span>访达</span><span>文件</span><span>编辑</span><span>显示</span></div>
+      <div class="right">
+        <div class="mb-icon">
+          <img src="assets/logo-mono-black-128.png" width="15" height="15" style="opacity:.35" alt="E登录" />
+        </div>
+        <span>100%</span><span>14:25</span>
+      </div>
+    </div>
+    <div class="desktop">
+      <div class="pop">
+        <div class="bindrow">
+          <div class="avatar" style="background:#C9CDD3">
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+              <circle cx="7.5" cy="5.4" r="2.6" stroke="#fff" stroke-width="1.4"/>
+              <path d="M2.6 13c0-2.3 2.2-3.6 4.9-3.6s4.9 1.3 4.9 3.6" stroke="#fff"
+                stroke-width="1.4" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="meta">
+            <div class="hi" style="color:var(--text-2)">尚未关联</div>
+            <div class="id">本机还没有关联统一身份账号</div>
+          </div>
+        </div>
+        <div class="sep"></div>
+        <div class="mi">
+          <span class="ico">
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+              <path d="M6.2 3.4a3.2 3.2 0 104.5 4.5l2.4-2.4a3.2 3.2 0 00-4.5-4.5L7.4 2.2"
+                stroke="#6B7280" stroke-width="1.3" stroke-linecap="round"/>
+              <path d="M8.8 11.6a3.2 3.2 0 01-4.5-4.5L6.8 4.6" stroke="#6B7280"
+                stroke-width="1.3" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <span class="txt">关联统一身份账号</span>
+          <span class="spacer"></span>
+          <span class="badge">1</span>
+        </div>
+        <div class="mi">
+          <span class="ico">
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+              <circle cx="7.5" cy="7.5" r="2.2" stroke="#6B7280" stroke-width="1.3"/>
+              <path d="M7.5 1.6v1.8M7.5 11.6v1.8M1.6 7.5h1.8M11.6 7.5h1.8M3.3 3.3l1.3 1.3M10.4 10.4l1.3 1.3M11.7 3.3l-1.3 1.3M4.6 10.4l-1.3 1.3"
+                stroke="#6B7280" stroke-width="1.3" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <span class="txt">设置</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="col">
+  <div class="panel-title">菜单栏图标（两态）<span class="sub">已登录用 logo 原色 / 未登录用黑色 35%</span></div>
+  <div class="icostates">
+    <div class="ico">
+      <div class="box">
+        <img src="assets/logo-color-128.png" width="20" height="20" alt="已登录" />
+      </div>
+      <span class="t">已登录</span>
+      <span class="d">logo 原色，正常显示</span>
+    </div>
+    <div class="ico">
+      <div class="box">
+        <img src="assets/logo-mono-black-128.png" width="20" height="20"
+          style="opacity:.35" alt="未登录" />
+      </div>
+      <span class="t">未登录</span>
+      <span class="d">黑色图标 · 透明度降至 35%</span>
+    </div>
+  </div>
+</div>
+
+<div class="note">
+  <b>覆盖的交互点</b>：<span class="id">M-MENU-001 ~ 006</span><br>
+  <b>绑定关系上提到面板<span class="new">本轮改动</span></b>：面板顶部一行<b>只读展示</b>「您好，zhangsan + 已绑定本机 · 设备名」，
+  右侧带「已登录」状态标。用户点开面板就知道当前是谁在用本机，不用进设置页翻。<br>
+  <b>取消二级菜单<span class="new">本轮改动</span></b>：不再需要「先点用户信息区再展开」这一层。
+  <b>注销绑定账号直接平铺在一级菜单</b>，路径从「点图标 → 点用户区 → 点注销」缩短为「点图标 → 点注销」。<br>
+  &nbsp;&nbsp;一级菜单顺序：<b>访问应用门户</b>（带应用数角标）→ <b>设置</b> → <b>注销绑定账号</b> → <b>退出登录</b>。<br>
+  &nbsp;&nbsp;<b>顺序的逻辑</b>：从高频到低频、从安全到危险。访问应用门户最常用放最上；设置次之；
+  注销和退出放最下，并用分隔线拉开距离，降低误触。<br>
+  <b>图标改原色<span class="new">本轮改动</span></b>：已登录态直接用 logo 原色（绿→蓝渐变），不再压成黑色。
+  未登录态用<b>黑色版图标</b>降透明度 35%（不是彩色图标加透明，那样会透出彩色）。<br>
+  &nbsp;&nbsp;注：macOS 默认把菜单栏图标按 template image 渲染成单色，要显示原色需要在代码里显式关掉
+  template 属性（<span class="id">setTemplate:NO</span>）。这里按你的要求走原色。<br>
+  <b>未登录态<span class="new">本轮细化</span></b>：本机<b>有</b>绑定记录时（即该账号在本机登录过、后来退出），面板顶部显示「未登录 + 已绑定 xxx，可一键登录」，功能项只留「登录统一身份」「设置」；点【登录统一身份】进登录页，可一键登录。本机<b>无</b>绑定记录的全新机器是另一种形态，见状态四。<br>
+  <b>「访问应用门户」显隐<span class="q">已裁定</span></b>：后台开关控制，关闭时整行不渲染（见状态二）。<br>
+  <b>面板宽度<span class="new">本轮修正</span></b>：268px → <b>320px</b>。原宽度下「访问应用门户」被挤到折行，
+  现在按 macOS 原生菜单面板的合理宽度给足，菜单项文字<b>一律不省略、不折行</b>；角标用弹性占位推到最右，
+  文字永远完整。<br>
+  <b>危险项配色<span class="new">本轮修正</span></b>：<b>注销绑定账号</b>与<b>退出登录</b>的文字回到常规色，
+  只保留图标的红色描边作轻提示。<br>
+  &nbsp;&nbsp;<b>为什么</b>：macOS 原生菜单里红色是强信号，只留给「破坏性且不可逆」的操作（如清空废纸篓）。
+  退出登录完全可逆（随时能登回来），不该用红；注销虽有二次确认兜底，但整行飘红会让整个面板显得警报感过重，
+  红色用多了就失效。图标描红既能提示风险，又不破坏面板的视觉平衡。
+</div>
+
+</body>
+</html>

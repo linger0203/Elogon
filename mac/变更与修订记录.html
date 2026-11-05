@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>E登录 Mac版 · 变更与修订记录</title>
+<style>
+:root{
+  --brand:#007AFF; --brand-hover:#0069DB; --brand-soft:#EAF3FF;
+  --bg-page:#F4F5F7; --bg-card:#FFFFFF; --bg-field:#F7F8FA; --bg-hover:#F0F1F4;
+  --border-card:#E8EAED; --border-field:#DDE0E4;
+  --text-1:#1A1D21; --text-2:#6B7280; --text-3:#9CA3AF; --text-on:#FFFFFF;
+  --success:#34C759; --success-soft:#EAF9EE;
+  --warning:#FF9500; --warning-soft:#FFF4E5;
+  --danger:#FF3B30; --danger-soft:#FFEDEC;
+  --r-card:16px; --r-field:10px; --r-tag:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:-apple-system,"SF Pro Text","PingFang SC","Helvetica Neue",Arial,sans-serif;
+  background:var(--bg-page); color:var(--text-1); font-size:13px; line-height:1.6;
+  padding:48px 32px 72px; -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1000px;margin:0 auto}
+
+header{margin-bottom:36px}
+.brand{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.brand img{width:40px;height:40px;display:block}
+h1{font-size:24px;font-weight:500;letter-spacing:-.4px}
+.lead{color:var(--text-2);font-size:13px;margin-top:8px;max-width:680px;line-height:1.7}
+.meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.tag{
+  display:inline-flex;align-items:center;height:22px;padding:0 8px;
+  border-radius:var(--r-tag);font-size:11px;font-weight:500;
+}
+.t-blue{background:var(--brand-soft);color:var(--brand)}
+.t-gray{background:var(--bg-field);color:var(--text-2)}
+.t-green{background:var(--success-soft);color:#248A3D}
+.t-orange{background:var(--warning-soft);color:#8A4B00}
+
+h2{font-size:14px;font-weight:500;margin:36px 0 14px;color:var(--text-1)}
+h2 .n{color:var(--text-3);font-weight:400;margin-right:8px}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+
+.card{
+  display:block;background:var(--bg-card);border:1px solid var(--border-card);
+  border-radius:var(--r-card);padding:20px 22px;text-decoration:none;color:inherit;
+  transition:border-color .14s ease,background .14s ease;
+}
+.card:hover{border-color:#CBD1D8;background:#FCFCFD}
+.card .top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.card .no{
+  font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;
+  color:var(--text-3);
+}
+.card h3{font-size:14px;font-weight:500;margin-bottom:6px}
+.card p{font-size:12px;color:var(--text-2);line-height:1.6}
+.card .ids{
+  font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10.5px;
+  color:var(--text-3);margin-top:10px;
+}
+.card .states-cnt{
+  font-size:11px;color:var(--brand);background:var(--brand-soft);
+  padding:1px 7px;border-radius:6px;font-weight:500;
+}
+.card.new{position:relative}
+.card.new::after{
+  content:"NEW";position:absolute;top:-6px;right:14px;
+  background:var(--success);color:#fff;font-size:9px;font-weight:600;
+  letter-spacing:.4px;padding:1px 6px;border-radius:5px;
+}
+
+.linkcard{border-style:dashed;background:transparent;border-color:#C9CDD3}
+/* 联动原型入口：主色描边 + 浅底，与平铺页面卡区分 */
+.card.linked{border-color:#BBD9F5;background:linear-gradient(180deg,#F5FAFF 0%,#FFFFFF 62%)}
+.card.linked:hover{border-color:var(--brand);background:linear-gradient(180deg,#EAF3FF 0%,#FFFFFF 62%)}
+.card.linked .no{background:var(--brand);color:#fff}
+.card.linked h3{color:#0059BC}
+.linkcard:hover{background:#fff}
+
+table{width:100%;border-collapse:collapse;background:#fff;
+  border:1px solid var(--border-card);border-radius:var(--r-card);overflow:hidden}
+th,td{padding:9px 14px;text-align:left;font-size:12px;border-bottom:1px solid var(--border-card)}
+th{background:var(--bg-field);color:var(--text-2);font-weight:500;font-size:11.5px}
+tbody tr:last-child td{border-bottom:0}
+td.mono{font-family:ui-monospace,Menlo,Consolas,monospace;color:var(--text-3);font-size:11px}
+td.c{text-align:center}
+
+.todo{background:#fff;border:1px solid var(--border-card);border-radius:var(--r-card);padding:4px 0}
+.todo .item{display:flex;gap:10px;padding:11px 20px;border-bottom:1px solid var(--border-card);font-size:12.5px}
+.todo .item:last-child{border-bottom:0}
+.todo .dot{
+  width:6px;height:6px;border-radius:50%;background:var(--warning);
+  flex:0 0 auto;margin-top:7px;
+}
+.todo .txt{flex:1}
+.todo .txt b{font-weight:500;color:var(--text-1)}
+.todo .txt span{color:var(--text-2);display:block;margin-top:2px;font-size:11.5px}
+
+footer{margin-top:40px;font-size:11px;color:var(--text-3);text-align:center}
+</style>
+<style>
+/* 日志页补充：返回研发功能页的入口条 */
+.backbar{
+  display:flex;align-items:center;gap:10px;margin-bottom:26px;
+  padding:12px 16px;background:#fff;border:1px solid var(--border-card);
+  border-radius:var(--r-card);font-size:12.5px;
+}
+.backbar a{color:var(--brand);text-decoration:none;font-weight:500}
+.backbar a:hover{text-decoration:underline}
+.backbar .s{color:var(--text-3);font-size:11.5px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="backbar">
+    <a href="index.html">← 回到「联动原型」</a>
+    <a href="E登录_Mac版_交互说明.html">交互说明（左原型 + 右 72 条）</a>
+    <span class="s">本页是设计演进史与裁定留档，不是研发开工用的功能清单</span>
+  </div>
+
+  <header>
+    <div class="brand">
+      <img src="assets/logo-color-128.png" alt="E登录">
+      <h1>E 登录 · Mac 版 变更与修订记录</h1>
+    </div>
+    <p class="lead">
+      这里记录 <b>从 v1.0 到 v1.0.18</b> 每一轮改了什么、为什么改、哪些方案被否掉了。
+      研发开工请回 <a href="index.html" style="color:var(--brand)">联动原型</a>
+      （要逐条对照验收说明走 <a href="E登录_Mac版_交互说明.html" style="color:var(--brand)">交互说明</a>）；
+      本页保留的是「为什么是现在这样」的来龙去脉。
+    </p>
+    <div class="meta">
+      <span class="tag t-blue">累计 v1.0 → v1.0.18</span>
+      <span class="tag t-gray">16 条裁定</span>
+      <span class="tag t-orange">2 项待确认</span>
+    </div>
+  </header>
+
+<h2><span class="n">02</span>修正记录（累计 v1.0 → v1.0.18）</h2>
+  <table>
+    <thead>
+      <tr><th style="width:34%">改动</th><th>说明</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>下线 <b>_单文件版/</b> 整个目录（v1.0.18 · 减负）</td><td>沁的指令：「<b>把 _单文件版/ 整个目录下线</b>」。<br>&nbsp;&nbsp;<b>为什么现在可以下线</b>：v1.0.17 把原型本体升格为 <code>index.html</code> 之后，<b>它本身就是零依赖的单文件</b> —— 而那份 444 KB 的「自包含版」内容停在 v1.0.15 的快照、生成脚本还已经丢了。再单独维护它纯属负担。要单发一个文件给研发，<b>直接发 <code>index.html</code> 即可</b>。<br>&nbsp;&nbsp;对比：<code>_单文件版/E登录Mac原型_单文件版.html</code> 444 KB / 零依赖 / 旧快照 / 脚本生成；<code>index.html</code> <b>178 KB / 零依赖 / 最新原型本体 / 直接维护</b>。<br>&nbsp;&nbsp;<b>处置方式不是直接 rm</b>：先 <code>cp -r _单文件版 _过程产物/_归档/_单文件版_已下线</code> 留退路，再 <code>rm -rf _单文件版</code>。归档里含 <code>E登录Mac原型.html</code>（445,323 B）与 <code>说明.md</code>（7,524 B），日后真要找回东西还在。<br>&nbsp;&nbsp;<b>顺手清掉一处污染</b>：删除过程中发现 <code>index.html</code> 被<b>设计预览器注入过 78 处 <code>data-page-node-id</code> 属性</b>（+3,354 字符）。这是外部工具留下的痕迹，不属于交付物，已全部剥离（181,052 → 177,698 字节）；<code>difflib</code> 复核确认剥掉后与原型原文的实质差异<b>只剩 v1.0.17 加的那段抬头注释</b>。<b>⚠️ 这个注入会反复发生</b> —— 只要用预览器打开过该文件它就会写回来，交付前值得 <code>grep -c data-page-node-id</code> 扫一遍。<br>&nbsp;&nbsp;<b>验证</b>：删除后重跑 <code>_过程产物/r37/verify_swap.py</code>，<b>29 项全绿 / 0 失败</b>（与删除前一致）；另确认全目录<b>无任何活引用</b>指向 <code>_单文件版/</code>（README 与修订记录里的提及都是文档描述，已同步更新）。</td></tr>
+      <tr><td><b>原型本体升级为 index</b>，删除 linked-prototype.html（v1.0.17 · 大幅简化）</td><td>沁的原话：「<b>linked-prototype.html 原型是我想要的有流程轨道也有本页说明，我觉得它更适合 index，是否可以直接删除 index，将此作为 index</b>」—— 追问后选定「<b>真删掉，内容搬过去</b>」。<br>&nbsp;&nbsp;<b>为什么这个判断是对的</b>：旧 index 是个 11.9 KB 的「壳」，自己什么都没有，靠 <code>&lt;iframe&gt;</code> 去装 177 KB 的原型；而原型本体<b>独立打开时本来就是轨道展开 + 工具条 + 状态面板 + 日志 + 本页说明浮层全在</b>—— 沁要的那个形态，原型自己就有，壳反而是多余的中间层。<b>一个入口页如果只是「用 iframe 装另一个文件」，那它就是纯粹的转发器，没有理由存在。</b><br>&nbsp;&nbsp;<b>这一刀省掉了什么</b>：① 少一层 iframe（说明页嵌原型时不再有「iframe 套 iframe 转发」）；② 少一套 <code>postMessage</code> 落点接力 —— 以前 index 顶栏要靠原型推消息才知道用户停在哪，现在顶栏和原型在同一个文档里，直接读状态；③ 少一处「改名就断链」的风险点。<br>&nbsp;&nbsp;<b>但有两条死结必须先解</b>：① <b>说明页会自己嵌自己</b> —— 它原本 <code>iframe src="linked-prototype.html?embed=1&amp;rail=1"</code>，文件没了就 404。解法：把说明页那三处（<code>:249</code> iframe 的 src、<code>:412</code> <code>load()</code> 的 base、<code>:450</code> 新标签打开）全部改指向 <code>index.html</code>，因为 <b><code>?embed=1</code> 这套参数在 index 上依然生效</b>（参数逻辑是原型自带的，跟文件名无关）。② <b>单文件版的生成脚本指向旧文件</b> —— 已同步文档说明。<br>&nbsp;&nbsp;<b>实测结果（19 项全绿）</b>：index 独立打开 <code>folded=false</code>、轨道宽 290px、工具条 <code>flex</code>、状态面板与日志俱在、「本页交互说明」按钮在、<b>浮层默认关着</b>（走 <code>.open</code> 类 + <code>transform</code>，不是 <code>display</code>，所以 <code>display</code> 恒为 <code>flex</code> 属正常）；说明页右栏 9 组仍在、iframe 指向 <code>index.html?embed=1&amp;rail=1&amp;node=bind</code> 且实渲染出 <b>828×464</b>；说明页点「← 联动原型」正常落回 <code>index.html</code>。<br>&nbsp;&nbsp;<b>验证方法提醒</b>：轨道节点的类名是 <code>.node</code> 不是 <code>.n</code>；判断浮层开没开要看 <code>classList.contains('open')</code>，不能看 <code>getComputedStyle().display</code>。</td></tr>
+      <tr><td>改回 <b>index.html</b>，恢复 3 条回程链（v1.0.16 · index + 说明页 + 记录页）</td><td>起因是沁的两句：「<b>把 E登录Mac原型.html 改回 index.html</b>」+「<b>E登录_Mac版_交互说明.html 和 E登录Mac原型.html 这两个有什么区别，我没看懂</b>」。<br>&nbsp;&nbsp;改名本身是一字未改的搬运（改名前后逐字节比对一致，11,902 字节）；<b>真正要修的是被打断的引用</b> —— 3 处硬编码了 <code>index.html</code> 的回程链：<code>E登录_Mac版_交互说明.html:457</code>（点「← 联动原型」）、<code>变更与修订记录.html:119</code>（点「← 回到联动原型」）与 <code>:131</code>（点「联动原型」）。三处全部改回指向 <code>index.html</code>。<br>&nbsp;&nbsp;<b>两页的分工，一句话讲清</b>：<b>嵌的是同一个原型，差别只在「右栏」</b>。index 没有右栏、原型铺满整屏，主任务是<b>看效果</b>；说明页有右栏（9 组 72 条验收说明），原型被挤窄，主任务是<b>逐条对照验收</b>。判据是那句话的老朋友：<b>一个页面只该有一个主任务</b> —— index 顶栏独有「交互说明」按钮，说明页顶栏独有「← 联动原型」「展开全部说明」，其余（版本标签、重载、全屏原型）两边一致；两页都用 <code>?node=</code> 双向接力，<b>去程回程都带落点</b>。<br>&nbsp;&nbsp;<b>验证 19 项全绿</b>：静态 10 项（旧名文件已不存在、三页剥注释后均无旧名活引用、3 条回链指向正确、依赖齐全）+ <code>file://</code> 实跑 9 项（index 无 <code>.side</code> 且三按钮齐、说明页 <code>groups=9</code>、两页 iframe 参数正确、<b>说明页点返回落到 <code>index.html?node=bind</code>、index 点说明落到说明页并带回落点</b>）。<br>&nbsp;&nbsp;<b>踩坑留档（工具层）</b>：<code>agent-browser batch</code> 的<b>参数模式</b>会把整串当命令名（<code>eval(atob(...))</code> 报 <code>Unknown command</code>），而经 shell 传 JS 时单双引号各被剥一层，JS 语法残缺后<b>静默返回 <code>null</code> 且不报错</b> —— 一度让我以为是页面有 bug。正解是 <b><code>batch</code> 的 stdin JSON 模式</b>：<code>[["open",url],["eval",js]]</code>，每个 token 独立原样送达。</td></tr>
+      <tr><td>做一份<b>单文件自包含版</b>（v1.0.15 · 新增 _单文件版/E登录Mac原型_单文件版.html）</td><td>起因是沁的一个提问：「<b>单独发送 index.html 给研发预览，这个名称被我改了，为什么我单独发送这个文件就打不开了</b>」。<br>&nbsp;&nbsp;查下来根因是：<b>index 不是页面，是「壳」</b>—— 它用 <code>&lt;iframe src="linked-prototype.html?…"&gt;</code> 装原型、用 <code>&lt;img src="assets/logo-color-128.png"&gt;</code> 取头像。只发这一个文件时，两个依赖都不在旁边：<b>实测原型请求 404（iframe 一片空白）+ 头像请求 404（裂图）</b>，合起来就是研发说的「打不开」。<br>&nbsp;&nbsp;改名还额外打断了 <b>3 条回程链</b>（都硬编码了 <code>index.html</code>）：<code>E登录_Mac版_交互说明.html:457</code>、<code>变更与修订记录.html:119</code> 与 <code>:131</code> —— 已一并改指向新文件名。<br>&nbsp;&nbsp;解法：原型整份内联进 iframe 的 <code>srcdoc</code>、两张 logo 转 data:URI、<b>在原型 &lt;head&gt; 前注入一段 shim 把 URLSearchParams 包一层</b>——因为 <code>srcdoc</code> 文档的 URL 是 <code>about:srcdoc</code>、<code>location.search</code> 恒为空，原型读不到 <code>embed=1&amp;rail=1</code> 就会按「独立打开」渲染，<b>左侧流程轨道这一页的意义就没了</b>。注入让原型本体<b>一行都不用改</b>。<br>&nbsp;&nbsp;验证 46 项全绿，最重的一层是 <b>file:// + 孤立目录</b>（= 研发真实「收到一个文件、双击」场景）：零外部依赖、logo 不裂、原型渲染、轨道 12 节点全在、点轨道外层标题跟着变、换页后仍正常。</td></tr>
+      <tr><td>72 条说明拆出 index，另起「交互说明」页（v1.0.14 · index + 新增页）</td><td>起因是沁的两句：「<b>index 直接用联动轨道流程放在左侧</b>」→「<b>要不我们就保留联动流程轨道，页面交互说明另起一个交互联动说明页面吧</b>」。<br>&nbsp;&nbsp;v1.0.13 让 index 同时成立「左侧轨道 + 右侧 430px 说明」，但两边都要位置时，中间的原型被压成了夹心：<b>视口 1280 → 原型区 1280 − 430 − 290 = 560px</b>。560px 里再摆模拟 macOS 窗口，窗口就不像窗口了 —— 与 v1.0.12 把说明改成浮层是同一个病根：<b>说明是「对照着看」的辅助，不该和原型抢同一块画布</b>。<br>&nbsp;&nbsp;本轮拆成两页，各自只做一件事：<b>index.html</b> 只有原型、铺满整屏（顶栏按裁定保留 版本标签 + 重载 + 全屏 + 跳说明）；新增 <b>E登录_Mac版_交互说明.html</b>，是「左原型 + 右 72 条说明」，主次对调。两页嵌同一个 <code>linked-prototype.html</code>，靠 <code>?node=</code> 互相接力：<b>去程带落点、回程也带落点</b>，谁都不会被扔回首页。窄屏兜底媒体查询随说明一起搬到了说明页 —— index 没有右栏，兜底无从谈起。</td></tr>
+      <tr><td>原型向外层播报落点（v1.0.14 · 联动原型）</td><td>拆页带出一个新问题：<b>外层不知道用户在原型里点轨道跳到了哪一页</b>。index 顶栏那颗「重载」要落在用户正看的那页才有意义；说明页的右栏也得跟着左侧轨道走，否则「左边已切到设置、右边还停在首次绑定」，看说明的人会以为是自己点漏了。<br>&nbsp;&nbsp;为什么不让外层自己读：iframe 走 <code>file://</code> 时是<b>不透明源</b>，外层碰 <code>frame.contentWindow.location</code> 直接抛 SecurityError —— 只能<b>由里往外推</b>。原型新增 <code>notifyHost()</code>，在 <code>go()</code>（界面内跳转）/ <code>goForce()</code>（轨道点节点）/ 启动段 三处各推一条 <code>{t:'e-login-view',node,name}</code>；独立打开时 <code>window.parent === window</code> 直接返回，全程 try/catch，<b>通知失败绝不影响原型本身</b>。<br>&nbsp;&nbsp;落在 9 条流程之外的界面（退出成功页、注销过程中的几步）时<b>什么都不做</b>：这些界面本就没有说明条目，硬切一个「最近的分组」只会让人对错号；这一条也保住了条目级落点（<code>M-MENU-007</code> → <code>panel-off-new</code>）刚写下的「正在看：M-MENU-007」不被冲掉。</td></tr>
+      <tr><td>index 的跳转按钮改名 btnNotesPage（v1.0.14 · index）</td><td>联动原型<b>工具条上本就有</b>一个 <code>id="btnNotes"</code>（「本页交互说明」浮层开关）。两者在不同文档里，技术上不会打架，但同一个 id 出现在两处，读代码的人迟早看串 —— index 那颗跳转按钮改名 <code>btnNotesPage</code>。</td></tr>
+      <tr><td>未登录面板按有无绑定记录分流（v1.0.10 · 联动原型 + 平铺 03）</td><td>用户报「退出登录时打开页面没有用户，写着『您好，』」。查下来根因不是缺兜底，而是<b>一条路径走错了地方</b>：「未登录面板 → 点【登录统一身份】→ 登录页」这条路径，在<b>全新机器（本机从未绑定过）</b>的场景下 `S.user` 为空，登录页回显成「您好，」——<b>没人登录过，却在对一个不存在的人问候</b>。修法不是补一个「您好，朋友」的兜底（那只是把空话说圆），而是<b>消除产生空前置的路径</b>：`panel-off` 这个面板同时服务两种场景（已绑定但退出登录 / 全新机器），去向必须分流。<br>&nbsp;&nbsp;<b>有绑定记录</b> → 按钮「登录统一身份」，进登录页，可一键登录；<b>无绑定记录</b> → 按钮「<b>关联统一身份账号</b>」，进<b>首次绑定引导页</b>。绑定关系区的文案同步区分：「未登录 / 已绑定 XXX，可一键登录」vs「<b>尚未关联</b> / 本机还没有关联统一身份账号」。平铺 03 新增<b>状态四 · 全新机器</b>，把这一态画出来。</td></tr>
+      <tr><td>绑定成功自动分配档案手机号（v1.0.10 · 交互表 + 联动原型）</td><td>手机号无法从账号名派生，旧版在档案表里留空、由用户手填，于是短信登录与忘记密码-短信渠道都没有值可用。本轮改为<b>绑定成功那一刻自动发号并写进档案</b>，规则（沁定）：<b>138 开头 + 按序编号</b>，第 n 个绑定账号取 <code>1381000000n</code>，全部为合法 11 位号码。同一账号重复绑定<b>拿到同一个号</b>（幂等，按档案已有记录返回）；解绑不回收。发号动作挂在 <code>commitBind()</code> —— 那是绑定记录的唯一写入口，保证「有绑定必有号」，不会出现两处各写一次而对不上。</td></tr>
+      <tr><td>手机号输入校验（v1.0.10 · 三处覆盖）</td><td>口径（沁定）：<b>严格 11 位国内手机号</b>（<code>/^1[3-9]\d{9}$/</code>），<b>边输边验 + 按钮置灰</b>。判定收敛成一个 <code>isPhone()</code>，三处共用：① 短信登录/绑定的按钮可用性（<code>bindReady()</code> 的短信分支）；② <code>doBind()</code> / <code>doLogin()</code> 的短信提交前置校验；③ 忘记密码「获取验证码」前（<b>仅手机号渠道</b>，邮箱与钉钉不套用手机号规则）。<br>&nbsp;&nbsp;<b>踩过一个坑</b>：发号算式第一版写成 <code>'138' + String(1000000+n).slice(-9)</code>，拼出来只有 <b>10 位</b>，自己发的号过不了自己的校验（T4 实测 <code>是否合法: false</code>）。已改为 <code>'138' + String(10000000+n).slice(-8)</code> = 11 位。<b>教训：取值规则与格式校验规则必须自洽</b>，发号方要拿校验函数自测一遍。</td></tr>
+      <tr><td>联动原型加「本页交互说明」栏（v1.0.11 · 联动原型）</td><td>研发看原型时手里只有画面，没有「这一屏有哪些交互点、预期是什么」。本轮在<b>最右侧</b>加一栏，与左侧流程轨道相对：轨道是「整条流程的节点地图」（跳到某一步），说明栏是「<b>眼下这屏有什么</b>」（对照着做）。<b>默认收起</b>，工具条上「本页交互说明」按钮展开；<b>切界面时自动刷新</b>——切到设置就是设置那 6 条，切到忘记密码就是 PWD 那 8 条，不用手动找。<br>&nbsp;&nbsp;每条交互点带蓝色 ID 标签（与交互表 / PRD 对照用），点开展示<b>触发 / 预期 / 异常 / 提示语原话 / 页面</b>五段，全部取自《交互表 v1.0》。<code>panel</code> 与 <code>panel-off</code> 两态<b>归并成同一份清单</b>（登录态判定不该影响「这屏能做什么」）。<br>&nbsp;&nbsp;数据由 <code>_过程产物/r31/</code> 的脚本从交互表导出后内嵌（原型保持<b>单文件、零依赖、双击即开</b>）；界面→交互点的映射写在脚本里并逐条核过，<b>72 条全部有落点</b>，改表后重跑脚本即可同步。</td></tr>
+      <tr><td>index 左侧直接用联动流程轨道（v1.0.13 · index + 联动原型）</td><td>起因是沁的一句：「<b>index 直接用联动轨道流程放在左侧，页面交互说明还放在原来的位置互不影响</b>」。<br>&nbsp;&nbsp;<b>为什么之前做不到</b>：v1.0.9 起 index 用 iframe 嵌原型，src 是 <code>?embed=1</code>。而 <code>embed=1</code> 一口气做了两件事 —— 加 <code>embedded</code>（嵌入形态）<b>和</b> 加 <code>folded</code>（轨道收起）。更绝的是还有这么一条 <code>html.embedded .shell.folded .rail-open{display:none}</code>：<b>嵌入形态下连「展开轨道」的按钮也一起藏了</b>。于是 index 里<b>根本没有任何入口</b>能看到轨道，研发只能靠右侧文字脑补流程。<br>&nbsp;&nbsp;<b>本轮把两件事拆开</b>：新增 <code>?rail=1</code> —— 嵌入形态（工具条照旧收掉、说明浮层照旧隐藏）<b>但轨道展开</b>。index 改用 <code>?embed=1&rail=1&node=xxx</code>，左侧于是直接显示「联动流程轨道」，可点节点跳转；右侧 430px 的 72 条说明<b>位置、宽度、行为全部不动</b>，两边互不影响。四处都要带上 <code>rail=1</code>（初始 src / <code>load()</code> / 重载 / 点条目），漏掉任何一处，<b>点一次条目轨道就没了</b>。<br>&nbsp;&nbsp;<b>顺手补了一个闭环</b>：轨道既然能收起，就必须能再展开 —— 否则收起来就回不去了。所以 <code>rail-on</code> 时把「展开轨道」按钮放行（选择器升到 5 个 class，无论写在哪都压得住原来那条隐藏规则）。实测：收起 → 按钮出现 → 点它 → 轨道回来，<code>闭环成立: true</code>。<br>&nbsp;&nbsp;<b>还加了窄屏兜底</b>：左侧多了 290px 轨道 + 右侧固定 430px，视口 ≤1150px 时中间原型会被压到 430px 以下。加两条媒体查询，<b>只在窄屏</b>收窄右栏（≤1200 → 370px，≤1100 → 330px），<b>≥1200px 完全不动</b> —— 1280 / 1366 / 1440 这些常规办公显示器不受任何影响。加后几何：≥1100px 都能保证原型桌面区 ≥480px。</td></tr>
+      <tr><td>「本页交互说明」改为右侧滑出浮层（v1.0.12 · 联动原型）</td><td>v1.0.11 把说明栏做成 <code>.shell</code> 的<b>第三个 flex 成员</b>，三栏（桌面区 + 流程轨道 + 说明栏）并排时宽度不够，<b>桌面区被压扁</b>——而桌面区里装的是模拟 macOS 窗口，压扁后窗口跟着缩，原型就不像原型了。本轮按沁的建议<b>改成右侧滑出的浮层</b>：<code>position:fixed</code> 脱离文档流，靠 <code>transform:translateX(100%) → 0</code> 滑入滑出（走合成层，不触发布局重排），桌面区宽度从此恒定。实测开关前后桌面宽 <b>968px 不变</b>、窗口宽不变。<br>&nbsp;&nbsp;<b>三个开关口</b>：工具条「本页交互说明」按钮、浮层头部 ✕、点浮层外部（遮罩只接点击、着色透明，不让原型变暗）；另加 <b>Esc</b>，优先级<b>排在模态框之后</b>——有模态框时 Esc 只关模态框，不会一次关两层。<br>&nbsp;&nbsp;浮层根元素挂到 <code>&lt;body&gt;</code> 下而不是留在 <code>.shell</code> 里（<code>.shell</code> 是 flex 容器，留在里面会被压/被裁）。嵌入模式（<code>?embed=1</code>）下浮层与遮罩一起隐藏——那是给 index 当 iframe 用的，index 自己已有右侧说明。<br>&nbsp;&nbsp;<b>本轮踩了一个很隐蔽的坑，值得单独记</b>：把浮层 DOM 搬到 <code>&lt;/body&gt;</code> 前之后，DOM 排到了 <code>&lt;script&gt;</code> <b>后面</b>，而 v1.0.11 遗留的顶层语句 <code>document.getElementById('notesBody').addEventListener(...)</code> 就拿不到元素 → <code>null.addEventListener</code> 抛 TypeError → <b>script 顶层执行中断</b>。后果是所有 <code>var</code> 赋值集体丢失（<code>FP_PROFILE</code> 变 undefined），v1.0.10 的<b>发号与手机号校验功能全部失灵</b>；而<b>函数声明会提升</b>，样式与结构检查也照样全绿——<b>表面上是「浮层工作正常」，实际已经崩了</b>。修法是把这个监听改为<b>委托到 document</b>，彻底摆脱 DOM 时序依赖。已同步在脚本里加护栏：凡顶层裸绑 DOM，断言<b>对应元素必须排在 <code>&lt;script&gt;</code> 之前</b>；验证脚本新增 <b>T0「script 顶层执行完整性」</b>，逐个确认关键 <code>var</code> 真的被赋过值。</td></tr>
+      <tr><td>交互表补 4 条（v1.0.10/11 · 母本回写）</td><td><code>M-MENU-007</code>（未登录面板分流）· <code>M-BIND-013</code>（自动发号）· <code>M-BIND-014</code>（手机号校验）· <code>M-PWD-009</code>（忘记密码手机号渠道返显与校验）。<b>为什么必须回写母本</b>：交互表是原型与 PRD 的共同母本，原型改了而表没改 → 下次从表重跑导出时会<b>把改动覆盖掉</b>。累计 <b>68 → 72 条</b>。</td></tr>
+      <tr><td>新增联动原型</td><td>单文件真状态机（非多页跳转），模拟 macOS 桌面 + 右侧流程轨道；12 个节点可点任意跳转，绑定 / 面板 / 退出 / 忘记密码 / 注销全程串联，状态跨页连续传递。</td></tr>
+      <tr><td>绑定引导窗口交互收口（v1.0.1）</td><td>四改合一：① 底部让位从 74px 收到 58px、内距收紧，绑定窗口不再出滚动条；② <b>移除绑定窗口的密码策略校验</b>（密码已在统一身份侧设好，绑定只做认证不做密码合规校验），此项同步影响交互表 M-BIND 条目；③ 主按钮补 <b>flex:0 0 auto + min-height + box-sizing</b>，高度锁定 34px 不再被压扁；④ 标题改「<b>登录并关联本机</b>」、删掉副标题（原副标题「关联后，开机将自动登录」比标题还长，层级倒挂）。</td></tr>
+      <tr><td>四种登录方式按钮可用性按方式判定（v1.0.1）</td><td>此前按钮只看账密两个输入框，切到扫码 / 短信 / 动态口令后输入框不存在，按钮恒灰。改为 <b>bindReady() 按 S.method 分支判定</b>：账密=账号+密码齐；扫码=二维码未过期；短信=手机号+验证码齐；动态口令=账号+口令齐。判定规则与沁确认的一致——<b>用户输入必填内容后按钮即可点</b>。</td></tr>
+      <tr><td>菜单栏图标可点击唤出下拉面板（v1.0.1）</td><td>菜单栏 E 登录图标此前是纯装饰 div，只有显隐控制、没有事件。补 <b>onMenubarClick()</b>：已绑定且已登录时点击展开面板，再点收起（macOS 原生交互）；未绑定 / 未登录分别给 toast 提示。</td></tr>
+      <tr><td>窗口红绿灯做成真窗口行为（v1.0.1）</td><td>三个灯此前是纯色圆点、无任何事件，流程走不下去。按「模拟真窗口」实现：<b>关闭</b>→窗口收起（已绑定进菜单栏态、未绑定进桌面空态并给「重新打开」入口）；<b>最小化</b>→缩到 Dock；<b>最大化</b>→铺满桌面工作区，且高度收 8px 避免被 Dock 遮挡；标题栏可拖动移窗。Dock 上的 E 登录图标补 <b>reopenWin()</b>，与空态文案一致真正能唤起。</td></tr>
+      <tr><td>修复「自动走一遍」卡死（v1.0.1）</td><td>演示脚本用固定 1700ms 间隔驱动，但绑定成功内部有异步延时，节奏对不上——第 3 步起状态没到位，被守卫拦下，整条演示停在第一步。改为<b>链式 setTimeout 顺序执行</b>，每步等前一步完成再走，并显式推进绑定 / 登录态。现在可完整走完：绑定 → 菜单栏 → 面板 → 门户单点 → 设置 → 退出 → 换人登录 → 注销解绑。</td></tr>
+      <tr><td>真输入真校验落地</td><td>密码策略三条规则实时判定并联动主按钮禁用态；未达标不给提交。弱口令规则放宽口径，避免「Abcd@1234」这类合格强密码被误杀。</td></tr>
+      <tr><td>忘记密码倒计时跑起来</td><td>顶部 300 秒业务总倒计时真实递减、进度条同步收缩，归零提示超时并重置；修正原来文案被拆成「请 在 04:58 内」的间距问题。</td></tr>
+      <tr><td>轨道跳转放行</td><td>节点作为演示通道→自动补齐该页最小前置状态（如点「下拉面板」自动置为已绑定+已登录），保证点得动且不出现状态矛盾；页面内按钮仍保留状态守卫。</td></tr>
+      <tr>
+        <td>补出「扫码登录」两态</td>
+        <td>绑定引导窗口此前只画了账密 / 短信 / 动态口令。本轮补二维码等待扫码、二维码过期（120 秒有效期，过期就地盖遮罩给【点击刷新】）</td>
+      </tr>
+      <tr>
+        <td>忘记密码改为「真·单页一站式」</td>
+        <td>删掉「下一步」按钮。三步全部落在一屏：选方式 + 填账号 → 获取/输入验证码 → 填新密码。第 3 步在验证码通过前置灰，通过后自动解锁，光标自动聚焦</td>
+      </tr>
+      <tr>
+        <td>菜单栏面板结构精简</td>
+        <td>顶部绑定关系区改为<b>只读展示</b>（不点击、不做二级菜单）；注销绑定账号从二级菜单提到<b>一级平铺</b>，与设置 / 退出登录同级</td>
+      </tr>
+      <tr>
+        <td>菜单栏图标已登录用原色</td>
+        <td>此前是单色 template 渲染。改为 logo <b>原色</b>显示（代码需关闭 macOS template image 渲染，setTemplate:NO）；未登录态不变</td>
+      </tr>
+      <tr>
+        <td>退出后登录页加注销入口</td>
+        <td>底部新增「忘记密码 · 注销绑定账号」文字链。用户退出后要让别人登录，必须先由原绑定用户注销。点注销后清空「您好，XXX」</td>
+      </tr>
+      <tr>
+        <td>设置页重构</td>
+        <td>删除「账号」组（绑定关系上提菜单栏面板，消除两处重复），保留<b>通用 / 登录后 / 关于</b>三组；每行统一为「图标 + 标题 + 说明 + 右侧控件」；版本号更新为 <b>Elogon V1.8.3.0.0430</b></td>
+      </tr>
+      <tr>
+        <td>新增网络状态提示规范</td>
+        <td>全页面统一顶部轻提示条：正常不占位 / 较弱 / 断开（禁用提交按钮但不清空内容）/ 重连 / 恢复。同一时刻只展示一条</td>
+      </tr>
+      <tr>
+        <td>修复菜单面板文字换行</td>
+        <td>面板被挤到「访问应用门户」竖排。根因是面板宽 268px 过窄 + 文字 13px，宽度不够。已把面板加宽到 292px、字号收到 12.5px、内边距 28→24，并给文字加 <b>nowrap + min-width:0</b> 防折行</td>
+      </tr>
+      <tr>
+        <td>未登录图标改黑色 35%</td>
+        <td>此前是彩色 logo 直接加透明度，会透出彩色。已换成<b>黑色版 logo</b> 再降透明度至 35%（与 macOS 菜单栏单色图标规范一致）</td>
+      </tr>
+      <tr>
+        <td>退出页入口改右对齐</td>
+        <td>「忘记密码 · 注销绑定账号」不再居中，改为<b>右对齐</b>贴近表单右缘；同时删除「已退出登录，可再次登录」副标题</td>
+      </tr>
+      <tr>
+        <td>面板加宽 + 文字不再省略</td>
+        <td>292 → <b>320px</b>（macOS 原生菜单面板合理宽度）。菜单项改为「图标 + 文字 + 弹性留白 + 角标」四栏结构，<b>文字一律完整展示、不省略不折行</b>，角标靠右</td>
+      </tr>
+      <tr>
+        <td>危险项配色回归克制</td>
+        <td>「注销绑定账号」与「退出登录」的文字<b>回到常规色</b>，只保留图标的红色描边。理由：macOS 里红色只留给破坏性且不可逆的操作，退出完全可逆；整行飘红会让面板警报感过重，红色用多就失效</td>
+      </tr>
+      <tr>
+        <td>网络提示条移到窗口顶部</td>
+        <td>从「内容区内的块」改为<b>窗口顶部通栏贴边条</b>（标题栏下方）。因为网络是<b>环境状态</b>、错误提示是<b>操作结果</b>，两者混在同一位置会让人误判失败原因。已统一 01 / 02 / 04 / 06 四页</td>
+      </tr>
+          <tr><td>绑定引导窗口 / 退出后登录页改「简洁版」表单（v1.0.2）</td><td>按参考图收敛表单语言：logo 从裸图标改为 <b>64×64 圆角底座</b>（浅渐变 + 细描边 + 软阴影），标题 <b>17px / 600</b> 居中；<b>去掉所有字段标签</b>，改为 <b>图标内嵌（.lead 绝对定位）+ placeholder</b> 写法（人像 / 锁 / 手机 / 盾 / 钥匙 / 笔记本，统一 16px 且用 currentColor 便于 <b>:focus-within 联动变色</b>）；输入框统一 <b>44px 高、10px 圆角、padding-left 41px</b>；密码框右侧加<b>明暗切换</b>（只切 input.type，不触碰 value，已输入内容保留）；主按钮同步 <b>44px</b>，空表单显示浅灰禁用态（#F7F8FA 底 + 灰字）。<b>四等分登录方式分段控件保留</b>，未按参考图砍方式。</td></tr>
+      <tr><td>登录页按钮可用性对齐绑定页（v1.0.2）</td><td>退出后登录页的主按钮此前<b>只判网络态</b>，断网恢复后即便没填密码也可点。补上 <b>bindReady()</b>，与绑定页统一为「<b>输入必填内容后才可点</b>」。实测四方式均正确：账密 / 短信 / 动态口令 = 初始禁 → 填一半仍禁 → 填齐可点；扫码 = 始终可点。</td></tr>
+      <tr><td>全局窗口圆角统一 12px，修复「上直下圆」（v1.0.2）</td><td>症状：所有苹果窗口<b>顶部两角是直角、底部两角是圆角</b>，上下不一致。根因：<b>.win 缺 overflow:hidden</b>，标题栏（浅灰底 #F6F7F9）作为一个矩形从容器边框溢出，把顶部两个圆角<b>盖成直角</b>；底部无遮挡元素，圆角得以保留。修复 = 给容器加 <b>overflow:hidden</b>，并统一用 <b>--r-win: 12px</b> 作为唯一圆角来源。收敛：<b>.pop</b> 14px → 12px、<b>.deskblank-tip</b> 16px → 12px（并补 overflow:hidden）。实测 6 个容器（.win ×3 变体 / .dialog / .pop / .deskblank-tip）四角均为 <b>12/12/12/12</b> 且 overflow:hidden；Dock 保持 16px（独立浮层，不受窗口规范约束）。</td></tr>
+      <tr><td>平铺原型 01 / 04 全量同步（v1.0.2）</td><td>01-绑定引导窗口（6 状态卡）与 04-退出后登录页（4 状态卡）同步简洁版：删副标题、标题改「登录并关联本机」、logo 加圆角底座、字段改 ipt 构件、按钮文案「绑定登录」→「绑定并登录」、密码框补锁图标 + 眼睛、空表单卡片主按钮补禁用态、01 的「忘记密码」入口改右对齐。<b>平铺版的眼睛切换为就地切换</b>（每张状态卡独立，不跨卡联动），与联动原型的按 id 切换不同。</td></tr>
+          <tr><td>忘记密码表单改简洁版 + 三渠道选择卡（v1.0.3）</td><td>按参考图重构整个表单：<b>去掉步骤编号（1/2/3）、分隔线、字段标签</b>，一屏四行到底；输入框统一 44px 高 / 10px 圆角 / 图标内嵌（账号按渠道换图标），密码框补明暗切换。验证方式从文字胶囊改为<b>三等分「图标在上、文字在下」的选择卡</b>，选中态用深色描边。账号行<b>随渠道预填</b>：短信 = 138****8888 / 邮箱 = zhangsan@corp.com / 钉钉 = zhangsan —— 口径取自项目既有账号数据（不用参考图里的 188****0008 / shen***@corp.com / 沈慕青），且<b>保持可编辑</b>而非只读。主按钮文案随图改为「确定」。</td></tr>
+      <tr><td>密码要求改 ⓘ 浮层（v1.0.3）</td><td>三条规则从「输入后常驻在密码框下方」改为「点密码框右侧 ⓘ 展开的浮层」，不再常驻占位。展开后每条仍保留<b>实时 ✓ / ✕ 反馈</b>：未输入显示灰点、达标显示绿圈白勾、不达标显示红圈白叉。浮层右对齐到输入框右缘、向上弹出 216px 宽，实测不溢出窗口。</td></tr>
+      <tr><td>绑定窗口标题改「首次登录」+ 加回副标题（v1.0.3，仅平铺 01）</td><td>主标题由「登录并关联本机」收短为<b>「首次登录」</b>（4 字），原长句「请将您的统一身份账号与操作系统账号关联」下移为<b>副标题</b>。口径修正：v1.0.2 删副标题的理由是「副标题字数多于主标题、层级倒挂」，那个判断建立在 8 字标题上；主标题缩到 4 字后，4 vs 20 的主副关系反而清晰，所以这轮把副标题从新标题下<b>加回来</b>。实测副标题单行 18px、不折行。</td></tr>
+      <tr><td>忘记密码卡⑤ 网络状态条配色修正（v1.0.3）</td><td>卡⑤ 说明文字是「网络断开」、就地提示也是「网络异常，请检查网络后重试」，但顶部状态条用的是 <b>net-weak（弱网橙）</b>，文案还是「当前网络较弱，验证码可能延迟送达」—— 配色与文案都对不上。已改为 <b>net-off（断开红）</b> + 断开专用文案与断线图标。</td></tr>
+      <tr><td>菜单栏「退出登录后点图标打不开面板」修复（v1.0.4）</td><td>症状：退出登录 → 关闭窗口 → 再点菜单栏 E 登录图标，面板始终不出现。根因是 <b>onMenubarClick() 里的 <code>if(!S.login)</code> 一刀切拦截</b>，而 winClose() 在同一状态下给的是「已绑定→收起进菜单栏」并 toast「可从菜单栏图标重新打开」—— <b>文案承诺与实际行为矛盾</b>。项目本来就设计了 <b>panel-off（未登录态面板，只留「登录统一身份」「设置」）</b>，所以正解是未登录时展开 panel-off，而不是拦下。实测：关窗后点图标 → view=panel-off、面板出现、项为「登录统一身份 / 设置」；再点收起；已登录点图标 → panel；未绑定 → toast。</td></tr>
+      <tr><td>「设置」在未登录态是死按钮，一并修掉（v1.0.4）</td><td>同一个根因：<code>go()</code> 里 settings 与 apps 共用一条 <code>if(!S.login)</code> 守卫，导致 panel-off 里的「设置」点了只弹 toast。已拆开 —— <b>设置只要求已绑定</b>（本地配置），<b>应用门户才要求已登录</b>（需要 IAM 会话），与 03 页「未登录态面板只留登录 + 设置」的既有设计对齐。</td></tr>
+      <tr><td>「登录成功后关闭窗口」开关默认值改关（v1.0.4）</td><td>落点在<b>平铺 06 页</b>，不在联动原型。两份交付物的同类构件默认态语义相反：联动原型 <code>.sw</code> 默认<b>关</b>、<code>.sw.on</code> 才开；平铺 06 的 <code>.sw</code> 默认<b>开</b>、<code>.sw.off</code> 才关。所以 06 卡①（中文）与卡②（EN）两处都是开着的，已改为 <code>.sw off</code>。开机自启、自动打开门户保持默认开。</td></tr>
+      <tr><td>界面语言切换做成真能切 · 联动原型全界面中英（v1.0.4）</td><td>联动原型「语言切换」此前是纯静态 <code>.seg</code>，点了没反应。本轮引入 <b>S.lang + 238 条中英字典 + loc()</b>：渲染出的 HTML / 文本在出口统一过一遍字典替换，<b>不用去两百多个调用点逐个包函数</b>，漏译面小。覆盖 14 个视图的窗口、面板、菜单栏（含「访达 / 文件 / 编辑 / 显示」）、应用门户、设置、忘记密码、二次确认弹窗、轻提示、网络条，以及右侧流程轨道与操作日志；静态外壳走 <b>locEl() 文本节点替换</b>（不碰标签与属性，保护 JS 维护的 class / id / on*），title 属性单独处理。实测：<b>14 视图 EN 模式漏译 0 条</b>；真实点击 中文→EN→中文 来回切换正常（分段控件选中态、窗口标题、菜单栏、日志全部跟随，切回中文不残留）。</td></tr>
+      <tr><td>平铺 06 卡② 漏译补齐（v1.0.4）</td><td>卡② 切到 EN 后仍有 3 处没跟着变：窗口标题「设置」、分组名「通用」、语言行「语言切换 / 切换需要使用的语言」。已分别改为 <b>Settings / General / Language / Choose the app language</b>。同时把四行英文说明与联动原型<b>统一为同一套措辞</b>。</td></tr>
+      <tr><td>绑定引导窗口副标题文案调整（v1.0.4，平铺 01 + 联动原型）</td><td>副标题由「请将您的统一身份账号<b>与操作系统账号</b>关联」改为「请将您的统一身份账号<b>与本机账号</b>关联」——「操作系统账号」是工程口径，用户视角里这台机器就叫「本机」，改后与面板上「已绑定本机 · MacBook Pro」用词统一。平铺 01 的 6 处副标题全部替换；同时把<b>联动原型 bind 窗口那句偏硬的「登录并关联本机」也统一为「首次登录」+ 新副标题</b>，两处交付物口径一致（顺带清掉上轮遗留的待办）。</td></tr>
+      <tr><td>补回因副标题导致的窗口高度回归（v1.0.4）</td><td>加副标题后联动原型 bind 窗口高 450 → 466 px，<b>顶到 max-height 并挤出滚动条</b>（body 439 / 430）。已把 <code>.win.auth .body</code> 的行间距 13px → 11px，bind / loginagain / settings / cancel3 全部回到 <b>溢出 0</b>，中英文两侧尺寸一致。</td></tr>
+      <tr><td>忘记密码真正「一屏到底」（v1.0.5 · 联动原型）</td><td>上一版只把<b>平铺 02</b> 改成了单页，联动原型的 forgot 视图仍是旧的 <b>1/2/3 带步骤编号</b>写法（<code>.stepnum</code> / <code>.divider</code> / <code>.field + label</code> / 常驻密码策略清单），中文下窗口内容溢出 <b>202px</b>、英文 215px，进去就出滚动条 —— 与「所有操作在一页完成、没有下一步」的要求不符。本轮整体重构：<b>去掉步骤编号、分隔线、字段标签</b>，输入框全部换成 44px 图标内嵌构件（<code>.ipt</code>），密码要求从常驻清单改为<b>点 ⓘ 展开的浮层</b>（不合规自动展开、合规自动收起），验证码按钮改为<b>做进输入框右端的文字按钮</b>（带竖线分隔），主按钮加高到 44px 与输入框齐平，顶部补「返回箭头 + 找回密码」标题行。<b>验证通过前密码两行仍置灰不可填</b>，避免乱序操作浪费有时限的会话。</td></tr>
+      <tr><td>渠道选择从三等分卡改回下拉（v1.0.5 · 平铺 02 + 联动原型）</td><td>第 13 轮的原话是「忘记密码页面，<b>下拉选择</b>不同的验证方式」，但 v1.0.3 实现成了三等分「图标在上、文字在下」的选择卡。本轮按参考稿改回<b>下拉选择</b>（手机号 / 邮箱 / 钉钉三项，右侧自绘 chevron，样式与输入框同源），账号行仍<b>随渠道联动预填并换行首图标</b>。顺带解决高度：单行下拉 44px 比 56px 的选择卡省 12px。平铺 02 的 6 张状态卡与联动原型同步，两份交付物不再分叉。</td></tr>
+      <tr><td>退出后登录页：两个入口分层重排（v1.0.5 · 平铺 04 + 联动原型）</td><td>上一版把「忘记密码 · 注销绑定账号」用 <code>·</code> 并排右对齐放在主按钮下方 —— 问题在于<b>破坏性操作与日常操作权重相同、还紧挨着</b>，手滑就会点到注销。本轮按视觉层级重排为三段：【登录】主操作 → 【忘记密码】单独一行右对齐、紧贴主按钮（它与密码框同源，属同一个操作带）→ 【注销绑定账号】沉到窗口最底部独立区，<b>细线隔开、左对齐、灰色小字、悬停才变红</b>。危险操作与主流程物理隔离，是防误触最直接的手段。</td></tr>
+      <tr><td>修掉忘记密码页两个未定义函数（v1.0.5）</td><td>重构时发现的既有缺陷：联动原型 <code>forgotPage()</code> 里的密码框写着 <code>oninput="checkPolicy(...)"</code>、主按钮写着 <code>onclick="doReset()"</code>，但<b>这两个函数从未定义过</b> —— 也就是说在旧版里填密码不会有任何策略反馈，点「确认修改」直接抛 <code>ReferenceError</code>，流程是断的。本轮已补齐：<code>checkPolicy()</code> 做策略实时反馈 + 自动开合浮层 + 同步按钮禁用态；<code>doReset()</code> 做四项前置校验（验证码已过 / 有网络 / 两次一致 / 策略合规）后再提交。另新增 <code>renderKeepPw()</code>，在验证码解锁触发重渲染时把已填密码原样写回，避免丢输入。</td></tr>
+      <tr><td>退出后登录页：只认本机绑定账号（v1.0.6 · 平铺 04 + 联动原型）</td><td>这个页面此前是「谁登都行」，但本机 OS 账号与统一身份账号是 <b>1:1</b> 绑定 —— 放别的账号进来会和绑定关系自相矛盾。本轮在提交环节加拦截：账号与本机绑定账号不一致时<b>不通过、不跳转</b>，账号框与密码框一并标红，并用错误条明确告知「<b>登录失败，本机已绑定账号：zhangsan</b>」。联动原型里这条规则落在 <code>doLogin()</code> 的 <code>view==='loginagain'</code> 分支，复用既有 <code>errBlock()</code>；<b>改动输入即撤掉失败态</b>（清 <code>S.data.loginErr</code> + 拆掉红框与错误条），不必刷新页面。自动演示脚本也补了一段「用 lisi 登录被拦下」的走位，免得这条规则只能手点才看得到。</td></tr>
+      <tr><td>撤掉退出页的注销入口 + 页面收窄（v1.0.6 · 平铺 04 / 05 + 联动原型）</td><td>上一版（v1.0.5）刚在退出后登录页底部加过「注销绑定账号」入口，本轮判定<b>逻辑不成立并撤回</b>：那一刻用户<b>处于未登录状态</b>，没有身份可验证，却允许发起解除绑定这种不可逆操作，等于把最危险的动作放在一个未经认证的入口上。现在注销<b>只保留唯一入口：菜单栏面板</b>（已登录态、一级平铺），必须走完二次确认 + 身份验证。连带把平铺 04 页与 05 页<b>重复承载的注销流程三张卡删掉</b>，04 页收窄为「退出后登录页」本身（正常态 + 失败态两张卡），注销流程全量归 05 页。<br>&nbsp;&nbsp;<b>遗留风险</b>：原绑定用户离职后，新用户既登不进去（账号不匹配）、也进不了菜单栏面板（面板要求已登录）去注销 —— 这条路径目前是<b>死锁</b>，已列入待确认。</td></tr>
+      <tr><td>退出后登录页：登录判定拆两层 + 死锁自助解绑（v1.0.7 · 平铺 04 + 联动原型）</td><td>本页此前<b>只比账号名，密码对不对压根没管</b>（v1.0.6 的漏洞）；加上 v1.0.6 撤掉了注销入口，「原绑定用户离职 → 新用户既登不进去、也进不了菜单栏面板注销」这条路径就成了<b>死锁</b>。本轮把提交动作拆成两层：<b>① 凭据认证</b>（账号密码对不对，由 IAM 服务端回答）→ <b>② 账号比对</b>（凭据对了，再看是不是本机绑定的那个）。<b>第 ② 层失败时</b>才在页面底部<b>条件渲染</b>出「<b>注销绑定账号</b>」入口 —— 此刻凭据已由 IAM 认证过，「来者是合法员工、只是不是本机绑定的那位」已成立，<b>验证在这一刻已经完成</b>，所以这条解绑路径<b>不再重复验证密码</b>，确认即解绑；<b>第 ① 层失败</b>则只报凭据错误，绝不透露本机绑定了谁。实现上新增 <code>S.data.canUnbind</code> 标志，与失败态同生共死 —— 改输入时既要摘错误条和红框，也要一并摘掉这个入口按钮（漏摘会留下一个语义已失效的按钮）。<br>&nbsp;&nbsp;<b>与 v1.0.6 撤回入口并不冲突</b>：当时反对的依据是「未登录态没有身份可验证」，本轮补上了<b>前置条件</b>（入口仅在第 ② 层失败时出现）—— 验证已在提交那一刻完成。<br>&nbsp;&nbsp;<b>实跑时又逮到一个</b>：第一版只让 <code>doCancel()</code> 跳过密码校验，但二次确认弹窗的「确认注销」按钮仍指向 <code>toCancel2()</code>，会跳到「请输入当前账号密码」那一屏 —— 本机绑的是别人的账号，新用户根本不知道那个密码，看到这个框就直接卡住了。已改为 lock 路径确认按钮直连 <code>doCancel()</code>，并给 <code>toCancel2()</code> 补守卫兜底。</td></tr>
+      <tr><td>「验证本机 macOS 系统密码」方案作废（v1.0.7）</td><td>曾考虑在解绑前让 E 登录验一遍<b>本机 macOS 系统密码</b>。技术上不成立：macOS 客户端<b>拿不到系统密码</b> —— <code>LocalAuthentication</code> 只返回布尔结果、且弹的是<b>系统自己的面板</b>（界面样式、文案、按钮都不受 App 控制）；<code>Authorization Services</code> 也不把密码交给调用方。也就是说这条路<b>原型画得出来、实现落不了地</b>，还会让界面语言分裂成两套。改为「<b>由 IAM 认证来者身份</b>」：与登录提交合并（二次确认文案明确写出「你已通过统一身份认证」），<b>零额外步骤</b>，且身份判定发生在服务端、可信。</td></tr>
+      <tr><td>忘记密码：账号行按本机绑定账号返显（v1.0.7 · 平铺 02 + 联动原型）</td><td>账号值此前<b>写死</b>成 zhangsan 那一套。本轮改为 <code>fpProfile(S.bindIam)</code> 按<b>「本机已绑定的那个账号」派生</b> —— 绑了 zhangsan 就返显 <b>138****8888 / zhangsan@corp.com / zhangsan</b>，绑到 lisi 就返显 <b>lisi@corp.com / lisi</b>（手机号在档案里查不到，<b>留空交给用户填，不编造</b>）。档案表里没有的账号走派生规则：邮箱 = 账号 + 企业域名、钉钉 = 账号本身。联动原型的自动演示会把本机绑定账号从 zhangsan 换成 lisi，切换后返显值同步易主。</td></tr>
+      <tr><td>「本机已绑定账号」改为读<b>绑定记录</b>，不再是常量（v1.0.8 · 联动原型 + 平铺 02 / 04 / 05）</td><td>症状：不管在绑定页输入哪个账号，退出后登录页都声称「<b>登录失败，本机已绑定账号：zhangsan</b>」——用<b>自己刚绑的</b>账号登录反而被拦。根因是那个值压根不是派生出来的：<code>S.osUser</code> 是个<b>写死的常量</b>（对象初始值写一次、<code>resetAll()</code> 复位写一次，连自动演示脚本里都得<b>手动塞</b>一次），而<b>绑定流程从头到尾没写过它</b> —— 绑谁都不影响它。<br>&nbsp;&nbsp;更深一层是<b>语义混用</b>：同一个字段，在绑定页那行被当作「<b>本机 macOS 账户名</b>」展示，在退出页又被当作「<b>绑定记录里的统一身份账号</b>」做比对。而这两个值在设备转交场景下<b>必然分离</b> ——新员工用的是自己的 macOS 账户，机器上的绑定记录却还留着原员工的 IAM 账号。<br>&nbsp;&nbsp;本轮拆成三个各司其职的字段：<code>macUser</code>（macOS 账户名，系统给的只读值）、<code>bindIam</code>（<b>本机绑定记录</b>里的统一身份账号 ——「本机已绑定账号」的唯一真相来源）、<code>user</code>（上次登录的账号，只喂「您好，XXX」回显）。<br>&nbsp;&nbsp;<b>规则约束</b>：<code>bindIam</code> 的<b>写入点唯一</b>（绑定成功那一刻的 <code>commitBind()</code>）、<b>清空点唯一</b>（注销成功那一刻的 <code>commitUnbind()</code>）；<b>退出登录不动它</b>（这正是「退出」与「注销」的分界线）；为空时<b>不做账号比对</b>（没有记录可比，不凭空拦人）。这两个函数是全项目仅有的两处赋值，别处一律不准直接改。右侧状态面板新增「本机 macOS 账户」「本机绑定记录」两行，来源可当场核对。</td></tr>
+    </tbody>
+  </table>
+
+<h2><span class="n">03</span>待确认</h2>
+  <div class="todo" style="padding:16px 20px">
+    <div class="item" style="border:0;padding:0">
+      <span class="txt" style="color:var(--text-2)">v1.0.8 把「本机已绑定账号」的来源定死了：它读<b>绑定记录</b>（写入点唯一 = 绑定成功，清空点唯一 = 注销成功），不再是常量 —— 绑谁就报谁。<br><br>v1.0.7 关闭了上一版列出的三项：① <b>死锁路径</b> —— 「原绑定用户离职 → 新用户登不进去、也进不了面板注销」这条路径，改由「认证失败态<b>条件开放自助解绑</b>」解开（凭据已由 IAM 认证，免验密码）；② <b>忘记密码账号行</b> —— 不再写死，改为按「本机绑定账号」返显（绑 lisi 就返显 lisi 的那套）；③ <b>交互表同步</b> —— 退出与切换 / 注销绑定账号 / 忘记密码三个 sheet 已随本轮更新，新增 <b>M-EXIT-008 / M-CANCEL-008 / M-PWD-008</b> 三条，交互点合计 <b>62 → 65</b>；v1.0.8 又补了 <b>M-BIND-012 / M-EXIT-009 / M-CANCEL-009</b> 三条，合计 <b>68</b>。<br><br>待确认一项：<br>&nbsp;&nbsp;① <b>手机号从哪来</b>：邮箱与钉钉都能从账号名派生（账号 + 企业域名 / 账号本身），<b>手机号不能</b>。原型里本机绑定账号是 zhangsan 时取到档案值 138****8888，但换成档案里没有的账号（如 lisi）时手机号留空、交由用户手填 —— 真实环境若 IAM 档案提供手机号字段则无需手填，<b>需与 IAM 侧确认档案字段范围</b>。</span>
+    </div>
+    <div class="item" style="border:0;padding:0">
+      <span class="txt" style="color:var(--text-2)">v1.0.14 新增一项：<br>&nbsp;&nbsp;① <b>共用同一界面的两个分组，被轨道点中时右栏取哪一个</b>。左侧轨道一个节点可能同时是两条流程的落点 —— 「手动登录」与「退出与切换」都落在<b>退出后登录页</b>（<code>loginagain</code>），「日常自动登录」与「网络状态提示」都落在<b>菜单栏常驻</b>（<code>menubar</code>）。现在的做法是<b>取清单里第一个匹配的分组</b>（所以点退出后登录页的节点，右栏停在「手动登录」）。两个分组描述的其实是同一屏，哪一种都不算错，但<b>严格说不是用户点的那一条</b>。备选：① 保持取第一个（简单，但可能答非所问）；② 右栏同时高亮两个分组，让用户自己挑；③ 轨道节点与分组做一对一拆分（改动最大，要先拆交互表）。<b>待沁定。</b></span>
+    </div>
+  </div>
+
+<h2><span class="n">04</span>本轮裁定（已落表）</h2>
+  <table>
+    <thead>
+      <tr><th style="width:34%">裁定</th><th>落地结果</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>注销不需要管理员审批</td>
+        <td>注销只需二次确认 + 身份验证即可完成，不再挂审批流。不向本人发通知</td>
+      </tr>
+      <tr>
+        <td>密码策略按现有 3 条定稿</td>
+        <td>① 长度 8-20 字符 ② 数字/大写/小写/特殊字符至少 3 种 ③ 未使用弱口令。实时逐项反馈</td>
+      </tr>
+      <tr>
+        <td>忘记密码改为「单页三步」</td>
+        <td>验证方式 → 验证码 → 设置新密码全部在同一窗口内完成，不跳页。因调用认证服务接口，
+          必须在一个会话有效期内做完，顶部常驻倒计时提示剩余时间</td>
+      </tr>
+      <tr>
+        <td>滑块防人机位置修正</td>
+        <td>不再单占一行，改为<b>点「获取验证码」后弹出滑块</b>，拖动通过才下发验证码。
+          验证码输入框与获取按钮同行，框在左、按钮在右</td>
+      </tr>
+      <tr>
+        <td>绑定关系放哪</td>
+        <td>放<b>菜单栏面板顶部</b>只读展示，不做点击展开、不做二级菜单；设置页不再重复展示</td>
+      </tr>
+      <tr>
+        <td>注销入口放哪一层</td>
+        <td>直接<b>平铺在面板一级</b>，与设置 / 退出登录同级，一次点击直达</td>
+      </tr>
+      <tr>
+        <td>退出页换人怎么走</td>
+        <td>退出页底部给注销入口；点注销后<b>清空「您好，XXX」</b>的用户名回显</td>
+      </tr>
+      <tr>
+        <td>网络状态覆盖范围</td>
+        <td><b>全页面统一的轻提示条</b>，且改为<b>窗口顶部通栏</b>，不占错误提示位置</td>
+      </tr>
+      <tr>
+        <td>语言切换是否铺到所有页面</td>
+        <td><b>不铺开。</b>语言是全局设置不是页面级操作：① 登录前页面没有用户身份，暴露语言开关是多余负担；② 每页放分段控件会与登录/绑定主任务抢焦点；③ 语言偏好应记住一次全局生效。保持「跟随系统语言 + 设置页手动切换」即可</td>
+      </tr>
+      <tr>
+        <td>说明页用什么形态</td>
+        <td><b>左侧原型预览 + 右侧说明</b>：把 index 原来的左右分栏搬过去、主次对调 —— 说明页的主任务是「逐条对照」，所以原型与说明并排；index 的主任务是「看效果」，所以原型独占整屏</td>
+      </tr>
+      <tr>
+        <td>index 顶栏保留什么</td>
+        <td><b>版本标签 + 重载 + 全屏 + 跳说明</b>。重载从原来的 stage-bar 提到顶栏；新增「交互说明」按钮跳新页，并带上当前落点</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <footer>E 登录 · Mac 版原型 · 变更与修订记录</footer>
+</div>
+</body>
+</html>

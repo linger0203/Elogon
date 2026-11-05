@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>绑定引导窗口 · E登录 Mac版</title>
+<style>
+:root{
+  --brand:#007AFF; --brand-hover:#0069DB; --brand-press:#0059BC;
+  --brand-soft:#EAF3FF;
+  --bg-page:#F4F5F7; --bg-card:#FFFFFF; --bg-field:#F7F8FA; --bg-hover:#F0F1F4;
+  --border-card:#E8EAED; --border-field:#DDE0E4;
+  --text-1:#1A1D21; --text-2:#6B7280; --text-3:#9CA3AF; --text-on:#FFFFFF;
+  --success:#34C759; --success-soft:#EAF9EE;
+  --warning:#FF9500; --warning-soft:#FFF4E5;
+  --danger:#FF3B30; --danger-soft:#FFEDEC;
+  --r-field:10px; --r-btn:10px; --r-win:12px;
+  --h-field:34px; --h-btn:34px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:-apple-system,"SF Pro Text","PingFang SC","Helvetica Neue",Arial,sans-serif;
+  background:var(--bg-page); color:var(--text-1); font-size:13px; line-height:1.6;
+  min-height:100vh; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; padding:40px 20px; gap:16px;
+  -webkit-font-smoothing:antialiased;
+}
+.win{
+  width:400px; background:var(--bg-card);
+  border:1px solid var(--border-card); border-radius:var(--r-win);
+  overflow:hidden; display:flex; flex-direction:column;
+}
+.titlebar{
+  height:38px; background:var(--bg-field); border-bottom:1px solid var(--border-card);
+  display:flex; align-items:center; padding:0 12px; gap:8px; flex:0 0 auto;
+}
+.lights{display:flex;gap:8px}
+.lights i{width:12px;height:12px;border-radius:50%;display:block}
+.lights i:nth-child(1){background:#FF5F57}
+.lights i:nth-child(2){background:#FEBC2E}
+.lights i:nth-child(3){background:#28C840}
+.titlebar .t{flex:1;text-align:center;font-size:12px;color:var(--text-2);margin-right:52px}
+.body{padding:24px 28px 26px; display:flex; flex-direction:column; gap:18px}
+.brand{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
+.logo{width:52px;height:52px;display:block;flex:0 0 auto}
+h1{font-size:16px;font-weight:500;letter-spacing:-.2px}
+.brand p{font-size:12px;color:var(--text-3);line-height:1.5;margin-top:-2px}
+.tabs{
+  display:grid; grid-template-columns:repeat(4,1fr); gap:4px;
+  background:var(--bg-field); padding:3px; border-radius:var(--r-field);
+}
+.tabs button{
+  height:30px; border:0; background:transparent; border-radius:8px;
+  font-family:inherit; font-size:12px; color:var(--text-2); cursor:pointer;
+  transition:background .12s ease,color .12s ease,box-shadow .12s ease;
+}
+.tabs button:hover{color:var(--text-1)}
+.tabs button.on{background:#fff;color:var(--brand);font-weight:500;box-shadow:0 1px 2px rgba(0,0,0,.06)}
+.form{display:flex;flex-direction:column;gap:12px}
+.field label{display:block;font-size:12px;color:var(--text-2);margin-bottom:6px}
+.input{
+  height:var(--h-field); width:100%; padding:0 12px;
+  border:1px solid var(--border-field); border-radius:var(--r-field);
+  background:var(--bg-field); font-size:13px; font-family:inherit; color:var(--text-1);
+  outline:none; transition:border-color .12s ease,background .12s ease,box-shadow .12s ease;
+}
+.input::placeholder{color:var(--text-3)}
+.input:hover{border-color:#C9CDD3}
+.input:focus{background:#fff;border-color:var(--brand);box-shadow:0 0 0 3px rgba(0,122,255,.14)}
+.input[readonly]{background:var(--bg-hover);color:var(--text-2);cursor:default}
+.input[readonly]:hover{border-color:var(--border-field)}
+.igroup{display:flex;gap:8px}
+.igroup .input{flex:1}
+.igroup .btn{flex:0 0 auto;min-width:92px}
+.btn{
+  height:var(--h-btn); padding:0 16px; border-radius:var(--r-btn);
+  font-size:13px; font-family:inherit; cursor:pointer;
+  border:1px solid transparent; display:inline-flex; align-items:center;
+  justify-content:center; transition:background .12s ease;
+}
+.btn-primary{background:var(--brand);color:var(--text-on);border-color:var(--brand)}
+.btn-primary:hover{background:var(--brand-hover)}
+.btn-primary:active{background:var(--brand-press)}
+.btn-secondary{background:#fff;color:var(--text-1);border-color:var(--border-field)}
+.btn-secondary:hover{background:var(--bg-hover)}
+.btn-block{width:100%}
+.arrow{display:flex;align-items:center;justify-content:center;
+  font-size:12px;color:var(--brand);cursor:pointer}
+.alert{display:flex;gap:8px;align-items:flex-start;
+  padding:10px 12px;border-radius:var(--r-field);font-size:12px;line-height:1.5}
+.alert svg{flex:0 0 auto;margin-top:1px}
+.alert-err{background:var(--danger-soft);color:#C92A21}
+.toast{display:flex;align-items:center;gap:8px;justify-content:center;
+  padding:10px 12px;border-radius:var(--r-field);
+  background:var(--success-soft);color:#248A3D;font-size:12px;font-weight:500}
+.note{
+  width:520px;background:#fff;border:1px dashed #C9CDD3;border-radius:var(--r-field);
+  padding:12px 16px;font-size:11px;color:var(--text-2);line-height:1.7;
+}
+.note b{color:var(--text-1);font-weight:500}
+.note .id{font-family:ui-monospace,Menlo,Consolas,monospace;color:var(--brand)}
+.note .new{background:var(--warning-soft);color:#633806;padding:1px 5px;border-radius:4px}
+/* 扫码登录 */
+.qrwrap{display:flex;flex-direction:column;align-items:center;gap:10px;
+  padding:16px 0 4px}
+.qrbox{
+  width:160px;height:160px;border-radius:var(--r-field);padding:8px;
+  background:#fff;border:1px solid var(--border-field);position:relative;
+}
+.qrbox svg{display:block;width:100%;height:100%}
+.qrbox .mask{
+  position:absolute;inset:0;border-radius:var(--r-field);
+  background:rgba(255,255,255,.92);display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:6px;text-align:center;
+  font-size:11.5px;color:var(--text-2);padding:0 14px;line-height:1.5;
+}
+.qrbox .mask .again{
+  color:var(--brand);font-weight:500;cursor:pointer;font-size:12px;
+}
+.qrnote{font-size:11.5px;color:var(--text-3);text-align:center;line-height:1.6}
+.qrnote b{color:var(--text-2);font-weight:500}
+.qrstatus{display:flex;align-items:center;gap:6px;justify-content:center;
+  font-size:11.5px;color:var(--brand)}
+.spin{width:12px;height:12px;border-radius:50%;
+  border:1.5px solid var(--brand-soft);border-top-color:var(--brand);
+  animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* 网络状态条：通栏贴在窗口顶部（参照 macOS 原生离线提示条） */
+.netbar{
+  display:flex;align-items:center;justify-content:center;gap:7px;
+  padding:8px 14px;font-size:11.5px;line-height:1.4;flex:0 0 auto;
+}
+.netbar svg{flex:0 0 auto}
+.net-weak{background:var(--warning-soft);color:#8A4B00}
+.net-off{background:var(--danger-soft);color:#A32620}
+.net-re{background:var(--brand-soft);color:#0C447C}
+.net-ok{background:var(--success-soft);color:#1D6B32}
+
+.states{display:flex;gap:24px;flex-wrap:wrap;justify-content:center;align-items:flex-start}
+.state-col{display:flex;flex-direction:column;align-items:center;gap:8px}
+.state-col .cap{font-size:11px;color:var(--text-2)}
+
+/* ============ 简洁版（v1.0.1）：对齐联动原型 ============ */
+.body{padding:20px 24px 18px;gap:13px}
+.brand{gap:9px}
+.logo-box{width:64px;height:64px;border-radius:16px;display:flex;align-items:center;
+  justify-content:center;background:linear-gradient(180deg,#FAFCFB 0%,#EDF3F1 100%);
+  border:.5px solid rgba(0,0,0,.055);
+  box-shadow:0 1px 2px rgba(0,0,0,.035),0 5px 14px rgba(0,0,0,.055)}
+.logo-box img{width:42px;height:42px;display:block}
+h1{font-size:17px;font-weight:600;letter-spacing:-.35px;line-height:1.3}
+.tabs{border-radius:10px}
+.tabs button{height:34px;font-size:12.5px;border-radius:8px}
+.form{gap:13px}
+.btn-block{height:44px;min-height:44px;font-size:13.5px;border-radius:10px}
+.ipt{position:relative;display:flex;align-items:center;gap:8px}
+.ipt .lead{position:absolute;left:13px;top:50%;transform:translateY(-50%);
+  display:flex;align-items:center;pointer-events:none;color:#9CA3AF;transition:color .12s ease}
+.ipt .input{height:44px;padding:0 14px 0 41px;font-size:13.5px;border-radius:10px;
+  background:#fff;border-color:#E3E6EA;flex:1 1 auto;min-width:0}
+.ipt .input::placeholder{color:#A5ABB4}
+.ipt .input:hover{border-color:#CFD4DA}
+.ipt .input:focus{border-color:var(--brand);background:#fff;box-shadow:0 0 0 3px rgba(0,122,255,.13)}
+.ipt:focus-within .lead{color:var(--brand)}
+.ipt.has-eye .input{padding-right:44px}
+.ipt .eye{position:absolute;right:8px;top:50%;transform:translateY(-50%);
+  width:28px;height:28px;display:flex;align-items:center;justify-content:center;
+  background:none;border:none;padding:0;cursor:pointer;color:#A5ABB4;border-radius:7px;
+  transition:color .12s ease,background .12s ease}
+.ipt .eye:hover{color:#6B7280;background:rgba(0,0,0,.045)}
+.ipt .input:focus~.eye{color:var(--brand)}
+.ipt.os .input{background:#F7F8FA;border-color:#E9ECEF;color:var(--text-1);cursor:default}
+.ipt.os .input:hover{border-color:#E9ECEF}
+.ipt.os .input:focus{background:#F7F8FA;border-color:#E9ECEF;box-shadow:none}
+.ipt.os .lead{color:#A9AFB7}
+.ipt>.btn{flex:0 0 auto}
+.arrow{justify-content:flex-end;color:var(--text-2)}
+.arrow:hover{color:var(--text-1);text-decoration:underline}
+.btn[disabled]{background:var(--bg-field);color:var(--text-3);border-color:var(--border-card);cursor:not-allowed}
+</style>
+</head>
+<body>
+
+<div class="states">
+
+  <div class="state-col">
+  <div class="win">
+    <div class="titlebar"><div class="lights"><i></i><i></i><i></i></div><div class="t">E 登录</div></div>
+    <div class="body">
+      <div class="brand">
+        <div class="logo-box"><img src="assets/logo-color-128.png" alt="E 登录" width="42" height="42" /></div>
+        <h1>首次登录</h1>
+        <p>请将您的统一身份账号与本机账号关联</p>
+      </div>
+      <div class="tabs">
+        <button class="on">账密登录</button>
+        <button>扫码登录</button>
+        <button>短信登录</button>
+        <button>动态口令</button>
+      </div>
+      <div class="form">
+        <div class="ipt"><span class="lead"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5.6" r="2.7" stroke="currentColor" stroke-width="1.3"/><path d="M2.9 13.7c0-2.4 2.3-3.9 5.1-3.9s5.1 1.5 5.1 3.9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></span><input class="input" placeholder="统一身份用户名"  /></div>
+        <div class="ipt has-eye"><span class="lead"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="3.1" y="6.9" width="9.8" height="6.7" rx="1.9" stroke="currentColor" stroke-width="1.3"/><path d="M5.5 6.9V5.2a2.5 2.5 0 015 0v1.7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></span><input class="input" type="password" placeholder="统一身份用户密码"  /><button class="eye" type="button" tabindex="-1" aria-label="显示密码" onclick="togglePw(this)"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M1.5 8S3.8 3.8 8 3.8 14.5 8 14.5 8s-2.3 4.2-6.5 4.2S1.5 8 1.5 8z" stroke="currentColor" stroke-width="1.25"/><circle cx="8" cy="8" r="1.95" stroke="currentColor" stroke-width="1.25"/></svg></button></div>
+        <div class="ipt os"><span class="lead"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2.9" y="3.6" width="10.2" height="7.1" rx="1.4" stroke="currentColor" stroke-width="1.3"/><path d="M1.2 12.9h13.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></span><input class="input" value="zhangsan" readonly  /></div>
+      </div>
+      <button class="btn btn-primary btn-block" disabled>绑定并登录</button>
+      <div class="arrow">忘记密码</div>
+    </div>
+  </div>
+  <span class="cap">① 账密登录 · 含忘记密码</span>
+  </div>
+
+  <div class="state-col">
+  <div class="win">
+    <div class="titlebar"><div class="lights"><i></i><i></i><i></i></div><div class="t">E 登录</div></div>
+    <div class="body">
+      <div class="brand">
+        <div class="logo-box"><img src="assets/logo-color-128.png" alt="E 登录" width="42" height="42" /></div>
+        <h1>首次登录</h1>
+        <p>请将您的统一身份账号与本机账号关联</p>
+      </div>
+      <div class="tabs">
+        <button>账密登录</button>
+        <button>扫码登录</button>
+        <button class="on">短信登录</button>
+        <button>动态口令</button>
+      </div>
+      <div class="form">
+        <div class="ipt"><span class="lead"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="4.2" y="1.9" width="7.6" height="12.2" rx="1.8" stroke="currentColor" stroke-width="1.3"/><path d="M6.9 12.2h2.2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></span><input class="input" placeholder="手机号码"  /></div>
+        <div class="ipt"><span class="lead"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1.9l5 1.9v4.3c0 2.9-2 5.1-5 6.1-3-1-5-3.2-5-6.1V3.8l5-1.9z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M6.1 8l1.5 1.5 2.6-3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span><input class="input" placeholder="短信验证码" /><button class="btn btn-secondary">获取验证码</button></div>
+        <div class="ipt os"><span class="lead"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2.9" y="3.6" width="10.2" height="7.1" rx="1.4" stroke="currentColor" stroke-width="1.3"/><path d="M1.2 12.9h13.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></span><input class="input" value="zhangsan" readonly  /></div>
+      </div>
+      <button class="btn btn-primary btn-block" disabled>绑定并登录</button>
+    </div>
+  </div>
+  <span class="cap">② 短信登录 · 无内部逻辑说明</span>
+  </div>
+
+  <div class="state-col">
+  <div class="win">
+    <div class="titlebar"><div class="lights"><i></i><i></i><i></i></div><div class="t">E 登录</div></div>
+    <div class="body">
+      <div class="brand">
+        <div class="logo-box"><img src="assets/logo-color-128.png" alt="E 登录" width="42" height="42" /></div>
+        <h1>首次登录</h1>
+        <p>请将您的统一身份账号与本机账号关联</p>
+      </div>
+      <div class="tabs">
+        <button class="on">账密登录</button>
+        <button>扫码登录</button>
+        <button>短信登录</button>
+        <button>动态口令</button>
+      </div>
+      <div class="form">
+        <div class="ipt"><span class="lead"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5.6" r="2.7" stroke="currentColor" stroke-width="1.3"/><path d="M2.9 13.7c0-2.4 2.3-3.9 5.1-3.9s5.1 1.5 5.1 3.9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></span><input class="input" value="zhangsan"  /></div>
+        <div class="ipt has-eye"><span class="lead"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="3.1" y="6.9" width="9.8" height="6.7" rx="1.9" stroke="currentColor" stroke-width="1.3"/><path d="M5.5 6.9V5.2a2.5 2.5 0 015 0v1.7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></span><input class="input" type="password" value="······"  /><button class="eye" type="button" tabindex="-1" aria-label="显示密码" onclick="togglePw(this)"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M1.5 8S3.8 3.8 8 3.8 14.5 8 14.5 8s-2.3 4.2-6.5 4.2S1.5 8 1.5 8z" stroke="currentColor" stroke-width="1.25"/><circle cx="8" cy="8" r="1.95" stroke="currentColor" stroke-width="1.25"/></svg></button></div>
+        <div class="ipt os"><span class="lead"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2.9" y="3.6" width="10.2" height="7.1" rx="1.4" stroke="currentColor" stroke-width="1.3"/><path d="M1.2 12.9h13.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></span><input class="input" value="zhangsan" readonly  /></div>
+      </div>
+      <div class="alert alert-err">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <circle cx="7" cy="7" r="6" stroke="#C92A21" stroke-width="1.4"/>
+          <path d="M7 4v3.5" stroke="#C92A21" stroke-width="1.4" stroke-linecap="round"/>
+          <circle cx="7" cy="9.8" r="0.8" fill="#C92A21"/>
+        </svg>
+        <span>该账号已被其他终端绑定</span>
+      </div>
+      <button class="btn btn-primary btn-block">绑定并登录</button>
+      <div class="arrow">忘记密码</div>
+    </div>
+  </div>
+  <span class="cap">③ 异常：账号已被其他终端绑定</span>
+  </div>
+
+  <div class="state-col">
+  <div class="win">
+    <div class="titlebar"><div class="lights"><i></i><i></i><i></i></div><div class="t">E 登录</div></div>
+    <div class="body">
+      <div class="brand">
+        <div class="logo-box"><img src="assets/logo-color-128.png" alt="E 登录" width="42" height="42" /></div>
+        <h1>首次登录</h1>
+        <p>请将您的统一身份账号与本机账号关联</p>
+      </div>
+      <div class="tabs">
+        <button class="on">账密登录</button>
+        <button>扫码登录</button>
+        <button>短信登录</button>
+        <button>动态口令</button>
+      </div>
+      <div class="form">
+        <div class="ipt"><span class="lead"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5.6" r="2.7" stroke="currentColor" stroke-width="1.3"/><path d="M2.9 13.7c0-2.4 2.3-3.9 5.1-3.9s5.1 1.5 5.1 3.9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></span><input class="input" value="zhangsan"  /></div>
+        <div class="ipt has-eye"><span class="lead"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="3.1" y="6.9" width="9.8" height="6.7" rx="1.9" stroke="currentColor" stroke-width="1.3"/><path d="M5.5 6.9V5.2a2.5 2.5 0 015 0v1.7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></span><input class="input" type="password" value="······"  /><button class="eye" type="button" tabindex="-1" aria-label="显示密码" onclick="togglePw(this)"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M1.5 8S3.8 3.8 8 3.8 14.5 8 14.5 8s-2.3 4.2-6.5 4.2S1.5 8 1.5 8z" stroke="currentColor" stroke-width="1.25"/><circle cx="8" cy="8" r="1.95" stroke="currentColor" stroke-width="1.25"/></svg></button></div>
+        <div class="ipt os"><span class="lead"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2.9" y="3.6" width="10.2" height="7.1" rx="1.4" stroke="currentColor" stroke-width="1.3"/><path d="M1.2 12.9h13.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></span><input class="input" value="zhangsan" readonly  /></div>
+      </div>
+      <div class="toast">
+        <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+          <circle cx="7.5" cy="7.5" r="6.5" stroke="#248A3D" stroke-width="1.4"/>
+          <path d="M4.8 7.7l1.9 1.9 3.5-3.8" stroke="#248A3D" stroke-width="1.6"
+            stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>绑定成功</span>
+      </div>
+    </div>
+  </div>
+  <span class="cap">④ 成功轻提示 · 约 2 秒后自动关窗</span>
+  </div>
+
+</div>
+
+
+  <div class="state-col">
+  <div class="win">
+    <div class="titlebar"><div class="lights"><i></i><i></i><i></i></div><div class="t">E 登录</div></div>
+    <div class="body">
+      <div class="brand">
+        <div class="logo-box"><img src="assets/logo-color-128.png" alt="E 登录" width="42" height="42" /></div>
+        <h1>首次登录</h1>
+        <p>请将您的统一身份账号与本机账号关联</p>
+      </div>
+      <div class="tabs">
+        <button>账密登录</button>
+        <button class="on">扫码登录</button>
+        <button>短信登录</button>
+        <button>动态口令</button>
+      </div>
+
+      <div class="qrwrap">
+        <div class="qrbox">
+          <svg viewBox="0 0 21 21" shape-rendering="crispEdges">
+            <rect width="21" height="21" fill="#fff"/>
+            <g fill="#1A1D21">
+              <path d="M0 0h7v7H0zM1 1v5h5V1z M2 2h3v3H2z"/>
+              <path d="M14 0h7v7h-7zM15 1v5h5V1z M16 2h3v3h-3z"/>
+              <path d="M0 14h7v7H0zM1 15v5h5v-5z M2 16h3v3H2z"/>
+              <rect x="9" y="0" width="1" height="1"/><rect x="11" y="1" width="1" height="1"/>
+              <rect x="9" y="2" width="1" height="1"/><rect x="12" y="3" width="1" height="1"/>
+              <rect x="10" y="4" width="1" height="1"/><rect x="9" y="5" width="1" height="1"/>
+              <rect x="8" y="8" width="2" height="2"/><rect x="11" y="8" width="1" height="1"/>
+              <rect x="13" y="8" width="1" height="1"/><rect x="15" y="9" width="1" height="1"/>
+              <rect x="17" y="8" width="1" height="1"/><rect x="19" y="8" width="1" height="1"/>
+              <rect x="10" y="10" width="1" height="1"/><rect x="12" y="10" width="2" height="1"/>
+              <rect x="16" y="10" width="1" height="1"/><rect x="18" y="11" width="1" height="1"/>
+              <rect x="8" y="12" width="1" height="1"/><rect x="11" y="12" width="1" height="1"/>
+              <rect x="14" y="12" width="1" height="1"/><rect x="17" y="13" width="1" height="1"/>
+              <rect x="9" y="14" width="1" height="1"/><rect x="12" y="14" width="1" height="1"/>
+              <rect x="15" y="14" width="1" height="1"/><rect x="18" y="14" width="1" height="1"/>
+              <rect x="8" y="16" width="1" height="1"/><rect x="11" y="16" width="1" height="1"/>
+              <rect x="14" y="16" width="1" height="1"/><rect x="16" y="17" width="1" height="1"/>
+              <rect x="19" y="16" width="1" height="1"/><rect x="9" y="18" width="1" height="1"/>
+              <rect x="13" y="18" width="1" height="1"/><rect x="17" y="19" width="1" height="1"/>
+              <rect x="10" y="19" width="1" height="1"/><rect x="15" y="19" width="1" height="1"/>
+              <rect x="19" y="18" width="1" height="1"/><rect x="12" y="19" width="1" height="1"/>
+              <rect x="18" y="20" width="1" height="1"/><rect x="14" y="20" width="1" height="1"/>
+              <rect x="8" y="20" width="1" height="1"/><rect x="20" y="12" width="1" height="1"/>
+            </g>
+            <rect x="9.2" y="9.2" width="2.6" height="2.6" rx="0.6" fill="#fff"/>
+            <rect x="9.4" y="9.4" width="2.2" height="2.2" rx="0.5" fill="#1A1D21"/>
+          </svg>
+        </div>
+        <div class="qrstatus"><span class="spin"></span>等待扫码…</div>
+        <div class="qrnote">请使用<b>手机 E 登录 App</b> 或<b>企业微信</b>扫码<br>扫码后请在手机上确认登录</div>
+      </div>
+
+      <div class="ipt os"><span class="lead"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2.9" y="3.6" width="10.2" height="7.1" rx="1.4" stroke="currentColor" stroke-width="1.3"/><path d="M1.2 12.9h13.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></span><input class="input" value="zhangsan" readonly  /></div>
+    </div>
+  </div>
+  <span class="cap">⑤ 扫码登录 · 等待扫码（轮询中）</span>
+  </div>
+
+  <div class="state-col">
+  <div class="win">
+    <div class="titlebar"><div class="lights"><i></i><i></i><i></i></div><div class="t">E 登录</div></div>
+    <div class="netbar net-off">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+          <path d="M1.6 5.2C3 3.9 4.7 3.2 6.5 3.2s3.5.7 4.9 2" stroke="#A32620"
+            stroke-width="1.2" stroke-linecap="round"/>
+          <path d="M3.6 7.4c.9-.8 1.9-1.2 2.9-1.2s2 .4 2.9 1.2" stroke="#A32620"
+            stroke-width="1.2" stroke-linecap="round"/>
+          <path d="M2.6 11.4l7.8-9.4" stroke="#A32620" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+        网络连接已断开，请检查网络后重试
+      </div>
+    <div class="body">
+      <div class="brand">
+        <div class="logo-box"><img src="assets/logo-color-128.png" alt="E 登录" width="42" height="42" /></div>
+        <h1>首次登录</h1>
+        <p>请将您的统一身份账号与本机账号关联</p>
+      </div>
+      <div class="tabs">
+        <button>账密登录</button>
+        <button class="on">扫码登录</button>
+        <button>短信登录</button>
+        <button>动态口令</button>
+      </div>
+
+      <div class="qrwrap">
+        <div class="qrbox">
+          <svg viewBox="0 0 21 21" shape-rendering="crispEdges">
+            <rect width="21" height="21" fill="#fff"/>
+            <g fill="#B6BCC4">
+              <path d="M0 0h7v7H0zM1 1v5h5V1z M2 2h3v3H2z"/>
+              <path d="M14 0h7v7h-7zM15 1v5h5V1z M16 2h3v3h-3z"/>
+              <path d="M0 14h7v7H0zM1 15v5h5v-5z M2 16h3v3H2z"/>
+              <rect x="9" y="0" width="1" height="1"/><rect x="11" y="1" width="1" height="1"/>
+              <rect x="9" y="2" width="1" height="1"/><rect x="12" y="3" width="1" height="1"/>
+              <rect x="10" y="4" width="1" height="1"/><rect x="9" y="5" width="1" height="1"/>
+              <rect x="8" y="8" width="2" height="2"/><rect x="11" y="8" width="1" height="1"/>
+              <rect x="13" y="8" width="1" height="1"/><rect x="15" y="9" width="1" height="1"/>
+              <rect x="17" y="8" width="1" height="1"/><rect x="19" y="8" width="1" height="1"/>
+              <rect x="10" y="10" width="1" height="1"/><rect x="12" y="10" width="2" height="1"/>
+              <rect x="16" y="10" width="1" height="1"/><rect x="18" y="11" width="1" height="1"/>
+              <rect x="8" y="12" width="1" height="1"/><rect x="11" y="12" width="1" height="1"/>
+              <rect x="14" y="12" width="1" height="1"/><rect x="17" y="13" width="1" height="1"/>
+              <rect x="9" y="14" width="1" height="1"/><rect x="12" y="14" width="1" height="1"/>
+              <rect x="15" y="14" width="1" height="1"/><rect x="18" y="14" width="1" height="1"/>
+              <rect x="8" y="16" width="1" height="1"/><rect x="11" y="16" width="1" height="1"/>
+              <rect x="14" y="16" width="1" height="1"/><rect x="16" y="17" width="1" height="1"/>
+              <rect x="19" y="16" width="1" height="1"/><rect x="9" y="18" width="1" height="1"/>
+              <rect x="13" y="18" width="1" height="1"/><rect x="17" y="19" width="1" height="1"/>
+              <rect x="10" y="19" width="1" height="1"/><rect x="15" y="19" width="1" height="1"/>
+              <rect x="19" y="18" width="1" height="1"/><rect x="12" y="19" width="1" height="1"/>
+              <rect x="18" y="20" width="1" height="1"/><rect x="14" y="20" width="1" height="1"/>
+              <rect x="8" y="20" width="1" height="1"/><rect x="20" y="12" width="1" height="1"/>
+            </g>
+            <rect x="9.2" y="9.2" width="2.6" height="2.6" rx="0.6" fill="#fff"/>
+            <rect x="9.4" y="9.4" width="2.2" height="2.2" rx="0.5" fill="#B6BCC4"/>
+          </svg>
+          <div class="mask">
+            <span>二维码已过期</span>
+            <span class="again">点击刷新</span>
+          </div>
+        </div>
+        <div class="qrnote">二维码有效期 <b>120 秒</b>，过期后需重新获取</div>
+      </div>
+
+      <div class="ipt os"><span class="lead"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2.9" y="3.6" width="10.2" height="7.1" rx="1.4" stroke="currentColor" stroke-width="1.3"/><path d="M1.2 12.9h13.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></span><input class="input" value="zhangsan" readonly  /></div>
+    </div>
+  </div>
+  <span class="cap">⑥ 扫码登录 · 二维码过期 + 网络断开提示</span>
+  </div>
+
+<div class="note">
+  <b>覆盖的交互点</b>：<span class="id">M-BIND-001 ~ 012</span><br>
+  <b>标题<span class="new">已调整</span></b>：主标题收短为「<b>首次登录</b>」（4 字），长句下移为<b>副标题</b>。副标题本轮再由「请将您的统一身份账号<b>与操作系统账号</b>关联」改为「请将您的统一身份账号<b>与本机账号</b>关联」——「操作系统账号」是工程口径，用户视角里这台机器就叫「本机」，改后与面板上「已绑定本机 · MacBook Pro」用词统一。<br>
+  <b>内部逻辑说明<span class="new">已删除</span></b>：去掉「短信 / 扫码 / 动态口令方式下不展示忘记密码」这类文字，
+  产品内部规则不进界面。<br>
+  <b>Logo<span class="new">已替换</span></b>：彩色版置于 <b>64×64 圆角底座</b>内（沿用「首次登录」简洁版样式）。菜单栏图标另用单色版，见第 03 页。<br>
+  <b>表单改版</b>：去掉字段标签，改为<b>图标内嵌 + placeholder</b> 写法；输入框高 44px、圆角 10px，密码框右侧加明暗切换。主按钮同步 44px，禁用态为浅灰底灰字。<br><b>macOS 账户名</b>：只读回显，多账号只听当前账户。<br>
+  <b>成功态</b>：窗口内浮出「绑定成功」→ 约 2 秒自动关窗 → 菜单栏图标点亮。
+</div>
+
+
+<script>
+/* 密码明文切换（平铺原型：每个状态卡独立，就地切换） */
+var ICO_EYE = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M1.5 8S3.8 3.8 8 3.8 14.5 8 14.5 8s-2.3 4.2-6.5 4.2S1.5 8 1.5 8z" stroke="currentColor" stroke-width="1.25"/><circle cx="8" cy="8" r="1.95" stroke="currentColor" stroke-width="1.25"/></svg>';
+var ICO_EYE_OFF = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M1.5 8S3.8 3.8 8 3.8c1 0 1.9.23 2.7.6M14.5 8s-2.3 4.2-6.5 4.2c-1.1 0-2-.27-2.9-.7" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/><path d="M6.4 6.4a2.3 2.3 0 003.2 3.2" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/><path d="M2.4 2.4l11.2 11.2" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></svg>';
+function togglePw(btn){
+  var box = btn.parentNode, el = box.querySelector('input');
+  if(!el) return;
+  var show = (el.type === 'password');
+  el.type = show ? 'text' : 'password';
+  btn.innerHTML = show ? ICO_EYE_OFF : ICO_EYE;
+}
+</script>
+</body>
+</html>

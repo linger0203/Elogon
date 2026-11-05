@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>E登录 Mac版 · 视觉规范样张</title>
+<style>
+:root{
+  /* 主色 —— macOS 系统蓝 */
+  --brand:        #007AFF;
+  --brand-hover:  #0069DB;
+  --brand-press:  #0059BC;
+  --brand-soft:   #EAF3FF;
+  --brand-mid:    #B3D7FF;
+
+  /* 页面与卡片分层 */
+  --bg-page:      #F4F5F7;
+  --bg-card:      #FFFFFF;
+  --bg-field:     #F7F8FA;
+  --bg-hover:     #F0F1F4;
+
+  /* 边框 */
+  --border-card:  #E8EAED;
+  --border-field: #DDE0E4;
+  --border-focus: var(--brand);
+
+  /* 文字三级灰阶 */
+  --text-1:       #1A1D21;
+  --text-2:       #6B7280;
+  --text-3:       #9CA3AF;
+  --text-on:      #FFFFFF;
+
+  /* 语义色 */
+  --success:      #34C759;
+  --success-soft: #EAF9EE;
+  --warning:      #FF9500;
+  --warning-soft: #FFF4E5;
+  --danger:       #FF3B30;
+  --danger-soft:  #FFEDEC;
+
+  /* 圆角 */
+  --r-card:  16px;
+  --r-field: 10px;
+  --r-btn:   10px;
+  --r-tag:    8px;
+  --r-win:   12px;
+
+  /* 间距（8 的倍数） */
+  --s1: 4px;  --s2: 8px;  --s3: 12px;
+  --s4: 16px; --s5: 24px; --s6: 32px;
+
+  /* 字号 */
+  --fs-title: 15px;
+  --fs-head:  14px;
+  --fs-body:  13px;
+  --fs-note:  12px;
+  --fs-tiny:  11px;
+
+  /* 控件高度 */
+  --h-field: 34px;
+  --h-btn:   34px;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:-apple-system,"SF Pro Text","PingFang SC","Helvetica Neue",Arial,sans-serif;
+  background:var(--bg-page);
+  color:var(--text-1);
+  font-size:var(--fs-body);
+  line-height:1.6;
+  padding:var(--s6) var(--s5) 64px;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:920px;margin:0 auto}
+
+h1{font-size:20px;font-weight:500;letter-spacing:-.2px}
+.sub{color:var(--text-2);font-size:var(--fs-body);margin-top:var(--s2)}
+
+section{margin-top:var(--s6)}
+h2{font-size:var(--fs-head);font-weight:500;margin-bottom:var(--s3);color:var(--text-1)}
+h2 .num{color:var(--text-3);font-weight:400;margin-right:6px}
+
+.card{
+  background:var(--bg-card);
+  border:1px solid var(--border-card);
+  border-radius:var(--r-card);
+  padding:20px var(--s5);
+}
+
+/* 色板 */
+.swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:var(--s3)}
+.sw{border:1px solid var(--border-card);border-radius:var(--r-field);overflow:hidden;background:#fff}
+.sw .chip{height:52px}
+.sw .meta{padding:var(--s2) 10px;font-size:var(--fs-tiny);line-height:1.5}
+.sw .meta b{display:block;font-weight:500;font-size:var(--fs-note);color:var(--text-1)}
+.sw .meta span{font-family:ui-monospace,Menlo,Consolas,monospace;color:var(--text-2)}
+
+/* 按钮 */
+.row{display:flex;flex-wrap:wrap;gap:var(--s3);align-items:center}
+.btn{
+  height:var(--h-btn);padding:0 var(--s4);border-radius:var(--r-btn);
+  font-size:var(--fs-body);font-family:inherit;cursor:pointer;
+  border:1px solid transparent;display:inline-flex;align-items:center;justify-content:center;
+  transition:background .12s ease;
+}
+.btn-primary{background:var(--brand);color:var(--text-on);border-color:var(--brand)}
+.btn-primary:hover{background:var(--brand-hover)}
+.btn-primary:active{background:var(--brand-press)}
+.btn-secondary{background:#fff;color:var(--text-1);border-color:var(--border-field)}
+.btn-secondary:hover{background:var(--bg-hover)}
+.btn-ghost{background:transparent;color:var(--brand);border-color:transparent}
+.btn-ghost:hover{background:var(--brand-soft)}
+.btn-danger{background:#fff;color:var(--danger);border-color:#F5C9C6}
+.btn-danger:hover{background:var(--danger-soft)}
+.btn[disabled]{background:var(--bg-field);color:var(--text-3);border-color:var(--border-card);cursor:not-allowed}
+.btn-block{width:100%}
+
+/* 输入框 */
+.field{margin-bottom:var(--s3)}
+.field label{display:block;font-size:var(--fs-note);color:var(--text-2);margin-bottom:6px}
+.input{
+  height:var(--h-field);width:100%;padding:0 var(--s3);
+  border:1px solid var(--border-field);border-radius:var(--r-field);
+  background:var(--bg-field);font-size:var(--fs-body);font-family:inherit;color:var(--text-1);
+  outline:none;transition:border-color .12s ease,background .12s ease;
+}
+.input::placeholder{color:var(--text-3)}
+.input:hover{border-color:#C9CDD3}
+.input:focus{background:#fff;border-color:var(--border-focus);box-shadow:0 0 0 3px rgba(0,122,255,.14)}
+.input.err{border-color:var(--danger);background:#fff}
+.hint{font-size:var(--fs-note);color:var(--text-3);margin-top:6px}
+.hint.err{color:var(--danger)}
+.hint.ok{color:var(--success)}
+
+/* 带按钮的输入框（验证码行） */
+.input-group{display:flex;gap:var(--s2)}
+.input-group .input{flex:1}
+.input-group .btn{flex:0 0 auto;min-width:96px}
+
+/* 步进 / 标签 */
+.tag{
+  display:inline-flex;align-items:center;height:22px;padding:0 var(--s2);
+  border-radius:var(--r-tag);font-size:var(--fs-tiny);font-weight:500;
+}
+.tag-blue{background:var(--brand-soft);color:var(--brand)}
+.tag-green{background:var(--success-soft);color:#248A3D}
+.tag-orange{background:var(--warning-soft);color:#B26A00}
+.tag-red{background:var(--danger-soft);color:#C92A21}
+.tag-gray{background:var(--bg-field);color:var(--text-2)}
+
+/* 圆角示意 */
+.radii{display:flex;gap:var(--s4);align-items:flex-end;flex-wrap:wrap}
+.radii .demo{text-align:center;font-size:var(--fs-tiny);color:var(--text-2)}
+.radii .demo i{
+  display:block;width:72px;height:52px;background:#fff;
+  border:1.5px solid var(--brand);margin-bottom:6px;
+}
+
+/* 灰阶文字 */
+.type-scale div{padding:6px 0;border-bottom:1px dashed var(--border-card)}
+.type-scale div:last-child{border-bottom:0}
+.type-scale .spec{color:var(--text-3);font-size:var(--fs-tiny);margin-left:var(--s3)}
+
+/* 窗口示意 */
+.wins{display:flex;gap:var(--s5);flex-wrap:wrap;align-items:flex-start}
+.win{
+  background:var(--bg-card);border:1px solid var(--border-card);border-radius:var(--r-win);
+  overflow:hidden;
+}
+.win .bar{height:28px;background:var(--bg-field);border-bottom:1px solid var(--border-card);
+  display:flex;align-items:center;padding:0 10px;gap:6px}
+.win .bar i{width:10px;height:10px;border-radius:50%;display:block}
+.win .bar i:nth-child(1){background:#FF5F57}
+.win .bar i:nth-child(2){background:#FEBC2E}
+.win .bar i:nth-child(3){background:#28C840}
+
+/* 三态图标 */
+.icon-states{display:flex;gap:var(--s5);flex-wrap:wrap}
+.ist{text-align:center;font-size:var(--fs-tiny);color:var(--text-2);width:88px}
+.ist svg{margin-bottom:6px}
+
+/* 对照说明 */
+.notes{font-size:var(--fs-note);color:var(--text-2);line-height:1.7}
+.notes b{color:var(--text-1);font-weight:500}
+code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:var(--fs-tiny);
+  background:var(--bg-field);padding:1px 5px;border-radius:4px;color:var(--text-1)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>E 登录 Mac 版 · 视觉规范样张</h1>
+  <p class="sub">路线：macOS 原生骨架 + 参考稿的配色与圆角。主色 #007AFF。所有页面共用这一份 token。</p>
+
+  <section>
+    <h2><span class="num">01</span>主色与语义色</h2>
+    <div class="card">
+      <div class="swatches">
+        <div class="sw"><div class="chip" style="background:#007AFF"></div>
+          <div class="meta"><b>主色</b><span>#007AFF</span></div></div>
+        <div class="sw"><div class="chip" style="background:#0069DB"></div>
+          <div class="meta"><b>主色 · 悬停</b><span>#0069DB</span></div></div>
+        <div class="sw"><div class="chip" style="background:#0059BC"></div>
+          <div class="meta"><b>主色 · 按下</b><span>#0059BC</span></div></div>
+        <div class="sw"><div class="chip" style="background:#EAF3FF"></div>
+          <div class="meta"><b>主色 · 浅底</b><span>#EAF3FF</span></div></div>
+        <div class="sw"><div class="chip" style="background:#34C759"></div>
+          <div class="meta"><b>成功</b><span>#34C759</span></div></div>
+        <div class="sw"><div class="chip" style="background:#FF9500"></div>
+          <div class="meta"><b>警告</b><span>#FF9500</span></div></div>
+        <div class="sw"><div class="chip" style="background:#FF3B30"></div>
+          <div class="meta"><b>错误</b><span>#FF3B30</span></div></div>
+      </div>
+      <p class="notes" style="margin-top:var(--s4)">
+        <b>克制原则：</b>一屏内彩色只出现在「一个主按钮 + 必要的状态提示」上。不做第二个彩色，
+        不用彩色做装饰。这是参考稿里最值得学的一点。
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">02</span>页面分层与灰阶文字</h2>
+    <div class="card">
+      <div class="swatches">
+        <div class="sw"><div class="chip" style="background:#F4F5F7"></div>
+          <div class="meta"><b>页面底</b><span>#F4F5F7</span></div></div>
+        <div class="sw"><div class="chip" style="background:#FFFFFF"></div>
+          <div class="meta"><b>卡片</b><span>#FFFFFF</span></div></div>
+        <div class="sw"><div class="chip" style="background:#E8EAED"></div>
+          <div class="meta"><b>卡片边框</b><span>#E8EAED</span></div></div>
+        <div class="sw"><div class="chip" style="background:#DDE0E4"></div>
+          <div class="meta"><b>输入框边框</b><span>#DDE0E4</span></div></div>
+      </div>
+      <p class="notes" style="margin-top:var(--s4)">
+        <b>不用阴影。</b>层级靠「页面底比卡片深一档」+ 1px 极淡边框切出来。
+        投影会显得厚、网页味重，和我们选的 Mac 原生路线冲突。
+      </p>
+      <div class="type-scale" style="margin-top:var(--s4)">
+        <div><span style="color:var(--text-1);font-size:15px;font-weight:500">一级文字 · 窗口标题</span>
+          <span class="spec">15px / medium / #1A1D21</span></div>
+        <div><span style="color:var(--text-1);font-size:14px;font-weight:500">二级文字 · 区块标题</span>
+          <span class="spec">14px / medium / #1A1D21</span></div>
+        <div><span style="color:var(--text-1);font-size:13px">正文 · 输入内容与说明</span>
+          <span class="spec">13px / regular / #1A1D21</span></div>
+        <div><span style="color:var(--text-2);font-size:12px">辅助文字 · 字段标签</span>
+          <span class="spec">12px / regular / #6B7280</span></div>
+        <div><span style="color:var(--text-3);font-size:12px">占位与提示 · 输入框 placeholder</span>
+          <span class="spec">12px / regular / #9CA3AF</span></div>
+      </div>
+      <p class="notes" style="margin-top:var(--s4)">
+        <b>字重只有两档</b>（400 / 500）。层级靠字号 + 灰度区分，不靠加粗堆层级。
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">03</span>圆角与间距</h2>
+    <div class="card">
+      <div class="radii">
+        <div class="demo"><i style="border-radius:16px"></i>卡片 16px</div>
+        <div class="demo"><i style="border-radius:12px"></i>窗口 12px</div>
+        <div class="demo"><i style="border-radius:10px"></i>控件 10px</div>
+        <div class="demo"><i style="border-radius:8px"></i>标签 8px</div>
+      </div>
+      <p class="notes" style="margin-top:var(--s4)">
+        间距一律取 <code>4 / 8 / 12 / 16 / 24 / 32</code> 六档，全部是 8 的倍数（首档为半档）。
+        卡片内边距 20~24px，元素之间 8 或 12px。<b>宁可少放内容，也不要挤。</b>
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">04</span>按钮：四种层级 + 禁用态</h2>
+    <div class="card">
+      <div class="row">
+        <button class="btn btn-primary">绑定登录</button>
+        <button class="btn btn-secondary">取消</button>
+        <button class="btn btn-ghost">忘记密码</button>
+        <button class="btn btn-danger">退出登录</button>
+        <button class="btn btn-primary" disabled>绑定登录</button>
+      </div>
+      <p class="notes" style="margin-top:var(--s4)">
+        <b>主按钮</b>实心蓝，一屏最多一个。<b>次按钮</b>白底细边。<b>文字按钮</b>用于「忘记密码」这类弱入口。
+        <b>危险按钮</b>只描红边不填红，避免退出的视觉重量压过登录。
+        控件高度统一 34px（macOS 标准控件高度）。
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">05</span>输入框：默认 / 聚焦 / 错误 / 带按钮</h2>
+    <div class="card">
+      <div style="max-width:380px">
+        <div class="field">
+          <label>统一身份账号</label>
+          <input class="input" placeholder="请输入统一身份账号" />
+        </div>
+        <div class="field">
+          <label>统一身份账号</label>
+          <input class="input" value="zhangsan" style="background:#fff;border-color:#007AFF;box-shadow:0 0 0 3px rgba(0,122,255,.14)" />
+          <p class="hint">聚焦态：底色转白 + 蓝色描边 + 3px 浅蓝光晕</p>
+        </div>
+        <div class="field">
+          <label>统一身份账号</label>
+          <input class="input err" value="zhangsan@" />
+          <p class="hint err">账号格式不正确</p>
+        </div>
+        <div class="field">
+          <label>短信验证码</label>
+          <div class="input-group">
+            <input class="input" placeholder="请输入验证码" />
+            <button class="btn btn-secondary">获取验证码</button>
+          </div>
+          <p class="hint">这就是交互表 M-BIND-007 提到的「同一行控件」</p>
+        </div>
+      </div>
+      <p class="notes" style="margin-top:var(--s4)">
+        <b>错误提示紧贴字段下方</b>，用色 #FF3B30，12px，不换行不抖动。
+        验证码按钮与输入框等高、同行摆放。
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">06</span>状态标签</h2>
+    <div class="card">
+      <div class="row">
+        <span class="tag tag-blue">已登录</span>
+        <span class="tag tag-gray">未登录</span>
+        <span class="tag tag-orange">需重新绑定</span>
+        <span class="tag tag-red">认证失败</span>
+        <span class="tag tag-green">绑定成功</span>
+      </div>
+      <p class="notes" style="margin-top:var(--s4)">
+        浅底 + 同色深字，不描边。用于菜单栏面板里的绑定状态、以及表内的状态列。
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">07</span>窗口形态（原生骨架）</h2>
+    <div class="card">
+      <div class="wins">
+        <div class="win" style="width:360px">
+          <div class="bar"><i></i><i></i><i></i></div>
+          <div style="height:120px;display:flex;align-items:center;justify-content:center;
+            color:var(--text-3);font-size:12px">登录窗口 ≈ 400 × 560</div>
+        </div>
+        <div class="win" style="width:280px">
+          <div class="bar"><i></i><i></i><i></i></div>
+          <div style="height:120px;display:flex;align-items:center;justify-content:center;
+            color:var(--text-3);font-size:12px">菜单栏面板 ≈ 320 宽，无标题栏</div>
+        </div>
+      </div>
+      <p class="notes" style="margin-top:var(--s4)">
+        窗口圆角 12px（与 macOS 原生一致）。登录窗口带红黄绿信号灯；
+        菜单栏下拉面板<b>不带信号灯</b>，用系统 popover 的圆角与描边。
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">08</span>菜单栏图标：两态</h2>
+    <p class="notes" style="margin-bottom:var(--s4)">
+      已登录用 <b>logo 原色</b>；未登录用<b>黑色版图标 + 降透明度 35%</b>。不做「异常」态。
+    </p>
+    <div class="grid3">
+      <div class="cell">
+        <div class="demo" style="background:#F0F2F5;height:72px">
+          <img src="assets/logo-color-128.png" width="22" height="22" alt="已登录" />
+        </div>
+        <div class="ist">
+          <b>已登录</b>
+        </div>
+      </div>
+      <div class="cell">
+        <div class="demo" style="background:#F0F2F5;height:72px">
+          <img src="assets/logo-mono-black-128.png" width="22" height="22"
+            style="opacity:.35" alt="未登录" />
+        </div>
+        <div class="ist">
+          <b>未登录</b>
+        </div>
+      </div>
+    </div>
+    <p class="notes" style="margin-top:var(--s4)">
+      尺寸 18×18（此处放大展示）。macOS 默认按 template image 渲染成单色，
+      要显示原色需在代码里关闭 template 属性（<code>setTemplate:NO</code>）。
+    </p>
+  </section>
+
+  <section>
+    <h2><span class="num">09</span>网络状态提示：四态</h2>
+    <p class="notes" style="margin-bottom:var(--s4)">
+      全页面统一的轻提示条，只在异常时出现，恢复正常后自动消失。<b>正常状态下完全不占位。</b>
+    </p>
+    <div class="stack" style="display:flex;flex-direction:column;gap:10px;max-width:460px">
+
+      <div style="display:flex;align-items:center;gap:7px;padding:8px 12px;
+        font-size:11.5px;border-radius:8px;background:#EAF9EE;color:#1D6B32">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+          <path d="M1.6 5.2C3 3.9 4.7 3.2 6.5 3.2s3.5.7 4.9 2" stroke="#1D6B32"
+            stroke-width="1.2" stroke-linecap="round"/>
+          <path d="M3.6 7.4c.9-.8 1.9-1.2 2.9-1.2s2 .4 2.9 1.2" stroke="#1D6B32"
+            stroke-width="1.2" stroke-linecap="round"/>
+          <circle cx="6.5" cy="10" r="1" fill="#1D6B32"/>
+        </svg>
+        网络已恢复
+        <span style="margin-left:auto;font-size:10.5px;opacity:.8">2 秒后自动消失</span>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:7px;padding:8px 12px;
+        font-size:11.5px;border-radius:8px;background:#FFF4E5;color:#8A4B00">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+          <path d="M1.6 5.2C3 3.9 4.7 3.2 6.5 3.2s3.5.7 4.9 2" stroke="#8A4B00"
+            stroke-width="1.2" stroke-linecap="round"/>
+          <path d="M3.6 7.4c.9-.8 1.9-1.2 2.9-1.2s2 .4 2.9 1.2" stroke="#8A4B00"
+            stroke-width="1.2" stroke-linecap="round"/>
+          <circle cx="6.5" cy="10" r="1" fill="#8A4B00"/>
+        </svg>
+        当前网络较弱，部分功能可能响应较慢
+        <span style="margin-left:auto;font-size:10.5px;opacity:.8">重连中</span>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:7px;padding:8px 12px;
+        font-size:11.5px;border-radius:8px;background:#FFEDEC;color:#A32620">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+          <path d="M1.6 5.2C3 3.9 4.7 3.2 6.5 3.2s3.5.7 4.9 2" stroke="#A32620"
+            stroke-width="1.2" stroke-linecap="round"/>
+          <path d="M3.6 7.4c.9-.8 1.9-1.2 2.9-1.2s2 .4 2.9 1.2" stroke="#A32620"
+            stroke-width="1.2" stroke-linecap="round"/>
+          <path d="M2.6 11.4l7.8-9.4" stroke="#A32620" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+        网络连接已断开，请检查网络后重试
+        <span style="margin-left:auto;font-size:10.5px;font-weight:500">重试</span>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:7px;padding:8px 12px;
+        font-size:11.5px;border-radius:8px;background:#EAF3FF;color:#0C447C">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+          <path d="M10.5 6.5a4 4 0 11-1.6-3.2" stroke="#0C447C" stroke-width="1.3"
+            stroke-linecap="round"/>
+          <path d="M9.4 1.6v2h2" stroke="#0C447C" stroke-width="1.3"
+            stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        正在重新连接…
+      </div>
+    </div>
+
+    <p class="notes" style="margin-top:var(--s4)">
+      <b>触发时机</b>：<br>
+      &nbsp;&nbsp;<b>正常</b> —— 不展示任何提示条。<br>
+      &nbsp;&nbsp;<b>较弱</b> —— 延迟超过阈值（建议 800ms）时出现，橙色，不阻断操作。<br>
+      &nbsp;&nbsp;<b>断开</b> —— 请求失败且判定为网络原因时出现，红色，禁用提交类按钮但<b>不清空已填内容</b>。<br>
+      &nbsp;&nbsp;<b>重连中</b> —— 检测到网络恢复但尚未连通时出现，蓝色，带转圈。<br>
+      &nbsp;&nbsp;<b>恢复</b> —— 连通后绿色提示 2 秒自动消失，不需要用户手动关。<br>
+      <b>位置</b>：<b>窗口顶部通栏贴边条</b>——紧贴标题栏下方、内容区之上，整行通宽，
+      不占内容区布局、不参与滚动。<br>
+      &nbsp;&nbsp;<b>为什么不放在错误提示的位置</b>：网络是<b>环境状态</b>（全局、持续），
+      账号密码错误是<b>操作结果</b>（局部、瞬时）。两者混在同一个位置，用户会误以为
+      「密码错误」是网络造成的。位置分开，语义才不会串。<br>
+      <b>颜色取值</b>：较弱 <code>#FFF4E5 / #8A4B00</code>、断开 <code>#FFEDEC / #A32620</code>、
+      重连 <code>#EAF3FF / #0C447C</code>、恢复 <code>#EAF9EE / #1D6B32</code>。
+    </p>
+  </section>
+
+</div>
+</body>
+</html>

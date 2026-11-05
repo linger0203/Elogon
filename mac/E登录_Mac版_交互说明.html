@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>E登录 Mac版 · 交互说明</title>
+<style>
+:root{
+  --brand:#007AFF; --brand-hover:#0069DB; --brand-soft:#EAF3FF;
+  --bg-page:#F4F5F7; --bg-card:#FFFFFF; --bg-field:#F7F8FA; --bg-hover:#F0F1F4;
+  --border-card:#E8EAED; --border-field:#DDE0E4;
+  --text-1:#1A1D21; --text-2:#6B7280; --text-3:#9CA3AF; --text-on:#FFFFFF;
+  --success:#34C759; --success-soft:#EAF9EE;
+  --warning:#FF9500; --warning-soft:#FFF4E5;
+  --danger:#FF3B30; --danger-soft:#FFEDEC;
+  --r-card:14px; --r-field:10px; --r-tag:8px;
+  --top-h:60px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:-apple-system,"SF Pro Text","PingFang SC","Helvetica Neue",Arial,sans-serif;
+  background:var(--bg-page); color:var(--text-1); font-size:13px; line-height:1.6;
+  -webkit-font-smoothing:antialiased; overflow:hidden;
+}
+
+/* ============ 顶栏 ============ */
+.top{
+  height:var(--top-h);display:flex;align-items:center;gap:14px;
+  padding:0 20px;background:rgba(255,255,255,.86);
+  backdrop-filter:saturate(180%) blur(18px);
+  border-bottom:1px solid var(--border-card);
+  position:relative;z-index:30;
+}
+.top .brand{display:flex;align-items:center;gap:10px;flex:0 0 auto}
+.top .brand img{width:30px;height:30px;display:block;border-radius:7px}
+.top .brand .t{display:flex;flex-direction:column;justify-content:center}
+.top h1{font-size:14px;font-weight:500;letter-spacing:-.2px;line-height:1.3}
+.top .sub{font-size:11px;color:var(--text-3);line-height:1.3}
+.top .sep{width:1px;height:22px;background:var(--border-card);flex:0 0 auto}
+.top .grow{flex:1 1 auto;min-width:0}
+.tag{
+  display:inline-flex;align-items:center;height:22px;padding:0 8px;
+  border-radius:var(--r-tag);font-size:11px;font-weight:500;white-space:nowrap;
+}
+.t-blue{background:var(--brand-soft);color:var(--brand)}
+.t-gray{background:var(--bg-field);color:var(--text-2)}
+.t-green{background:var(--success-soft);color:#248A3D}
+.t-top{display:flex;gap:6px;flex-wrap:wrap;flex:0 0 auto}
+
+/* ============ 主体：左右分栏 ============ */
+.main{display:flex;height:calc(100% - var(--top-h))}
+
+/* ---- 左：联动原型 ---- */
+.stage{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;background:#DDE3EA}
+.stage-bar{
+  height:42px;display:flex;align-items:center;gap:8px;padding:0 14px;
+  background:#FBFCFD;border-bottom:1px solid var(--border-card);flex:0 0 auto;
+}
+.stage-bar .cur{
+  font-size:12px;font-weight:500;flex:1 1 auto;min-width:0;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  display:flex;align-items:baseline;gap:7px;
+}
+.stage-bar .cur .id{
+  font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10.5px;
+  color:var(--text-3);
+}
+.stage-bar .hint{font-size:11px;color:var(--text-3);flex:0 0 auto}
+.ib{
+  height:26px;padding:0 10px;border:1px solid var(--border-field);
+  background:#fff;border-radius:7px;font-size:11.5px;color:var(--text-2);
+  cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;
+  gap:5px;flex:0 0 auto;transition:background .12s,border-color .12s;
+}
+.ib:hover{background:var(--bg-hover);border-color:#C9CDD3;color:var(--text-1)}
+.ib.pri{background:var(--brand);border-color:var(--brand);color:#fff}
+.ib.pri:hover{background:var(--brand-hover);border-color:var(--brand-hover)}
+.stage-frame{flex:1 1 auto;position:relative;overflow:hidden;min-height:0}
+.stage-frame iframe{
+  width:100%;height:100%;border:0;display:block;background:#DDE3EA;
+}
+/* iframe 内的原型顶到容器上沿，macOS 菜单栏会贴着工具条 —— 留一条细缝分开 */
+.stage-frame{padding-top:0}
+.stage-frame::before{
+  content:"";position:absolute;left:0;right:0;top:0;height:1px;
+  background:rgba(0,0,0,.06);z-index:2;pointer-events:none;
+}
+
+/* ---- 右：要求与验收 ---- */
+.side{
+  width:430px;flex:0 0 auto;background:#fff;border-left:1px solid var(--border-card);
+  display:flex;flex-direction:column;overflow:hidden;
+}
+.side.filter{
+  height:auto;flex:0 0 auto;padding:10px 14px 11px;
+  border-bottom:1px solid var(--border-card);display:flex;
+  flex-direction:column;gap:8px;
+}
+.flist{display:flex;flex-wrap:wrap;gap:5px}
+.fbtn{
+  height:24px;padding:0 9px;border:1px solid var(--border-field);background:#fff;
+  border-radius:7px;font-size:11.5px;color:var(--text-2);cursor:pointer;
+  font-family:inherit;transition:background .12s,border-color .12s,color .12s;
+}
+.fbtn:hover{background:var(--bg-hover);color:var(--text-1)}
+.fbtn.on{background:var(--brand-soft);border-color:#BBD9F5;color:var(--brand);font-weight:500}
+.fbtn .n{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px;
+  color:var(--text-3);margin-left:4px}
+.fbtn.on .n{color:var(--brand);opacity:.7}
+
+.side-body{flex:1 1 auto;overflow-y:auto;padding:0}
+
+/* ---- 功能块 ---- */
+.grp{border-bottom:1px solid var(--border-card);scroll-margin-top:0}
+.grp:last-child{border-bottom:0}
+.grp-h{
+  display:flex;align-items:center;gap:9px;padding:12px 14px;cursor:pointer;
+  user-select:none;transition:background .12s;
+}
+.grp-h:hover{background:var(--bg-hover)}
+.grp-h .arw{
+  width:12px;flex:0 0 auto;color:var(--text-3);font-size:9px;
+  transition:transform .16s cubic-bezier(.32,.72,0,1);
+}
+.grp.open .grp-h .arw{transform:rotate(90deg)}
+.grp-h .nm{flex:1 1 auto;min-width:0;font-size:12.5px;font-weight:500}
+.grp-h .ct{
+  font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10.5px;
+  color:var(--text-3);flex:0 0 auto;
+}
+.grp-h.dim{opacity:.45}
+.grp-b{display:none;padding:0 14px 14px}
+.grp.open .grp-b{display:block}
+
+/* ---- 交互点 ---- */
+.pt{
+  border:1px solid var(--border-card);border-radius:var(--r-field);
+  margin-bottom:8px;background:#fff;overflow:hidden;
+}
+.pt:last-child{margin-bottom:0}
+.pt-h{
+  display:flex;align-items:flex-start;gap:8px;padding:9px 11px;cursor:pointer;
+  user-select:none;transition:background .12s;
+}
+.pt-h:hover{background:var(--bg-hover)}
+.pt-h .arw{
+  width:10px;flex:0 0 auto;color:var(--text-3);font-size:8px;margin-top:5px;
+  transition:transform .16s cubic-bezier(.32,.72,0,1);
+}
+.pt.open .pt-h .arw{transform:rotate(90deg)}
+.pt-h .tx{flex:1 1 auto;min-width:0}
+.pt-h .id{
+  font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px;
+  color:var(--brand);background:var(--brand-soft);padding:1px 5px;
+  border-radius:5px;display:inline-block;margin-bottom:4px;
+}
+/* 「看效果」—— 该条目有自己的落点，点标题即可把左侧切过去 */
+.pt-h .jn{
+  font-size:10px;color:var(--brand);border:1px solid #BBD9FF;
+  background:#FFF;padding:1px 5px;border-radius:5px;margin-left:6px;
+  display:inline-block;margin-bottom:4px;white-space:nowrap;
+}
+.pt[data-node] .pt-h:hover .jn{background:var(--brand);color:#FFF;border-color:var(--brand)}
+.pt-h .do{font-size:12px;line-height:1.55}
+.pt-b{display:none;padding:0 11px 11px 29px}
+.pt.open .pt-b{display:block}
+
+.row{display:flex;gap:9px;padding:6px 0;border-top:1px solid #F1F2F4}
+.row:first-child{border-top:0}
+.row .k{
+  flex:0 0 62px;font-size:11px;color:var(--text-3);padding-top:1px;
+}
+.row .v{flex:1 1 auto;min-width:0;font-size:11.5px;color:var(--text-2);line-height:1.62}
+.row .v.q{color:var(--text-1)}
+.row .v.mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10.5px}
+.row .v .ok{color:#248A3D}
+.row .v .er{color:#B3261E}
+.row .v em{
+  font-style:normal;background:var(--bg-field);padding:0 4px;border-radius:4px;
+  font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10.5px;color:var(--text-1);
+}
+.row.go .v a{
+  color:var(--brand);text-decoration:none;font-size:11.5px;cursor:pointer;
+  border-bottom:1px solid #BBD9F5;
+}
+.row.go .v a:hover{border-bottom-color:var(--brand)}
+
+.empty{padding:30px 20px;text-align:center;color:var(--text-3);font-size:12px}
+
+/* ---- 免责/说明条 ---- */
+.note{
+  margin:0 14px 14px;padding:10px 12px;background:var(--warning-soft);
+  border-radius:var(--r-field);font-size:11.5px;color:#8A4B00;line-height:1.65;
+}
+.note b{font-weight:500}
+
+/* ---- 全屏 ---- */
+body.fs .top{display:none}
+body.fs .main{height:100%}
+body.fs .side{width:0;border-left:0;overflow:hidden}
+body.fs .stage-bar{border-radius:0}
+/* ---- 窄屏兜底（v1.0.13）----
+   左侧 iframe 里现在带流程轨道（290px），右侧说明栏固定 430px。
+   视口 ≤1150px 时中间的原型会被压到 430px 以下，窗口就缩得不像样了。
+   这里**只在窄屏**收窄右栏，≥1200px 完全不动 ——
+   1280 / 1366 / 1440 这些常规办公显示器不受任何影响。
+   全屏态（body.fs .side，2 个 class）优先级更高，不受本文影响。 */
+@media (max-width:1200px){ .side{width:370px} }
+@media (max-width:1100px){ .side{width:330px} }
+</style>
+</head>
+<body>
+
+<!-- v1.0.14：94 条说明从 index 搬到了这一页。
+     顶栏因此多了一个「← 联动原型」—— 想看大画面时一键回去，
+     回来时还会把当前落点（?node=）带过去，不会重新回到首页。 -->
+<div class="top">
+  <div class="brand">
+    <img src="assets/logo-color-128.png" alt="E登录">
+    <div class="t">
+      <h1>E 登录 · Mac 版 交互说明</h1>
+      <div class="sub">左侧预览原型（流程轨道可直接点跳转），右侧逐条对照 —— 点分组切换流程，点条目展开验收条目</div>
+    </div>
+  </div>
+  <div class="sep"></div>
+  <div class="t-top">
+    <span class="tag t-blue">联动原型 v1.0.14</span>
+    <span class="tag t-gray">11 条流程 · 126 个交互点</span>
+    <span class="tag t-green">交互表 v1.0</span>
+  </div>
+  <div class="grow"></div>
+  <button class="ib" id="btnBack" title="回到「联动原型」页 —— 那边只有原型，画面更大">← 联动原型</button>
+  <button class="ib" id="btnFold" title="展开/收起全部验收说明">展开全部说明</button>
+  <button class="ib" id="btnFs" title="全屏看原型（Esc 退出）">全屏原型</button>
+</div>
+
+<div class="main">
+
+  <!-- 左：联动原型 -->
+  <div class="stage">
+    <div class="stage-bar">
+      <span class="cur"><span id="curName">首次绑定</span><span class="id" id="curId">M-BIND-001 ~ 012</span></span>
+      <span class="hint">轨道可点跳转 · 窗口内可滚动</span>
+      <button class="ib" id="btnReload" title="重新载入原型">↻ 重载</button>
+      <button class="ib pri" id="btnOpen" title="在新标签打开（占满整屏，看得更舒展）">新标签打开</button>
+    </div>
+    <div class="stage-frame">
+      <iframe id="frame" src="index.html?embed=1&rail=1&node=bind"
+              title="E登录 Mac 版联动原型" allow="clipboard-write"></iframe>
+    </div>
+  </div>
+
+  <!-- 右：要求与验收 -->
+  <div class="side">
+    <div class="side filter">
+      <div class="flist" id="flist"></div>
+    </div>
+    <div class="side-body" id="sideBody"></div>
+  </div>
+
+</div>
+
+<script>
+/* =========================================================
+   交互说明页（v1.0.14）
+   本页 = 左侧预览原型（带流程轨道）+ 右侧 126 条交互说明。
+   与 index.html 的分工（v1.0.17 起 index 即原型本体）：
+     index.html                    原型本体独立打开：桌面 + 流程轨道 + 状态面板
+                                   + 操作日志 + 本页说明浮层，工具条在手边
+     E登录_Mac版_交互说明.html      原型（嵌入形态）+ 右侧 126 条说明并排，逐条对照时用
+   两页嵌的是同一个原型（现在的 index.html = 原型本体），靠 URL 参数互相接力：
+     ?node=<视图名>   开门直接落在该界面（从另一页跳过来时带）
+   原型每次换页会 postMessage 一条 { t:'e-login-view', node, name }（v1.0.14），
+   下面据此让右栏跟着左侧轨道一起走。
+
+   数据：来自 E登录_Mac版_交互表_v1.1.xlsx（11 sheet / 126 条）
+   字段 —— id 交互ID / page 页面 / do 点了什么 / ok 正常会怎样
+           err 出错了会怎样 / copy 提示语原话
+   node —— 点该分组时，左侧 iframe 跳到联动原型的哪个节点
+           留空表示该分组不绑定单一节点（如网络状态是全局行为）
+   ========================================================= */
+var GROUPS = [{"key": "bind", "node": "bind", "title": "首次绑定", "points": [{"id": "M-BIND-001", "page": "绑定引导窗口", "do": "OS 登录后 CS 程序首次自启（自动）", "ok": "自动弹出绑定引导窗口，顶部为品牌区与标题，中部为登录方式切换，下部为 macOS 账户名与提交按钮", "err": "CS 未自启 → 用户从菜单栏图标手动打开", "copy": "关联统一身份账号 / 关联后，开机将自动登录"}, {"id": "M-BIND-002", "page": "绑定引导窗口", "do": "点【账密登录】", "ok": "表单切换为 账号 + 密码 + macOS 账户名（只读）", "err": "无", "copy": "请输入统一身份账号 / 请输入密码"}, {"id": "M-BIND-003", "page": "绑定引导窗口", "do": "点【扫码登录】", "ok": "表单切换为二维码区域，前端持续轮询扫码结果。二维码居中展示，下方提示用哪个 App 扫", "err": "无可用扫码通道 → 该 tab 不展示", "copy": "扫码登录 / 请使用手机 E 登录 App 或企业微信扫码"}, {"id": "M-BIND-004", "page": "绑定引导窗口", "do": "（自动）二维码失效 / 扫码后", "ok": "二维码有效期 120 秒；过期后就地盖一层遮罩，提供【点击刷新】重新获取，不退出当前 tab。扫码成功后在手机上确认，客户端收到结果自动进入绑定", "err": "用户取消扫码 → 二维码保持可扫状态；刷新失败 → 提示重试", "copy": "等待扫码… / 二维码已过期 / 点击刷新 / 扫码成功，请在手机上确认"}, {"id": "M-BIND-005", "page": "绑定引导窗口", "do": "点【短信登录】", "ok": "表单切换为 手机号 + 验证码", "err": "后台未配置短信认证 → 该入口不展示", "copy": "短信登录 / 请输入手机号码"}, {"id": "M-BIND-006", "page": "绑定引导窗口", "do": "点【动态口令】", "ok": "表单切换为口令输入框", "err": "后台未配置 OTP → 该入口不展示", "copy": "口令登录 / 请输入动态口令"}, {"id": "M-BIND-007", "page": "绑定引导窗口", "do": "输入 IAM 账号（账号 / 手机号）", "ok": "默认以统一身份用户名作为输入框提示，提示文案支持后台自定义修改；账号与手机号共用一个输入框，按输入内容自动识别走哪种校验", "err": "留空提交 → 提示必填；格式不符 → 提示输入格式错误", "copy": "请输入统一身份账号 / 请输入手机号码 / 账号格式不正确"}, {"id": "M-BIND-008", "page": "绑定引导窗口", "do": "点【获取验证码】并输入验证码", "ok": "点击按钮：先弹滑块防人机校验，通过后按钮进入倒计时，向手机号下发短信验证码；同一行控件内输入收到的验证码，输入满位后自动校验", "err": "格式不符 / 号码不存在 → 点击时即提示；验证码填错 / 已过期 → 分别提示，验证码框不清空", "copy": "请填写手机号码 / 手机号码不存在 / 手机号码格式不正确 / 验证码不正确 / 验证码已过期"}, {"id": "M-BIND-009", "page": "绑定引导窗口", "do": "输入 OS 账号名", "ok": "默认读取 macOS 本地账户名；多值时可下拉单选，仅一个值时直接回显只读", "err": "本机无可用账户 → 提示手动输入", "copy": "请输入 macOS 账户名"}, {"id": "M-BIND-010", "page": "绑定引导窗口", "do": "点【绑定登录】", "ok": "全部校验通过 → 窗口内弹出成功提示 → 约 2 秒后窗口自动关闭 → 菜单栏常驻图标点亮为原色，同时完成一次 IAM 登录。全程无需用户点击确认，不做独立成功页", "err": "IAM 账号已被其他终端绑定 / OS 账密错误 / IAM 账号已被锁定 / 网络异常，分别给出对应提示，窗口保持打开且不清空已填内容", "copy": "绑定成功"}, {"id": "M-BIND-011", "page": "绑定引导窗口", "do": "（系统自动）绑定成功后", "ok": "菜单栏图标点亮为「已登录」态（logo 原色），窗口关闭，后续开机自动登录", "err": "自动登录失败（OS 账号变更 / IAM 会话过期）→ 弹出窗口要求重新登录，图标转为「未登录」态", "copy": "详见「日常自动登录」流程"}, {"id": "M-BIND-012", "page": "绑定引导窗口", "do": "（系统自动）绑定提交通过后", "ok": "在【本机绑定记录】里写入本次认证通过的统一身份账号 —— 这是「本机已绑定账号」的唯一写入点。此后退出后登录页的账号比对、忘记密码的账号行返显、注销二次确认的文案，读的都是这个值。写什么就报什么：绑定 lisi 后，退出页的提示即为「本机已绑定账号：lisi」，而不是永远写着某个写死的账号。注意它与窗口里那行只读的「本机 macOS 账户」是两个字段 —— 后者是系统给的账户名（whoami），前者是绑定关系的右端。", "err": "写盘失败 → 绑定不成立，提示重试、不进入已绑定态。否则会出现「IAM 会话已建立、但本地绑定记录是空的」这种不一致：退出后登录页会因为读不到记录而跳过账号比对，等于绑定白做。", "copy": "绑定成功"}, {"id": "M-BIND-013", "page": "首次绑定成功后（自动）", "do": "绑定关系写入本机的同一时刻（自动）", "ok": "为该统一身份账号自动分配一个档案手机号，写入 IAM 档案，规则为「138 开头 + 按序编号」（第 n 个绑定账号取 1381000000n），所有号码均为合法 11 位国内手机号。该号用于短信登录与忘记密码-短信渠道的返显。同一账号重复绑定拿到同一个号（按档案已有记录返回，不重复发号）；解绑不回收号码。", "err": "档案中已有该账号 → 复用原号，不另行分配", "copy": "无提示（后台自动完成）"}, {"id": "M-BIND-014", "page": "绑定引导窗口 / 登录窗口（短信登录）", "do": "在手机号输入框中输入内容", "ok": "边输边验：输入内容须为 11 位国内手机号（1 开头、第二位 3-9、其后 9 位数字）。校验通过则「绑定并登录」/「登录」按钮解锁；未通过则按钮保持置灰不可点。格式不符时点击提交，提示「请输入正确的 11 位手机号码」。该规则同样适用于忘记密码页的手机号渠道。", "err": "格式不符 → 按钮置灰；强行提交 → 提示「请输入正确的 11 位手机号码」", "copy": "请输入正确的 11 位手机号码"}, {"id": "M-BIND-015", "page": "绑定引导窗口（人脸认证区）", "do": "点【人脸】", "ok": "整页切为人脸认证区：圆形取景框 + 头肩剪影 + 扫描线 + 三列取景提示（保持光线充足 / 脸在取景框内 / 面部正对屏幕）。**一颗主按钮**：初始为【开始人脸识别】→ 点击后「识别中…」→ 通过后变【绑定并登录】。全程不出现录入 / 绑定 / 首次采集", "err": "比对不通过 → 提示可重试；后台未开通人脸 → 该 tab 不展示", "copy": "请将面部置于取景框内 / 保持光线充足 / 开始人脸识别 / 识别中… / 绑定并登录"}, {"id": "M-BIND-016", "page": "绑定引导窗口（指纹认证区）", "do": "点【指纹】", "ok": "整页切为指纹认证区：大号指纹线稿 + 一句提示，不套取景框。主按钮【开始指纹校验】→「校验中…」→【绑定并登录】。同样不做录入 / 绑定", "err": "校验不通过 → 提示可重试；后台未开通指纹 → 该 tab 不展示", "copy": "请将手指放在 Touch ID 上 / 开始指纹校验 / 校验中… / 绑定并登录"}]}, {"key": "pwd", "node": "forgot", "title": "忘记密码", "points": [{"id": "M-PWD-001", "page": "绑定引导窗口 / 登录页 / 退出后登录页", "do": "账密认证失败后（自动）", "ok": "在失败提示下方展示【忘记密码】文字入口，点入后在同一个 CS 窗口内进入找回密码，不跳页", "err": "账号已被锁定 / 网络异常 → 不展示该入口", "copy": "忘记密码"}, {"id": "M-PWD-002", "page": "忘记密码（单页）", "do": "进入找回密码页（自动）", "ok": "一页承载全部三步，自上而下依次为：① 选验证方式 + 填用户名/手机号；② 获取并输入验证码；③ 填新密码。没有「下一步」按钮，也不跳页。页面顶部常驻会话倒计时；第 3 步的密码表单在验证码通过前置灰不可填，通过后自动解锁", "err": "无任何可用验证方式 → 提示联系管理员", "copy": "请在 04:58 内完成全部操作"}, {"id": "M-PWD-003", "page": "忘记密码（单页）", "do": "选择验证方式（短信 / 邮箱 / 钉钉）", "ok": "同一位置切换输入项：手机号 / 邮箱地址 / 钉钉扫码。切换不清空已填内容、不重置倒计时", "err": "后台未配置的方式 → 该 tab 不展示", "copy": "短信验证 / 邮箱验证 / 钉钉验证"}, {"id": "M-PWD-004", "page": "忘记密码（单页）", "do": "点【获取验证码】", "ok": "就地弹出滑块防人机校验（不占独立一行、不弹新窗口）；拖动通过后才下发验证码，按钮随即进入 59 秒倒计时重发状态。验证码输入框与【获取验证码】按钮在同一行，框在左、按钮在右", "err": "滑块未拖到位 → 校验失败并重置滑块；验证码下发失败 → 提示重试，倒计时回退", "copy": "向右拖动滑块完成验证 / 验证码已发送 / 59s 后重发"}, {"id": "M-PWD-005", "page": "忘记密码（单页）", "do": "输入验证码", "ok": "校验通过 → 页面下半部分的新密码表单就地解锁（不跳页、不新增弹窗），光标自动聚焦到新密码框", "err": "验证码错误 / 已过期 → 分别提示；超时 → 提示操作已超时并提供【重新开始】", "copy": "验证码不正确 / 验证码已过期 / 操作已超时，请重新开始找回密码"}, {"id": "M-PWD-006", "page": "忘记密码（单页）", "do": "输入新密码", "ok": "输入时实时提示密码策略符合情况（未满足项逐条标红并说明原因，不是笼统提示）", "err": "不满足策略 / 两次输入不一致 → 提示具体是哪一项，「确认修改」置灰", "copy": "密码要求\n1. 长度为 8-20 个字符\n2. 至少包含数字、大写字母、小写字母、特殊字符中的 3 种\n3. 未使用弱口令（账号名、姓名拼音、生日、连续或重复数字等）"}, {"id": "M-PWD-007", "page": "忘记密码（单页）", "do": "点【确认修改】", "ok": "修改成功 → 提示并返回登录页，用户用新密码登录", "err": "与原密码相同 / 命中历史密码限制 → 提示", "copy": "密码修改成功，请使用新密码登录"}, {"id": "M-PWD-008", "page": "忘记密码（单页）", "do": "（页面展示）账号行预填值", "ok": "账号行的预填值按【本机绑定记录】里的那个统一身份账号返显（不是常量，也不是绑定页显示的「本机 macOS 账户名」—— 两者是两个字段） —— 绑定谁就返显谁，绑了 lisi 就显示 lisi 那一套，不写死。三项取该账号在 IAM 档案里已绑定的联系方式（脱敏展示，仍可编辑）。默认绑定 zhangsan 时：手机号 138****8888 / 邮箱 zhangsan@corp.com / 钉钉 zhangsan。档案里没有的账号，邮箱按「账号 + 企业域名」派生、钉钉用账号本身", "err": "手机号无法从账号名派生 → 留空，由用户自己填，不编造", "copy": "请输入手机号码 / 请输入邮箱地址 / 请输入钉钉账号"}, {"id": "M-PWD-009", "page": "忘记密码（单页）", "do": "选择【短信验证】渠道 / 点【获取验证码】", "ok": "手机号自动返显「本机已绑定的那个账号」档案中的手机号（绑定谁就返显谁）；返显值可编辑。点【获取验证码】前做格式校验：仅手机号渠道校验 11 位国内号，邮箱渠道与钉钉渠道不套用手机号规则。校验不通过则不下发验证码，提示「请输入正确的 11 位手机号码」。", "err": "手机号格式不符 → 不下发验证码并提示；档案中无该账号 → 输入框留空由用户填写", "copy": "请输入正确的 11 位手机号码"}]}, {"key": "auto", "node": "menubar", "title": "日常自动登录", "points": [{"id": "M-AUTO-001", "page": "菜单栏（后台）", "do": "macOS 登录成功（自动）", "ok": "E 登录 CS 程序随系统登录自启，读取本机已绑定的 IAM 账号", "err": "CS 未随系统启动 → 用户从菜单栏图标手动唤起", "copy": "无提示（全程静默）"}, {"id": "M-AUTO-002", "page": "菜单栏（后台）", "do": "系统自动（读取本地绑定关系）", "ok": "使用本地保存的凭证向 IAM 发起静默认证，不弹窗、不打断用户桌面", "err": "本地无绑定关系 → 转入首次绑定流程", "copy": "无提示（全程静默）"}, {"id": "M-AUTO-003", "page": "菜单栏（后台）", "do": "静默认证通过（自动）", "ok": "菜单栏图标切换为「已登录」态，IAM 会话建立，访问集成应用免登录", "err": "无", "copy": "无提示（全程静默）"}, {"id": "M-AUTO-004", "page": "登录窗口", "do": "静默认证失败（自动）", "ok": "自动弹出登录窗口，预填上次登录的账号，用户只需补凭证。失败原因不同，提示语与窗口标题也不同，让用户一眼知道该干什么", "err": "① 凭证失效 / 会话过期 → 标题「登录状态已失效」，副文案「为保障账号安全，请重新登录」；② 网络异常 → 标题「网络连接异常」，副文案「请检查网络后重试」，窗口内提供【重试】按钮；③ IAM 账号被锁定 → 标题「账号已被锁定」，副文案「请联系管理员解锁后再试」", "copy": "登录状态已失效，为保障账号安全，请重新登录 / 网络连接异常，请检查网络后重试 / 账号已被锁定，请联系管理员解锁后再试"}, {"id": "M-AUTO-005", "page": "登录窗口", "do": "OS 账号发生变更（自动）", "ok": "检测到当前 OS 账号与绑定关系不一致 → 弹出绑定引导窗口，要求重新完成绑定。原绑定关系仍在，新绑定成功后再覆盖（避免误操作把绑定弄丢）", "err": "无", "copy": "当前操作系统账号已变更，请重新关联统一身份账号"}]}, {"key": "login", "node": "loginagain", "title": "手动登录", "points": [{"id": "M-LOGIN-001", "page": "登录窗口", "do": "从菜单栏点【登录】", "ok": "弹出独立登录窗口（非全屏、非代填），展示上次使用的登录方式", "err": "已有会话 → 直接展示已登录状态，不重复登录", "copy": "请选择登录方式"}, {"id": "M-LOGIN-002", "page": "登录窗口", "do": "点【账密登录】", "ok": "表单切换为 账号 + 密码；账号与手机号共用输入框，按内容自动识别", "err": "留空提交 → 提示必填", "copy": "请输入统一身份账号 / 请输入密码"}, {"id": "M-LOGIN-003", "page": "登录窗口", "do": "点【扫码登录】", "ok": "表单切换为二维码，前端轮询扫码结果", "err": "二维码过期 → 自动刷新并提示", "copy": "扫码登录 / 二维码已过期"}, {"id": "M-LOGIN-004", "page": "登录窗口", "do": "点【短信登录】", "ok": "表单切换为 手机号 + 验证码；点【获取验证码】后进入倒计时", "err": "后台未配置短信认证 → 该入口不展示；号码格式错 / 验证码错 → 分别提示", "copy": "请输入手机号码 / 验证码不正确"}, {"id": "M-LOGIN-005", "page": "登录窗口", "do": "点【动态口令】", "ok": "表单切换为口令输入框", "err": "后台未配置 OTP → 该入口不展示；口令错误 → 提示剩余重试次数", "copy": "请输入动态口令 / 动态口令不正确"}, {"id": "M-LOGIN-006", "page": "二次验证页", "do": "首因素校验通过后，策略要求二次验证（自动）", "ok": "窗口内容**整页切换**为二次验证页（不是叠一层弹窗，也不是新开窗口）：顶部品牌区 + 标题「需要二次验证」+ 方式切换 + 验证区 + 主按钮 + 「返回上一级认证登录」。可用的方式由后台策略下发，且排掉与首因素相同的方式；首因素已是人脸 / 指纹时不再给生物识别，兜底至少给短信（方式集合永不为空）。人脸 / 指纹沿用同一套采集区，只做认证、不做录入", "err": "验证不通过 → 提示并留在本页，已填内容不清空；点「返回上一级」→ 本次二次验证作废，首因素结果同时失效，需重新完成首因素认证", "copy": "需要二次验证 / 为了保障您的账户安全，请完成二次验证 / 返回上一级认证登录"}, {"id": "M-LOGIN-007", "page": "登录窗口", "do": "认证全部通过（自动）", "ok": "窗口内提示登录成功 → 窗口自动关闭 → 菜单栏图标点亮为「已登录」态", "err": "密码错误 / 账号已被锁定 / 账号不存在 / 网络异常 → 分别提示，窗口保持打开", "copy": "登录成功 / 账号或密码错误 / 账号已被锁定"}, {"id": "M-LOGIN-008", "page": "登录窗口（人脸认证区）", "do": "点【人脸】", "ok": "整页切为人脸认证区（取景框 + 剪影 + 扫描线 + 三列提示），主按钮【开始人脸识别】→「识别中…」→【登录】", "err": "比对不通过 → 可重试；后台未开通 → 该 tab 不展示", "copy": "请将面部置于取景框内 / 开始人脸识别 / 识别中… / 登录"}, {"id": "M-LOGIN-009", "page": "登录窗口（指纹认证区）", "do": "点【指纹】", "ok": "整页切为指纹认证区（大号线稿 + 一句提示），主按钮【开始指纹校验】→「校验中…」→【登录】", "err": "校验不通过 → 可重试；后台未开通 → 该 tab 不展示", "copy": "请将手指放在 Touch ID 上 / 开始指纹校验 / 校验中… / 登录"}]}, {"key": "chpw", "node": "bind", "title": "修改密码", "points": [{"id": "M-CHPW-001", "page": "修改密码页", "do": "账号密码认证成功、账号比对通过后，服务端返回密码状态「初始密码」（自动）", "ok": "整页切到改密页：抬头「您好，XXX」回显本次通过认证的账号；副标题灰字「初始密码请修改后继续登录」；两个密码框 + 策略清单 +【确定】。**不设取消、不设跳过**", "err": "取不到账号 → 抬头降级只显示「您好」，不编造账号", "copy": "您好，XXX / 初始密码请修改后继续登录"}, {"id": "M-CHPW-002", "page": "修改密码页", "do": "账号密码认证成功、账号比对通过后，服务端返回「已过期」（自动）", "ok": "整页切到改密页：抬头「您好，XXX」，副标题灰字「登录密码已过期请重新设置」；**不设取消、不设跳过**", "err": "取不到账号 → 抬头降级只显示「您好」", "copy": "您好，XXX / 登录密码已过期请重新设置"}, {"id": "M-CHPW-003", "page": "修改密码页", "do": "账号密码认证成功、账号比对通过后，服务端返回「即将过期」及剩余天数 N（自动）", "ok": "整页切到改密页：抬头「您好，XXX」，副标题灰字「密码还有 N 天过期请及时修改」（N 加粗、与正文同字号同色，不放大不飘色）。N 取服务端返回值（原型默认 3 天），客户端不自己算。底部给【跳过，直接登录】", "err": "服务端未回 N → 按默认 3 天渲染，不卡住用户；N ≤ 0 按 1 处理；N > 90 按 90 封顶", "copy": "您好，XXX / 密码还有 3 天过期请及时修改 / 跳过，直接登录"}, {"id": "M-CHPW-004", "page": "修改密码页", "do": "在【新密码】输入框输入内容", "ok": "逐条实时判定，每条前的符号三态：未输入灰点 · / 已满足绿勾 ✓（#1D6B32）/ 不满足红叉 ✕（#A32620）。敲到第 8 位长度就该变绿，不用等提交", "err": "三条规则分别判定、分别标出，不合并成一句「格式不对」", "copy": "长度为 8-20 个字符 / 至少包含数字、大写字母、小写字母、特殊字符中的 3 类 / 不能使用弱口令（账号名、连续或重复数字等）"}, {"id": "M-CHPW-005", "page": "修改密码页", "do": "两次输入不一致", "ok": "提示「两次输入的密码不一致」，**两个框都不清空**，用户就地改", "err": "无", "copy": "两次输入的密码不一致"}, {"id": "M-CHPW-006", "page": "修改密码页", "do": "点【确定】但策略未满足", "ok": "列出**具体未满足项**并命中的那条保持红叉：长度不在 8-20 位之间 / 字符种类不足 3 类 / 命中了弱口令规则；留在本页，已输内容保留", "err": "拼一句「密码格式不正确：…」放在按钮上方，不用 toast 一闪而过", "copy": "密码格式不正确：长度不在 8-20 位之间；字符种类不足 3 类；命中了弱口令规则"}, {"id": "M-CHPW-007", "page": "修改密码页", "do": "点【确定】且三项全部合规", "ok": "新密码写入 IAM、旧密码立即失效；**不直接登录、不关窗口**，回到判定顺序继续判二次验证，账号密码不用再输一遍", "err": "服务端失败 → 提示重试，保留已输内容，不当作改密成功", "copy": "确定"}, {"id": "M-CHPW-008", "page": "修改密码页", "do": "点【跳过，直接登录】（仅「即将过期」分支有这一项）", "ok": "放弃本次改密，直接进入二次验证判定；密码状态保持「即将过期」，到期后会被强制改密", "err": "另外两支（初始 / 已过期）不显示该入口", "copy": "跳过，直接登录"}]}, {"key": "second", "node": "loginagain", "title": "二次验证", "points": [{"id": "M-SEC-001", "page": "二次验证页", "do": "首因素通过且后台策略要求二次验证（自动）", "ok": "窗口内容**整页切换**为二次验证页（不叠弹层、不新开窗口）：品牌区 + 标题「需要二次验证」+ 方式切换 + 验证区 + 主按钮 + 「返回上一级认证登录」", "err": "策略为关 → 不出现本页，直接收尾", "copy": "需要二次验证 / 为了保障您的账户安全，请完成二次验证"}, {"id": "M-SEC-002", "page": "二次验证页", "do": "（自动）计算可用方式集合", "ok": "后台开通集 ∩ 策略候选集；排除扫码（只能当首因素）；排除与首因素相同的方式；首因素为生物识别时不再给任何生物识别（人脸 + 指纹同属「你是谁」）。集合永不为空，兜底给短信", "err": "算出来为空 → 兜底短信，界面不出现「暂无可用方式」的空态", "copy": "—"}, {"id": "M-SEC-003", "page": "二次验证页", "do": "点其他方式的 tab", "ok": "同页切换验证区；已填内容按方式分别暂存，切回不丢", "err": "无", "copy": "短信 / 动态口令 / 人脸 / 指纹"}, {"id": "M-SEC-004", "page": "二次验证页", "do": "二次方式为短信", "ok": "带出该账号在 IAM 档案里的手机号（脱敏展示、可改）；【获取验证码】与输入框同一行，点击后 60 秒倒计时", "err": "号码格式不符 → 不下发并提示；验证码错误 / 过期 → 分别提示，框不清空", "copy": "请输入正确的 11 位手机号码 / 获取验证码 / 验证码不正确 / 验证码已过期"}, {"id": "M-SEC-005", "page": "二次验证页", "do": "二次方式为动态口令", "ok": "显示口令输入框，满位自动校验", "err": "口令错误 → 提示并保留在页，给出剩余重试次数", "copy": "请输入动态口令 / 动态口令不正确"}, {"id": "M-SEC-006", "page": "二次验证页", "do": "二次方式为人脸", "ok": "取景框 + 扫描线 + 三列提示（光线 / 取景框内 / 正视屏幕）；**一颗主按钮**：初始为【开始人脸识别】→ 点击后变「识别中…」→ 通过后变【验证】，不做两颗按钮。全程无「录入 / 绑定 / 首次采集」字眼", "err": "比对不通过 → 可重试，不自动降级到其他方式", "copy": "请将面部置于取景框内 / 保持光线充足 / 开始人脸识别 / 识别中… / 验证"}, {"id": "M-SEC-007", "page": "二次验证页", "do": "二次方式为指纹", "ok": "大号指纹线稿 + 一句提示；主按钮同样随状态变化：【开始指纹校验】→「校验中…」→【验证】", "err": "校验不通过 → 可重试", "copy": "请将手指放在 Touch ID 上 / 开始指纹校验 / 校验中… / 验证"}, {"id": "M-SEC-008", "page": "二次验证页", "do": "点【验证】且通过", "ok": "二次验证完成，继续原流程收尾（建立会话 / 写绑定记录），**不重走首因素**", "err": "无", "copy": "验证"}, {"id": "M-SEC-009", "page": "二次验证页", "do": "点【返回上一级认证登录】", "ok": "本次二次验证作废、**首因素结果同时失效**，回登录表单重新选方式（不是退回上一步的改密页）", "err": "无", "copy": "返回上一级认证登录"}, {"id": "M-SEC-010", "page": "二次验证页", "do": "点【验证】但未通过", "ok": "提示并留在本页，已填内容不清空，按钮恢复可点", "err": "连续失败达上限 → 按后台策略锁定，提示联系管理员", "copy": "验证不通过，请重试"}]}, {"key": "menu", "node": "panel", "title": "菜单栏常驻", "points": [{"id": "M-MENU-001", "page": "菜单栏图标", "do": "（系统自动）状态变化时", "ok": "两态：已登录（logo 原色正常显示）／未登录（黑色版图标 + 降透明度 35%）。不做「异常」态。已登录态需在代码里关闭 macOS 的 template image 渲染（setTemplate:NO）才能显示原色", "err": "无", "copy": "无（仅图标形态变化，不弹提示）"}, {"id": "M-MENU-002", "page": "菜单栏下拉面板", "do": "点菜单栏图标", "ok": "展开下拉面板（宽 320px）。顶部为只读绑定关系区：头像 +「您好，XXX」+「已绑定本机 · 设备名」+ 已登录 状态标。此区不可点击、不展开二级菜单，仅作信息展示。菜单项为「图标 + 文字 + 弹性留白 + 尾部角标」四栏，文字一律完整展示——不换行、不折行、不出现省略号；角标靠右对齐", "err": "取不到账号信息 → 降级只展示「已登录」", "copy": "您好，XXX / 已绑定本机"}, {"id": "M-MENU-003", "page": "菜单栏下拉面板", "do": "点面板内【访问应用门户】", "ok": "展开 IAM 集成应用入口列表，点击即以单点方式在浏览器打开。该入口显隐由后台开关统一控制：开关关闭时整个入口不展示", "err": "后台开关关闭 → 该入口不展示，面板只留「设置」「注销绑定账号」「退出登录」；已授权应用为空 → 提示暂无可用应用", "copy": "访问应用门户 / 暂无可用应用"}, {"id": "M-MENU-004", "page": "菜单栏下拉面板", "do": "点面板内【设置】", "ok": "打开设置窗口（独立窗口）：通用 / 登录后 / 关于三组", "err": "无", "copy": "设置"}, {"id": "M-MENU-005", "page": "菜单栏下拉面板", "do": "点面板内【注销绑定账号】", "ok": "直接进入注销确认流程（二次确认 + 身份验证），详见「注销绑定账号」流程。该行文字用常规色（非红色），仅图标保留红色描边作风险轻提示——因为注销有完整的二次确认 + 身份验证兜底，不需要再用整行飘红施压", "err": "无", "copy": "注销绑定账号"}, {"id": "M-MENU-006", "page": "菜单栏下拉面板", "do": "点面板内【退出登录】", "ok": "弹出二次确认，确认后清除 IAM 会话，图标转为「未登录」态并保留绑定关系。该行文字用常规色（非红色），因为退出完全可逆、随时可登回来，按 macOS 原生菜单规范红色只留给破坏性且不可逆的操作", "err": "取消 → 关闭确认框，保持已登录状态", "copy": "确定要退出登录吗？"}, {"id": "M-MENU-007", "page": "菜单栏下拉面板（未登录态）", "do": "点面板内的主行动按钮（自动按本机绑定记录分流）", "ok": "按「本机有没有绑定记录」展示不同去向：① 有绑定记录 → 按钮文案「登录统一身份」，点击进入登录页，可一键登录；② 无绑定记录（全新机器）→ 按钮文案「关联统一身份账号」，点击进入首次绑定引导页。绑定关系区同步区分：有记录显示「未登录 / 已绑定 XXX，可一键登录」，无记录显示「尚未关联 / 本机还没有关联统一身份账号」。", "err": "取不到绑定记录 → 按无记录处理，引导去绑定，不会进到登录页", "copy": "登录统一身份 / 关联统一身份账号 / 未登录 / 尚未关联"}]}, {"key": "set", "node": "settings", "title": "设置", "points": [{"id": "M-SET-001", "page": "菜单栏下拉面板", "do": "点面板内【设置】", "ok": "打开设置窗口（独立窗口，400 宽），带返回箭头回面板。页面按「通用 / 登录后 / 关于」三组排布，每行为「图标 + 标题 + 说明 + 右侧控件」", "err": "无", "copy": "设置"}, {"id": "M-SET-002", "page": "设置", "do": "切换语言（中文 / EN）", "ok": "分段控件直接切换，无需进二级页；切换后全界面文案跟随", "err": "无", "copy": "中文 / EN / 语言切换"}, {"id": "M-SET-003", "page": "设置", "do": "切换「开机自动启动」开关", "ok": "开启 → 登录 macOS 后自动运行 Elogon 并按绑定关系自动登录；关闭 → 下次开机需手动登录", "err": "关闭时给出明确后果提示，避免用户误以为解绑", "copy": "开机自动启动 / 已关闭开机自动登录，下次开机需手动登录统一身份。绑定关系仍保留。"}, {"id": "M-SET-004", "page": "设置", "do": "切换「自动打开应用门户」开关", "ok": "开启 → 登录成功后自动展开门户界面，无需手动点击；关闭 → 登录后不自动展开", "err": "后台未开放门户功能 → 该行不展示", "copy": "自动打开应用门户"}, {"id": "M-SET-005", "page": "设置", "do": "切换「登录成功后关闭窗口」开关", "ok": "开启 → 进入应用门户后自动收起客户端窗口，转为后台保持在线；关闭 → 窗口保持打开", "err": "关闭「自动打开应用门户」时，本项无意义 → 一并置灰", "copy": "登录成功后关闭窗口"}, {"id": "M-SET-006", "page": "设置", "do": "（页面展示）关于分组", "ok": "展示品牌 logo + 产品名 Elogon + 版本号 V1.8.4.2.021301；下方提供「检查更新」「用户协议」入口", "err": "有新版本 → 提示并可下载", "copy": "Elogon / V1.8.4.2.021301 / 检查更新 / 用户协议"}]}, {"key": "exit", "node": "loginagain", "title": "退出与切换", "points": [{"id": "M-EXIT-001", "page": "菜单栏下拉面板", "do": "点【退出登录】", "ok": "弹出二次确认弹窗，说明退出后需重新登录，但绑定关系保留", "err": "无", "copy": "确定要退出登录吗？退出后需重新登录，绑定关系将保留"}, {"id": "M-EXIT-002", "page": "确认弹窗", "do": "点【取消】", "ok": "关闭弹窗，保持当前登录态，不产生任何会话变更", "err": "无", "copy": "取消"}, {"id": "M-EXIT-003", "page": "确认弹窗", "do": "点【确定】", "ok": "清除 IAM 会话与浏览器侧单点状态，窗口切为「未登录」态", "err": "网络异常导致服务端会话未清除 → 本次退出仅清本地，下次登录强制重新认证", "copy": "已退出登录"}, {"id": "M-EXIT-004", "page": "退出后登录页", "do": "（页面展示）", "ok": "页面上部以标题回显当前用户「您好，XXX」（不另配副标题）；下方直接承接认证方式表单（默认账密），不额外列入口按钮。顶部展示品牌 logo", "err": "取不到用户名 → 降级只展示「您好」，不展示账号", "copy": "您好，XXX"}, {"id": "M-EXIT-005", "page": "退出后登录页", "do": "默认展示认证方式表单", "ok": "沿用该用户上次使用的登录方式；可切换到扫码 / 短信 / 动态口令", "err": "无", "copy": "请输入统一身份账号 / 请输入密码"}, {"id": "M-EXIT-006", "page": "退出后登录页", "do": "直接提交认证（自动）", "ok": "判定拆两层：① 凭据认证 —— 账号密码对不对，由 IAM 服务端回答；② 账号比对 —— 凭据对了，再看是不是本机绑定的那个账号。两层都通过 → 复用当前绑定关系直接登录，窗口关闭回到菜单栏已登录态，可反复登录", "err": "①层失败 → 只报凭据错误，绝不透露本机绑定了谁；②层失败 → 提示「登录失败，本机已绑定账号：XXX」，同时开放自助解绑（见 M-EXIT-008）", "copy": "登录成功 / 账号或密码错误 / 登录失败，本机已绑定账号：zhangsan"}, {"id": "M-EXIT-007", "page": "退出后登录页", "do": "（页面展示）认证失败态", "ok": "账号框与密码框一并标红（对齐 macOS 原生登录失败表现），下方出现错误条告知本机绑定的是谁；底部「注销绑定账号」入口仅在此态出现，与「忘记密码」同行、排在它左侧。正常退出后（用户自己退出、准备重新登录）不出现该入口", "err": "用户修改账号输入 → 失败提示自动撤掉（错误条 + 红框 + 解绑入口一并消失），回到正常态", "copy": "登录失败，本机已绑定账号：XXX（读本机绑定记录，绑谁报谁） / 注销绑定账号"}, {"id": "M-EXIT-008", "page": "退出后登录页（认证失败态）", "do": "点底部【注销绑定账号】", "ok": "进入解绑二次确认弹窗，告知本机绑定的是哪个账号、以及「你已通过统一身份认证」，注销后可直接重新关联自己的账号。确认后直接解绑（不再验密码），回到绑定引导窗口。这条路径专治「原绑定用户离职」的死锁：来者已用真实凭据通过 IAM 认证，原用户密码此时拿不到，若再要求验原密码等于没解", "err": "取消 → 关闭弹窗，仍停在退出后登录页，绑定关系与已退出状态都不变；服务端解除失败 → 提示重试，本地绑定关系不先行清除", "copy": "确定要注销绑定账号吗？/ 本机当前绑定的是「XXX」。你已通过统一身份认证，注销后绑定关系将解除，可直接重新关联你自己的账号。"}, {"id": "M-EXIT-009", "page": "退出后登录页（认证失败态）", "do": "（系统行为）渲染失败提示", "ok": "「本机已绑定账号」的值取自【本机绑定记录】，不是常量、也不是绑定页显示的 macOS 账户名。绑定记录为空时不提示、也不做账号比对 —— 没有记录可比，不凭空拦人。记录里的账号与「本机 macOS 账户名」是两个字段：设备转交后会分离（新员工用的是自己的 macOS 账户，记录里仍是原员工的 IAM 账号），这条分离正是「原绑定用户离职」死锁成立的前提。", "err": "读不到绑定记录 → 视为未绑定，走首次绑定流程，不做账号比对。（不得用任何写死的默认账号兜底 —— 那会谎报本机绑定了谁。）", "copy": "登录失败，本机已绑定账号：XXX"}]}, {"key": "cancel", "node": "cancel", "title": "注销绑定账号", "points": [{"id": "M-CANCEL-001", "page": "菜单栏下拉面板 / 退出后登录页", "do": "找到注销入口（两处）", "ok": "注销绑定账号共两处入口，都是「一级可见、一次点击直达」：① 菜单栏下拉面板一级（已登录态，平铺、不藏二级菜单）；② 退出后登录页底部「注销绑定账号」—— 仅认证失败态出现，即「凭据已通过 IAM 认证、但账号不是本机绑定的那个」。两处进入的是同一套解绑动作，不各做一套，差异只在验证门槛（见 M-CANCEL-004）", "err": "无", "copy": "注销绑定账号"}, {"id": "M-CANCEL-002", "page": "注销确认弹窗", "do": "点【注销绑定账号】", "ok": "弹出注销确认弹窗，明确告知将解除本机账号与统一身份账号的绑定关系，并说明后果：后续需重新绑定才能自动登录。注销不需要管理员审批", "err": "无", "copy": "注销后，本机账号与统一身份账号的绑定关系将解除，需重新绑定后才能自动登录"}, {"id": "M-CANCEL-003", "page": "注销确认弹窗", "do": "点【取消】", "ok": "关闭弹窗，保持当前绑定关系与登录态不变", "err": "无", "copy": "取消"}, {"id": "M-CANCEL-004", "page": "注销确认弹窗 / 身份验证", "do": "点【确认注销】", "ok": "按路径分两种 —— A 已登录态（菜单栏面板入口）：先要求输入当前 IAM 账号密码验证身份，通过后解绑；二次验证是为了防止他人趁用户离开电脑时误注销。B 认证失败态（登录页入口）：不重复验证，确认即解绑 —— 来者已在登录页用真实凭据通过 IAM 认证，证明是合法员工，只是不是本机绑定的那位", "err": "A 路径密码错误 → 提示并保留在验证步骤；B 路径取消 → 回到退出后登录页", "copy": "请输入当前账号密码以确认注销 / 账号或密码错误"}, {"id": "M-CANCEL-005", "page": "注销确认弹窗", "do": "身份验证通过（自动）", "ok": "解除绑定关系、清除本地凭证与 IAM 会话，回到绑定引导窗口，等待用户重新绑定。A、B 两条路径结果一致；都不向本人发送注销通知（已裁定），靠操作日志与服务端记录事后追查", "err": "服务端解除失败 → 提示重试，本地绑定关系不先行清除", "copy": "注销成功，请重新绑定账号"}, {"id": "M-CANCEL-006", "page": "绑定引导窗口", "do": "（自动）从注销流程返回", "ok": "展示空白的绑定引导窗口（无预填账号），走一遍完整绑定流程。采用「先注销再重绑」而不是「直接换绑」，是为了守住 OS 账号 ↔ IAM 账号的 1:1 关系：任一时刻本机 OS 账号只对应一个 IAM 账号，系统才能凭 OS 账号唯一定位到该自动登录哪个 IAM 账号", "err": "无", "copy": "关联统一身份账号"}, {"id": "M-CANCEL-007", "page": "菜单栏下拉面板", "do": "（页面展示）注销入口的层级", "ok": "注销绑定账号直接平铺在菜单栏面板一级列表，与「设置」「退出登录」同级；顶部绑定关系区为只读展示，不承载任何点击行为，不做二级菜单", "err": "无", "copy": "注销绑定账号"}, {"id": "M-CANCEL-008", "page": "注销绑定账号（方案论证）", "do": "（设计裁定）认证失败态用什么验证身份", "ok": "不用 macOS 系统密码验证 —— macOS 上客户端拿不到也验证不了系统密码：LocalAuthentication 只返回布尔结果，且弹的是系统自己的认证面板；Authorization Services 是申请特权操作，同样不向 App 暴露密码。在自家弹窗里放「请输入系统密码」再本地校验，技术上落不了地。验证对象改为由 IAM 回答「你是谁」—— 与来者那次登录提交合并，不额外增加步骤。备选（已否决）：唤起 macOS 原生授权框 / 仅强二次确认 / 走 IT 审批", "err": "无", "copy": "—"}, {"id": "M-CANCEL-009", "page": "注销绑定账号", "do": "（系统自动）解绑成功后", "ok": "清空【本机绑定记录】—— 这是「本机已绑定账号」的唯一清空点。清空后回到绑定引导窗口，可重新关联任意统一身份账号；此时退出后登录页不再做账号比对。注意「退出登录」只清 IAM 会话、【不动】绑定记录 —— 这正是「退出」与「注销」的分界线。", "err": "服务端解除失败 → 提示重试，【本地绑定记录不先行清除】，避免出现「本地以为解绑了、服务端还绑着」的不一致。", "copy": "注销成功 / 绑定关系已解除，请重新关联账号 / 去关联"}]}, {"key": "net", "node": "menubar", "title": "网络状态提示", "points": [{"id": "M-NET-001", "page": "全局（所有需要联网的页面）", "do": "网络正常", "ok": "不展示任何提示条。页面布局不为其预留占位，避免正常态下白白占一行高度", "err": "无", "copy": "无提示（正常态静默）"}, {"id": "M-NET-002", "page": "全局", "do": "网络较弱（自动检测）", "ok": "窗口顶部通栏浮出一条浅黄提示条：「当前网络较弱，操作可能较慢」，不遮挡内容、不弹窗。恢复后自动消失（约 2 秒）。此时提交类按钮仍可点击", "err": "持续弱网 → 提示条常驻不自动消失", "copy": "当前网络较弱，操作可能较慢"}, {"id": "M-NET-003", "page": "全局", "do": "网络断开（自动检测）", "ok": "窗口顶部通栏浮出浅红提示条：「网络已断开，请检查网络连接」，并提供【重试】按钮。同时禁用所有提交类按钮（获取验证码 / 绑定登录 / 确认修改 / 登录），但不清空用户已填内容，恢复联网后按钮自动恢复可点", "err": "无", "copy": "网络已断开，请检查网络连接 / 重试"}, {"id": "M-NET-004", "page": "全局", "do": "网络重连中（自动检测）", "ok": "顶部提示条换成浅蓝：「正在重新连接…」，接口失败重连时同样复用此条。位置与其余三态一致", "err": "多次重连失败 → 转为「网络已断开」态，给出【重试】", "copy": "正在重新连接…"}, {"id": "M-NET-005", "page": "全局", "do": "网络恢复（自动检测）", "ok": "短暂展示浅绿提示条：「网络已恢复」，约 2 秒后自动消失，不打断用户当前操作", "err": "无", "copy": "网络已恢复"}, {"id": "M-NET-006", "page": "全局", "do": "四种状态的位置与视觉规则", "ok": "位置：统一做成<b>窗口顶部通栏贴边条</b>（紧贴标题栏下方、内容区之上），不占内容区布局、不参与滚动，不放在错误提示的位置。因为网络是环境状态（全局），账号密码错误是操作结果（局部），两者不能混在同一个位置，否则用户会误以为错误提示是网络导致的。颜色：较弱 #FFF4E5 底 / #8A4B00 字；断开 #FFEDEC 底 / #A32620 字；重连 #EAF3FF 底 / #0C447C 字；恢复 #EAF9EE 底 / #1D6B32 字。同一时刻只展示一条，按「断开 > 重连 > 较弱 > 恢复」优先级取最高", "err": "无", "copy": "当前网络较弱，操作可能较慢 / 网络已断开，请检查网络连接 / 正在重新连接… / 网络已恢复"}], "tip": "这是菜单栏图标常驻态：桌面上本来就没有窗口，网络提示条固定显示在屏幕顶部。可在原型右上角切换网络状态观看四态。"}];
+
+/* 多个分组可能落在同一个节点（如「手动登录」与「退出与切换」都在退出后登录页；
+   「日常自动登录」与「网络状态提示」都在菜单栏常驻）。
+   这时左侧画面看起来"没变"，容易让人以为点漏了 ——
+   下面给共享节点的分组算一个「落在哪」的说明，显示在标题旁。 */
+(function(){
+  var byNode = {};
+  GROUPS.forEach(function(g){ if(g.node){ (byNode[g.node]=byNode[g.node]||[]).push(g.title); } });
+  GROUPS.forEach(function(g){
+    if(g.node && byNode[g.node].length>1) g.shared = byNode[g.node].length;
+  });
+})();
+
+/* 把 node 为空的补上兜底说明 */
+GROUPS.forEach(function(g){
+  if(!g.node) g.noNode = true;
+});
+
+var elList  = document.getElementById('flist');
+var elBody  = document.getElementById('sideBody');
+var elFrame = document.getElementById('frame');
+var elCurN  = document.getElementById('curName');
+var elCurI  = document.getElementById('curId');
+var cur = -1;
+var curNode = null;      /* 当前 iframe 已加载的节点，避免同节点重复重载 */
+var allOpen = false;
+/* v1.0.14：index 跳过来时会带 ?node=xxx，开门就落在对应流程 ——
+   不让「首次绑定」先闪一下再跳走。 */
+var bootNode = new URLSearchParams(location.search).get('node');
+
+/* ---- 渲染左侧过滤器 ---- */
+function renderList(){
+  elList.innerHTML = GROUPS.map(function(g,i){
+    return '<button class="fbtn'+(i===cur?' on':'')+'" data-i="'+i+'">'+
+             g.title+'<span class="n">'+g.count+'</span></button>';
+  }).join('');
+}
+
+/* ---- 渲染右侧全部功能块 ---- */
+function renderBody(){
+  elBody.innerHTML = GROUPS.map(function(g,gi){
+    var items = g.points.map(function(p,pi){
+      var rows = '';
+      rows += '<div class="row"><span class="k">交互 ID</span>'+
+              '<span class="v mono">'+p.id+'</span></div>';
+      if(p.page) rows += '<div class="row"><span class="k">所在页面</span>'+
+              '<span class="v">'+p.page+'</span></div>';
+      if(p.do)   rows += '<div class="row"><span class="k">触发</span>'+
+              '<span class="v q">'+p.do+'</span></div>';
+      if(p.ok)   rows += '<div class="row"><span class="k">预期结果</span>'+
+              '<span class="v"><span class="ok">✓</span> '+p.ok+'</span></div>';
+      if(p.err && p.err!=='无') rows += '<div class="row"><span class="k">异常处理</span>'+
+              '<span class="v"><span class="er">!</span> '+p.err+'</span></div>';
+      if(p.copy) rows += '<div class="row"><span class="k">提示语</span>'+
+              '<span class="v mono">「'+p.copy+'」</span></div>';
+      return '<div class="pt" data-g="'+gi+'" data-p="'+pi+'"'+
+               (p.node ? ' data-node="'+p.node+'"' : '')+'>'+
+               '<div class="pt-h"><span class="arw">▶</span><div class="tx">'+
+                 '<span class="id">'+p.id+'</span>'+
+                 (p.node ? '<span class="jn">看效果</span>' : '')+
+                 '<div class="do">'+p.do+'</div>'+
+               '</div></div>'+
+               '<div class="pt-b">'+rows+'</div>'+
+             '</div>';
+    }).join('');
+
+    var note = g.tip
+      ? '<div class="note"><b>先说明一下左侧画面</b>：'+g.tip+'</div>'
+      : (g.noNode
+        ? '<div class="note"><b>这一组是全局行为</b>，不绑定单一界面 —— '+
+          '左侧原型里可在任意页面手动切换网络状态来复现（全局轻提示条）。</div>'
+        : '');
+
+    return '<div class="grp" data-gi="'+gi+'">'+
+             '<div class="grp-h"><span class="arw">▶</span>'+
+               '<span class="nm">'+g.title+'</span>'+
+               '<span class="ct">'+g.count+' 点</span></div>'+
+             '<div class="grp-b">'+note+items+'</div>'+
+           '</div>';
+  }).join('');
+}
+
+/* ---- 切到某个分组 ---- */
+function select(gi, silent){
+  cur = gi;
+  var g = GROUPS[gi];
+  renderList();
+
+  /* 右侧：展开该组、收起其余 */
+  [].slice.call(elBody.querySelectorAll('.grp')).forEach(function(el,i){
+    el.classList.toggle('open', i===gi);
+  });
+  elCurN.textContent = g.title;
+  elCurI.textContent = g.points.length
+    ? (g.points[0].id+' ~ '+g.points[g.points.length-1].id +
+       (g.shared ? ' · 与同类流程共用界面' : ''))
+    : '';
+  /* 左侧：iframe 切节点。
+     silent=true 表示「右栏跟着走，但别再动左边」—— 用户在 iframe 里点轨道
+     跳到设置页时，左边已经是那一页了，再 load 一次只会把原型状态重置。 */
+  if(g.node){
+    if(!silent) load(g.node);
+  }else{
+    /* 没有专属节点：把左侧标题改成中性文案，避免出现
+       「标题写着 A、画面停在 B」的错位（真实发现的 bug）。
+       画面保持在当前节点不动 —— 网络状态是全局面板，任意页面都能切。 */
+    elCurN.textContent = g.title;
+    elCurI.textContent = '全局面板 · 见右侧说明';
+    elBody.querySelector('.grp[data-gi="'+gi+'"]')
+      .scrollIntoView({block:'start', behavior:'smooth'});
+    return;
+  }
+  /* 滚到该组 */
+  setTimeout(function(){
+    var el = elBody.querySelector('.grp[data-gi="'+gi+'"]');
+    if(el) el.scrollIntoView({block:'start', behavior:'smooth'});
+  }, 60);
+}
+
+function load(node){
+  /* 同一个节点不重复重载 —— 多个分组可能落在同一界面
+     （手动登录 / 退出与切换 都在退出后登录页；日常自动登录 / 网络状态 都在菜单栏常驻）。
+     重复重载会把原型状态重置，研发刚点的东西就没了。 */
+  if(node === curNode){
+    return;
+  }
+  curNode = node;
+  /* 换 src 比 postMessage 稳（file:// 下也能用）；先置 about:blank 避免历史记录堆积 */
+  /* rail=1：左侧保持流程轨道展开 —— 漏了它，点一次条目轨道就没了。 */
+  var base = 'index.html?embed=1&rail=1&node=' + encodeURIComponent(node);
+  elFrame.src = 'about:blank';
+  setTimeout(function(){ elFrame.src = base; }, 30);
+}
+
+/* ---- 事件 ---- */
+elList.addEventListener('click', function(e){
+  var b = e.target.closest('.fbtn');
+  if(!b) return;
+  select(+b.dataset.i);
+});
+
+elBody.addEventListener('click', function(e){
+  var h = e.target.closest('.grp-h');
+  if(h){ h.parentNode.classList.toggle('open'); return; }
+  var ph = e.target.closest('.pt-h');
+  if(ph){
+    var pt = ph.parentNode;
+    pt.classList.toggle('open');
+    /* 该条目若指定了自己的落点（同一界面的另一种状态），点它就切过去 ——
+       分组级 node 给的是「典型状态」，个别条目要的是「另一种状态」，
+       不切的话研发按说明去比对，左侧画面却对不上。 */
+    var n = pt.getAttribute('data-node');
+    if(n){
+      load(n);
+      elCurI.textContent = '正在看：' + (GROUPS[+pt.dataset.g].points[+pt.dataset.p].id);
+    }
+  }
+});
+
+document.getElementById('btnReload').addEventListener('click', function(){
+  /* 强制重载：清掉 curNode 记忆，否则 load() 会认为「已在当前节点」而跳过 */
+  curNode = null;
+  load(GROUPS[cur] && GROUPS[cur].node ? GROUPS[cur].node : 'bind');
+});
+
+document.getElementById('btnOpen').addEventListener('click', function(){
+  var node = GROUPS[cur] && GROUPS[cur].node ? GROUPS[cur].node : 'bind';
+  window.open('index.html?node='+encodeURIComponent(node), '_blank');
+});
+
+/* ---- 回 index（v1.0.14）----
+   index 没有说明栏，开场画面完全由 ?node= 决定 —— 所以回程必须带上落点，
+   否则从设置页回去又被扔回「首次绑定」。 */
+document.getElementById('btnBack').addEventListener('click', function(){
+  location.href = 'index.html' + (curNode ? '?node=' + encodeURIComponent(curNode) : '');
+});
+
+/* ---- 跟着原型里的轨道走（v1.0.14）----
+   左侧嵌的是同一个联动原型，用户完全可以直接点里面的流程轨道。
+   原型每次换页会往外推一条 { t:'e-login-view', node:<视图名>, name:<中文名> }。
+   不接这条消息的话，会出现「左边已经切到设置、右边还停在首次绑定」——
+   看说明的人会以为是自己点漏了。
+   （file:// 下外层读不到 iframe 的 location，只能由里往外推。） */
+window.addEventListener('message', function(e){
+  var d = e.data;
+  if(!d || d.t !== 'e-login-view' || !d.node) return;
+  /* 记住落点：重载 / 新标签打开 / 回 index 都要用它 */
+  curNode = d.node;
+  /* 右栏跟着走：找落在同一节点的分组（多个分组共用一个界面时取第一个） */
+  var gi = -1;
+  for(var i=0;i<GROUPS.length;i++){ if(GROUPS[i].node === d.node){ gi = i; break; } }
+  if(gi >= 0){
+    if(gi !== cur) select(gi, true);
+  }
+  /* 落在 11 条流程之外时**什么都不做**。
+     原型里的视图比这 9 条多（退出成功页、注销过程的几步、无绑定记录的未登录面板……），
+     这些界面本来就没有说明条目，硬切一个"最近的分组"只会让人对错号。
+     另外这里也不能去改标题 —— 条目级的落点（如 M-MENU-007 的 panel-off-new）
+     刚把标题写成「正在看：M-MENU-007」，一改就把它冲掉了。 */
+});
+
+document.getElementById('btnFs').addEventListener('click', function(){
+  document.body.classList.toggle('fs');
+  this.textContent = document.body.classList.contains('fs')
+    ? '退出全屏' : '全屏原型';
+});
+document.addEventListener('keydown', function(e){
+  if(e.key==='Escape' && document.body.classList.contains('fs')){
+    document.body.classList.remove('fs');
+    document.getElementById('btnFs').textContent = '全屏原型';
+  }
+});
+
+document.getElementById('btnFold').addEventListener('click', function(){
+  allOpen = !allOpen;
+  [].slice.call(elBody.querySelectorAll('.pt')).forEach(function(el){
+    el.classList.toggle('open', allOpen);
+  });
+  this.textContent = allOpen ? '收起全部说明' : '展开全部说明';
+});
+
+/* ---- 启动 ---- */
+renderList();
+renderBody();
+/* ?node= 直达：找到落在该节点的分组（同一界面多个分组时取第一个）。
+   找不到就退回第一条，行为与之前一致。 */
+var bootGi = 0;
+if(bootNode){
+  for(var bi=0; bi<GROUPS.length; bi++){
+    if(GROUPS[bi].node === bootNode){ bootGi = bi; break; }
+  }
+}
+select(bootGi);
+</script>
+
+</body>
+</html>

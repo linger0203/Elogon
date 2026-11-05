@@ -1,0 +1,3916 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-page-node-id="0ySDD5JOKCLpW8800wLTI0">
+<head data-page-node-id="HeRHnyAM6x0xGCpMHjO3sJ">
+<meta charset="UTF-8" data-page-node-id="hWzMRwnp6ECC1E8USPmqa5">
+<title>E 登录 Mac 版 · 联动原型</title>
+<style>
+:root{
+  --brand:#007AFF; --brand-hover:#0069DB; --brand-press:#0059BC;
+  --brand-soft:#EAF3FF; --brand-mid:#B3D7FF;
+  --bg-page:#F4F5F7; --bg-card:#FFFFFF; --bg-field:#F7F8FA; --bg-hover:#F0F1F4;
+  --border-card:#E8EAED; --border-field:#DDE0E4;
+  --text-1:#1A1D21; --text-2:#6B7280; --text-3:#9CA3AF; --text-on:#FFFFFF;
+  --success:#34C759; --success-soft:#EAF9EE;
+  --warning:#FF9500; --warning-soft:#FFF4E5;
+  --danger:#FF3B30; --danger-soft:#FFEDEC;
+  --r-card:16px; --r-field:10px; --r-btn:10px; --r-tag:8px; --r-win:12px;
+  --h-field:34px; --h-btn:34px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:-apple-system,"SF Pro Text","PingFang SC","Helvetica Neue",Arial,sans-serif;
+  background:#DDE3EA; color:var(--text-1); font-size:13px; line-height:1.6;
+  -webkit-font-smoothing:antialiased; overflow:hidden;
+}
+
+/* ============ 整体布局：桌面 + 右侧流程轨道 ============ */
+.shell{display:flex;height:100vh}
+
+/* ---- 桌面区 ---- */
+.desk-wrap{flex:1;display:flex;flex-direction:column;min-width:0;
+  background:linear-gradient(160deg,#8FA8C8 0%,#6E8BB0 40%,#4E6B92 100%);
+  position:relative;overflow:hidden}
+.desk-wrap::before{
+  content:"";position:absolute;inset:0;
+  background-image:
+    radial-gradient(circle at 18% 22%,rgba(255,255,255,.20) 0%,transparent 42%),
+    radial-gradient(circle at 76% 74%,rgba(255,255,255,.13) 0%,transparent 46%);
+  pointer-events:none}
+
+/* ---- macOS 顶部菜单栏 ---- */
+.menubar{
+  height:26px;flex:0 0 auto;display:flex;align-items:center;
+  padding:0 12px;gap:16px;font-size:11.5px;color:#1A1D21;
+  background:rgba(255,255,255,.62);backdrop-filter:blur(20px);
+  border-bottom:.5px solid rgba(0,0,0,.07);position:relative;z-index:30}
+.menubar .left{display:flex;gap:15px;align-items:center}
+.menubar .right{margin-left:auto;display:flex;gap:13px;align-items:center}
+.menubar .apple{font-size:13px;line-height:1}
+.mb-app{display:flex;align-items:center;gap:4px}
+.mb-app img{width:14px;height:14px;display:block}
+
+/* ---- 桌面工作区 ---- */
+.desk{flex:1;position:relative;overflow:hidden;box-sizing:border-box;
+  display:flex;align-items:center;justify-content:center;
+  padding:14px 14px 58px}
+
+/* ============ 窗口通用 ============ */
+.win{
+  width:400px;background:var(--bg-card);
+  border:.5px solid rgba(0,0,0,.10);border-radius:var(--r-win);
+  box-shadow:0 12px 40px rgba(0,0,0,.24),0 2px 8px rgba(0,0,0,.12);
+  display:flex;flex-direction:column;overflow:hidden;
+  position:relative;flex:0 1 auto;
+  height:auto;max-height:100%;max-width:100%;
+  animation:winIn .22s cubic-bezier(.32,.72,0,1)}
+@keyframes winIn{from{opacity:0;transform:translateY(6px) scale(.98)}
+  to{opacity:1;transform:translateY(0) scale(1)}}
+.titlebar{
+  height:36px;flex:0 0 auto;display:flex;align-items:center;
+  padding:0 12px;background:#F6F7F9;border-bottom:.5px solid var(--border-card)}
+.lights{display:flex;gap:7px}
+.lights i{width:11px;height:11px;border-radius:50%;display:block;cursor:pointer;
+  position:relative;transition:filter .12s ease}
+.lights i:hover{filter:brightness(.88)}
+.lights i:active{filter:brightness(.76)}
+/* 窗口关闭 / 最小化动画 */
+.win.closing{animation:winOut .16s ease forwards}
+@keyframes winOut{to{opacity:0;transform:scale(.96)}}
+.win.minishing{animation:winMin .22s cubic-bezier(.4,0,1,1) forwards}
+@keyframes winMin{to{opacity:0;transform:translateY(140px) scale(.5)}}
+/* 窗口最大化：铺满桌面工作区 */
+.win.maxed{width:100% !important;max-width:100% !important;
+  height:calc(100% - 8px) !important;max-height:calc(100% - 8px) !important}
+/* 最大化时内容居中，避免表单被无限拉伸 */
+.win.maxed .body{justify-content:center}
+/* 桌面空白提示 */
+.deskblank-tip{display:flex;flex-direction:column;align-items:center;gap:10px;
+  text-align:center;padding:26px 30px;border-radius:var(--r-win);
+  overflow:hidden;
+  background:rgba(255,255,255,.52);backdrop-filter:blur(18px);
+  border:.5px solid rgba(255,255,255,.60);box-shadow:0 8px 28px rgba(0,0,0,.14)}
+.deskblank-tip .dbt{font-size:13.5px;font-weight:500;color:var(--text-1)}
+.deskblank-tip .dbs{font-size:11.5px;color:var(--text-2);line-height:1.55;max-width:220px}
+.deskblank-tip .btn{margin-top:2px}
+.lights i:nth-child(1){background:#FF5F57}
+.lights i:nth-child(2){background:#FEBC2E}
+.lights i:nth-child(3){background:#28C840}
+.titlebar .t{flex:1;text-align:center;font-size:11.5px;color:var(--text-2);margin-right:44px}
+.body{padding:18px 24px 18px;display:flex;flex-direction:column;gap:12px;
+  overflow-y:auto;overflow-x:hidden;flex:1 1 auto;min-height:0}
+.body.no-scroll{overflow-y:hidden}
+.body::-webkit-scrollbar{width:8px}
+.body::-webkit-scrollbar-thumb{background:rgba(0,0,0,.16);border-radius:4px}
+.body::-webkit-scrollbar-track{background:transparent}
+
+/* ============ 网络提示条：窗口顶部通栏 ============ */
+.netbar{
+  display:flex;align-items:center;justify-content:center;gap:7px;
+  padding:8px 14px;font-size:11.5px;line-height:1.4;flex:0 0 auto;
+  animation:netIn .2s ease}
+@keyframes netIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.netbar svg{flex:0 0 auto}
+.net-weak{background:var(--warning-soft);color:#8A4B00}
+.net-off{background:var(--danger-soft);color:#A32620}
+.net-re{background:var(--brand-soft);color:#0C447C}
+.net-ok{background:var(--success-soft);color:#1D6B32}
+.netbar .retry{
+  margin-left:6px;font-size:11px;color:#A32620;text-decoration:underline;
+  cursor:pointer;background:none;border:none;font-family:inherit;padding:0}
+
+/* ============ 品牌区 ============ */
+.brand{display:flex;flex-direction:column;align-items:center;gap:9px;text-align:center;flex:0 0 auto}
+.brand.row{flex-direction:row;align-items:center;text-align:left;gap:11px}
+.brand img{display:block;flex:0 0 auto}
+.brand h1{font-size:17px;font-weight:600;letter-spacing:-.35px;line-height:1.3}
+.brand p{font-size:12px;color:var(--text-3);line-height:1.5;margin-top:-2px}
+.brand .txt{display:flex;flex-direction:column;justify-content:center;min-width:0}
+.brand .txt h1{white-space:nowrap}
+/* 简洁版：logo 圆角底座（参考「首次登录」样式） */
+.brand .logo-box{width:64px;height:64px;border-radius:16px;
+  display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(180deg,#FAFCFB 0%,#EDF3F1 100%);
+  border:.5px solid rgba(0,0,0,.055);
+  box-shadow:0 1px 2px rgba(0,0,0,.035),0 5px 14px rgba(0,0,0,.055)}
+.brand .logo-box img{width:42px;height:42px}
+
+/* ============ 分段标签（登录方式） ============
+   v1.0.16：认证方式从 4 种扩到 6 种（加人脸、指纹）。
+   原来用文字标签「账密登录 / 扫码登录 / 短信登录 / 动态口令」，4 格时每格 88px 够用；
+   6 格只剩 58px，四个字放不下。改成「图标 + 两字标签」的竖排格：
+   格宽由 grid-auto-columns:1fr 均分，后台只配 2 种时两格各占一半、居中，
+   不会留空格 —— 数量由渲染层决定，样式不写死列数。 */
+.tabs{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:3px;
+  background:var(--bg-field);padding:3px;border-radius:var(--r-field)}
+.tabs button{
+  height:27px;border:none;background:transparent;border-radius:7px;
+  font-size:11px;font-family:inherit;color:var(--text-2);cursor:pointer;
+  transition:background .12s ease,color .12s ease;white-space:nowrap;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
+  line-height:1;padding:0}
+.tabs button svg{width:13px;height:13px;display:block}
+.tabs button:hover{color:var(--text-1)}
+.tabs button.on{background:#fff;color:var(--brand);font-weight:500;
+  box-shadow:0 1px 2px rgba(0,0,0,.07)}
+
+/* ============ 生物识别采集区（人脸 / 指纹） ============
+   样式对齐沁给的参考图：大圆形取景框 + 人像剪影 + 扫描线 +
+   三列提示（保持光线充足 / 脸在取景框内 / 面部正对屏幕）+ 大按钮。
+   指纹则是大号蓝色线稿 + 一句提示，不套取景框。
+
+   ★ 口径（沁 2026-11-05 确认）：人脸与指纹的**录入 / 绑定不在本客户端做**，
+   用户在企业侧已具备这两项能力，客户端拿到的只是「能否比对通过」。
+   所以界面上不出现任何「录入」「绑定」「首次采集」的入口与文案。 */
+.bio2{display:flex;flex-direction:column;align-items:center;gap:8px;
+  padding:8px 0 2px}
+.maskwrap{width:118px;height:118px;border-radius:50%;position:relative;
+  background:linear-gradient(180deg,#EAF3FF 0%,#F7FBFF 100%);
+  border:3px solid #BBD6FA;display:flex;align-items:flex-end;justify-content:center;
+  overflow:hidden;transition:border-color .18s ease,background .18s ease}
+.maskwrap .psn{display:block;flex:0 0 auto;transition:opacity .18s ease}
+.maskwrap.busy{border-color:var(--brand)}
+.maskwrap.busy .psn{opacity:.86}
+.maskwrap.ok{border-color:#34C759;background:#F0FAF3}
+.maskwrap.ok .psn{opacity:.35}
+.maskwrap .scanline{position:absolute;left:6%;right:6%;height:2px;border-radius:1px;
+  background:var(--brand);box-shadow:0 0 7px rgba(0,123,255,.75);
+  animation:scanmove 1.5s ease-in-out infinite;z-index:2}
+@keyframes scanmove{0%{top:12%}50%{top:84%}100%{top:12%}}
+.maskwrap .okmark,.fpbig .okmark{position:absolute;inset:0;display:flex;
+  align-items:center;justify-content:center;z-index:3}
+
+.bio2 .ttl{font-size:12.5px;color:var(--text-2);text-align:center;line-height:1.5}
+.biotips{display:flex;align-items:flex-start;justify-content:center;gap:12px;
+  margin-top:1px}
+.biotips .tip{display:flex;flex-direction:column;align-items:center;gap:3px;
+  color:var(--text-2);opacity:.82;width:62px}
+.biotips .tip svg{width:16px;height:16px;color:var(--text-2)}
+.biotips .tip span{font-size:9.5px;line-height:1.3;text-align:center;white-space:nowrap}
+.biotips.gone{visibility:hidden}
+
+/* 指纹：大号线稿，颜色取参考图的蓝 */
+.fpbig{width:118px;height:118px;border-radius:50%;display:flex;
+  align-items:center;justify-content:center;background:#F2F7FF;
+  border:1px solid #DCE9FA;position:relative}
+.fpbig svg{width:72px;height:72px;color:#5B8DEF}
+.fpbig.busy svg{color:var(--brand)}
+.fpbig.ok{background:#F0FAF3;border-color:#BFE6CC}
+.fpbig.ok svg{opacity:.28}
+
+/* ============ 改密页 ============ */
+.chpw .lead{font-size:12.5px;color:var(--text-2);line-height:1.6}
+.chpw .lead b{color:var(--text-1);font-weight:500}
+.reqbox{background:var(--bg-field);border-radius:var(--r-field);padding:9px 12px;
+  font-size:11.5px;color:var(--text-2);line-height:1.75}
+.reqbox .it{display:flex;gap:6px;align-items:flex-start}
+.reqbox .it.ok{color:#1D6B32}
+.reqbox .it.no{color:#A32620}
+.reqbox .bul{width:12px;flex:0 0 12px;text-align:center;font-weight:500;
+  display:flex;align-items:center;justify-content:center;height:16px}
+.reqbox .bul svg{display:block}
+
+/* 改密原因：抬头回显「您好，XXX」，副标题一句话、灰色、不带标点。
+   v1.0.20 先把副标题按紧迫度分了红 / 琥珀 / 灰三色，实测反而像报错 ——
+   这一页是登录流程里的一员，不是事故页，颜色统一回灰，靠字词表达轻重。 */
+.chpw .brand p b{font-weight:600;font-variant-numeric:tabular-nums}
+
+/* ============ 二次验证页（整页，不是弹层） ============
+   v1.0.17：原来是半透明蒙层盖在登录表单上，看着像弹窗。
+   改为整页切换 —— 和改密页一样把窗口内容整个换掉，品牌区、标题、
+   方式切换、输入、按钮一应俱全，返回走页面里的「返回上一级」。
+   （对齐移动端「进入下一页」的心智，不是「叠一个框」。） */
+.backrow{margin-top:2px;display:flex;justify-content:center}
+.backbtn{display:inline-flex;align-items:center;gap:5px;background:none;border:none;
+  padding:4px 6px;cursor:pointer;font-family:inherit;font-size:11.5px;
+  color:var(--text-2);border-radius:6px}
+.backbtn:hover{color:var(--text-1);text-decoration:underline}
+.backbtn svg{width:11px;height:11px}
+
+/* ============ 表单 ============ */
+.field{display:flex;flex-direction:column;gap:6px;flex:0 0 auto}
+.field label{font-size:12px;color:var(--text-2);font-weight:500}
+.input{
+  height:var(--h-field);padding:0 11px;width:100%;
+  border:1px solid var(--border-field);border-radius:var(--r-field);
+  background:var(--bg-field);font-size:13px;font-family:inherit;color:var(--text-1);
+  outline:none;transition:border-color .12s ease,background .12s ease,box-shadow .12s ease}
+.input::placeholder{color:var(--text-3)}
+.input:hover{border-color:#C9CDD3}
+.input:focus{background:#fff;border-color:var(--brand);box-shadow:0 0 0 3px rgba(0,122,255,.14)}
+.input[readonly]{background:#F0F2F5;color:var(--text-2);cursor:default}
+.input[readonly]:focus{background:#F0F2F5;border-color:var(--border-field);box-shadow:none}
+/* ⚠️ 必须带 .ipt 前缀：与 .ipt .input 同为 2 个 class 时，后出现的 .ipt .input 会赢，
+   红框静默失效（v1.0.6 实测发现 —— 绑定失败页的红框此前一直是假的） */
+.input.bad,.ipt .input.bad{border-color:var(--danger);background:#FFF8F8}
+.input.bad:focus,.ipt .input.bad:focus{box-shadow:0 0 0 3px rgba(255,59,48,.13)}
+
+/* ============ 简洁版：图标内嵌输入框 ============ */
+.ipt{position:relative;display:flex;align-items:center;gap:8px;flex:0 0 auto}
+.ipt .lead{position:absolute;left:13px;top:50%;transform:translateY(-50%);
+  display:flex;align-items:center;pointer-events:none;color:#9CA3AF;
+  transition:color .12s ease}
+.ipt .input{height:44px;padding:0 14px 0 41px;font-size:13.5px;
+  border-radius:10px;background:#fff;border-color:#E3E6EA;
+  flex:1 1 auto;min-width:0}
+.ipt>.btn{flex:0 0 auto}
+.ipt .input::placeholder{color:#A5ABB4}
+.ipt .input:hover{border-color:#CFD4DA}
+.ipt .input:focus{border-color:var(--brand);background:#fff;
+  box-shadow:0 0 0 3px rgba(0,122,255,.13)}
+.ipt:focus-within .lead{color:var(--brand)}
+.ipt.has-eye .input{padding-right:44px}
+.ipt .eye{position:absolute;right:8px;top:50%;transform:translateY(-50%);
+  width:28px;height:28px;display:flex;align-items:center;justify-content:center;
+  background:none;border:none;padding:0;cursor:pointer;color:#A5ABB4;
+  border-radius:7px;transition:color .12s ease,background .12s ease}
+.ipt .eye:hover{color:#6B7280;background:rgba(0,0,0,.045)}
+.ipt .input:focus~.eye{color:var(--brand)}
+/* 只读行（macOS 本机账户） */
+.ipt.os .input{background:#F7F8FA;border-color:#E9ECEF;color:var(--text-1);
+  cursor:default}
+.ipt.os .input:hover{border-color:#E9ECEF}
+.ipt.os .input:focus{background:#F7F8FA;border-color:#E9ECEF;box-shadow:none}
+.ipt.os .lead{color:#A9AFB7}
+
+.rowline{display:flex;gap:8px;align-items:stretch}
+.rowline .input{flex:1;min-width:0}
+.rowline .btn{flex:0 0 auto;white-space:nowrap;padding:0 13px}
+
+.hint{font-size:11px;color:var(--text-3);line-height:1.5}
+.hint.err{color:var(--danger)}
+.errmsg{display:flex;align-items:flex-start;gap:6px;font-size:11.5px;
+  color:var(--danger);background:var(--danger-soft);
+  padding:8px 11px;border-radius:var(--r-field);line-height:1.5}
+.errmsg svg{flex:0 0 auto;margin-top:2px}
+
+/* ============ 按钮 ============ */
+.btn{height:var(--h-btn);min-height:var(--h-btn);padding:0 15px;border-radius:var(--r-btn);
+  font-size:13px;font-family:inherit;cursor:pointer;
+  border:1px solid transparent;display:inline-flex;align-items:center;
+  justify-content:center;gap:6px;transition:background .12s ease,border-color .12s ease;
+  white-space:nowrap;flex:0 0 auto;box-sizing:border-box}
+.btn-primary{background:var(--brand);color:var(--text-on);border-color:var(--brand)}
+.btn-primary:hover{background:var(--brand-hover)}
+.btn-primary:active{background:var(--brand-press)}
+.btn-secondary{background:#fff;color:var(--text-1);border-color:var(--border-field)}
+.btn-secondary:hover{background:var(--bg-hover)}
+.btn-quiet{background:transparent;color:var(--text-2);border-color:transparent}
+.btn-quiet:hover{background:var(--bg-hover);color:var(--text-1)}
+.btn-block{width:100%}
+.btn[disabled]{background:var(--bg-field);color:var(--text-3);
+  border-color:var(--border-card);cursor:not-allowed}
+.btn[disabled]:hover{background:var(--bg-field)}
+
+.footrow{display:flex;align-items:center;justify-content:flex-end;
+  gap:6px;font-size:11.5px;color:var(--text-3);margin-top:2px}
+.footrow .lnk{color:var(--text-2);cursor:pointer;background:none;border:none;
+  font-family:inherit;font-size:11.5px;padding:0}
+.footrow .lnk:hover{color:var(--text-1);text-decoration:underline}
+.footrow .lnk.danger{color:var(--text-2)}
+.footrow .lnk.danger:hover{color:var(--danger)}
+.dotsep{color:var(--border-field)}
+
+/* ============ 密码策略清单 ============ */
+.policy{display:flex;flex-direction:column;gap:4px;margin-top:2px}
+.policy .pi{display:flex;align-items:flex-start;gap:6px;font-size:11px;
+  color:var(--text-3);line-height:1.5}
+.policy .pi .mk{flex:0 0 auto;width:13px;height:13px;border-radius:50%;
+  border:1px solid var(--border-field);margin-top:1.5px;
+  display:flex;align-items:center;justify-content:center}
+.policy .pi.ok{color:#1D6B32}
+.policy .pi.ok .mk{background:var(--success);border-color:var(--success)}
+.policy .pi.no{color:var(--danger)}
+.policy .pi.no .mk{background:var(--danger);border-color:var(--danger)}
+
+/* ============ 步骤分节 ============ */
+.stepnum{display:flex;align-items:center;gap:7px;font-size:12px;
+  font-weight:500;color:var(--text-1)}
+.stepnum .n{width:17px;height:17px;border-radius:50%;background:var(--brand-soft);
+  color:var(--brand);font-size:10.5px;font-weight:500;
+  display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.stepnum.lock{color:var(--text-3)}
+.stepnum.lock .n{background:var(--bg-field);color:var(--text-3)}
+.divider{height:1px;background:var(--border-card);margin:2px 0}
+.seg{display:inline-flex;background:var(--bg-field);padding:3px;
+  border-radius:var(--r-field);gap:3px}
+.seg span{font-size:11.5px;padding:4px 11px;border-radius:7px;
+  color:var(--text-2);cursor:pointer;transition:background .12s,color .12s}
+.seg span.on{background:#fff;color:var(--brand);font-weight:500;
+  box-shadow:0 1px 2px rgba(0,0,0,.07)}
+
+/* ============ 忘记密码：验证渠道下拉（v1.0.5，对齐参考图） ============ */
+.ipt select.selin{padding:0 34px 0 41px;cursor:pointer;
+  appearance:none;-webkit-appearance:none;-moz-appearance:none}
+.ipt select.selin::-ms-expand{display:none}
+.ipt .chev{position:absolute;right:13px;top:50%;transform:translateY(-50%);
+  display:flex;pointer-events:none;color:#9CA3AF;transition:color .12s ease}
+.ipt:focus-within .chev{color:var(--brand)}
+
+/* ============ 忘记密码：标题行 + 返回箭头 ============ */
+.head{display:flex;align-items:center;gap:8px;flex:0 0 auto}
+.back{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;
+  justify-content:center;cursor:pointer;color:var(--text-2);flex:0 0 auto;
+  background:none;border:none;padding:0}
+.back:hover{background:var(--bg-hover)}
+.head h1{font-size:17px;font-weight:600;letter-spacing:-.35px;line-height:1.3}
+
+/* ============ 验证码按钮：做进输入框右端 ============ */
+.codebtn{display:flex;align-items:center;gap:5px;flex:0 0 auto;
+  background:none;border:0;font-family:inherit;font-size:12.5px;color:var(--text-1);
+  cursor:pointer;white-space:nowrap;transition:color .12s ease}
+.codebtn svg{color:var(--text-3);flex:0 0 auto;transition:color .12s ease}
+.codebtn:hover{color:var(--brand)}
+.codebtn:hover svg{color:var(--brand)}
+.codebtn[disabled]{color:var(--text-3);cursor:not-allowed}
+.codebtn[disabled] svg{color:#C3C8CF}
+.ipt.has-code .input{padding-right:118px}
+.ipt .codebtn{position:absolute;right:12px;top:50%;transform:translateY(-50%);
+  padding-left:10px;border-left:1px solid #E3E6EA}
+
+/* ============ 密码要求浮层 ============ */
+.reqpop{position:absolute;right:0;bottom:calc(100% + 8px);width:216px;z-index:20;
+  background:#fff;border:.5px solid rgba(0,0,0,.10);border-radius:10px;
+  box-shadow:0 10px 28px rgba(0,0,0,.16),0 2px 6px rgba(0,0,0,.08);
+  padding:11px 13px 12px;display:none}
+.reqpop.show{display:block}
+.reqpop .rt{font-size:12px;font-weight:600;color:var(--text-1);margin-bottom:1px}
+.reqpop .pi{display:flex;align-items:flex-start;gap:7px;margin-top:7px;
+  font-size:11.5px;line-height:1.55;color:var(--text-2)}
+.reqpop .pi .mk{width:12px;height:12px;flex:0 0 auto;margin-top:3px;border-radius:50%;
+  background:#B6BCC4;display:flex;align-items:center;justify-content:center}
+.reqpop .pi .mk i{width:3.5px;height:3.5px;border-radius:50%;background:#fff;display:block}
+.reqpop .pi .mk svg{display:block}
+.reqpop .pi.ok{color:#248A3D}
+.reqpop .pi.ok .mk{background:#34C759}
+.reqpop .pi.no{color:#C92A21}
+.reqpop .pi.no .mk{background:#FF3B30}
+
+/* ============ 密码框 ⓘ 要求按钮 ============ */
+.ipt .info{position:absolute;right:8px;top:50%;transform:translateY(-50%);
+  width:28px;height:28px;display:flex;align-items:center;justify-content:center;
+  background:none;border:none;padding:0;cursor:pointer;color:#A5ABB4;
+  border-radius:7px;transition:color .12s ease,background .12s ease}
+.ipt .info:hover{color:#6B7280;background:rgba(0,0,0,.045)}
+.ipt.has-info .eye{right:36px}
+.ipt.has-eye.has-info .input{padding-right:76px}
+
+/* ============ 锁定区（验证码通过前置灰） ============ */
+.locked{opacity:.45;pointer-events:none;filter:saturate(.3)}
+
+/* ============ 倒计时 ============ */
+.timer{display:flex;align-items:center;gap:6px;font-size:11.5px;
+  color:#8A4B00;background:var(--warning-soft);padding:7px 11px;
+  border-radius:var(--r-field);justify-content:center}
+.timer b{font-weight:600;font-variant-numeric:tabular-nums;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.bar{height:3px;background:var(--warning-soft);border-radius:2px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--warning);
+  transition:width 1s linear}
+
+/* 忘密页计时卡：进度条做进卡片底边，省一行高度（窗口高度受限） */
+.timer{position:relative;overflow:hidden;padding-bottom:8px}
+.timer .tbar{position:absolute;left:0;bottom:0;height:2px;
+  background:var(--warning);transition:width 1s linear}
+/* 忘密页主按钮：与输入框等高（44px），对齐参考图 */
+.fp-ok{height:44px;min-height:44px;font-size:13.5px;border-radius:10px}
+
+/* ============ 滑块 ============ */
+.slider{height:40px;background:var(--bg-field);border:1px solid var(--border-field);
+  border-radius:var(--r-field);position:relative;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;user-select:none}
+.slider .track{font-size:11.5px;color:var(--text-3);pointer-events:none}
+.slider .thumb{
+  position:absolute;left:2px;top:2px;width:44px;height:34px;
+  background:#fff;border:.5px solid var(--border-field);border-radius:8px;
+  display:flex;align-items:center;justify-content:center;cursor:grab;
+  box-shadow:0 1px 3px rgba(0,0,0,.10);transition:background .12s}
+.slider .thumb:active{cursor:grabbing}
+.slider .fill{position:absolute;left:0;top:0;bottom:0;background:var(--brand-soft);width:0}
+.slider.done .fill{background:var(--success-soft)}
+.slider.done .track{color:#1D6B32}
+.pop-r{position:absolute;right:2px;top:2px;bottom:2px;width:44px;border-radius:8px;
+  background:transparent;pointer-events:none}
+
+/* ============ 二维码 ============ */
+.qrwrap{display:flex;flex-direction:column;align-items:center;gap:11px;padding:4px 0}
+.qrbox{width:150px;height:150px;background:#fff;border:1px solid var(--border-card);
+  border-radius:10px;padding:9px;position:relative}
+.qrbox svg{display:block;width:100%;height:100%}
+.qrbox .mask{
+  position:absolute;inset:0;background:rgba(255,255,255,.93);
+  border-radius:10px;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:5px;
+  font-size:12px;color:var(--text-2)}
+.qrbox .mask .again{color:var(--brand);cursor:pointer;font-weight:500}
+.qrbox .mask .again:hover{text-decoration:underline}
+.qrstatus{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--text-2)}
+.spin{width:11px;height:11px;border:1.5px solid var(--brand-mid);
+  border-top-color:var(--brand);border-radius:50%;
+  animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.qrnote{font-size:11px;color:var(--text-3);text-align:center}
+.qrnote b{color:var(--text-2);font-weight:500}
+
+/* ============ 菜单栏面板 ============ */
+.pop{
+  position:absolute;top:9px;right:56px;width:320px;
+  background:rgba(252,252,253,.94);backdrop-filter:blur(24px);
+  border:.5px solid rgba(0,0,0,.12);border-radius:var(--r-win);
+  box-shadow:0 12px 38px rgba(0,0,0,.24),0 2px 8px rgba(0,0,0,.10);
+  overflow:hidden;animation:popIn .16s cubic-bezier(.32,.72,0,1)}
+@keyframes popIn{from{opacity:0;transform:translateY(-6px) scale(.98)}
+  to{opacity:1;transform:none}}
+.bindrow{display:flex;align-items:center;gap:10px;padding:12px 13px}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--brand);
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:13px;font-weight:500;flex:0 0 auto}
+.bindrow .meta{flex:1;min-width:0}
+.bindrow .meta .hi{font-size:12.5px;font-weight:500;color:var(--text-1);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bindrow .meta .id{font-size:10.5px;color:var(--text-3);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.badge-ok{font-size:10px;color:#248A3D;background:var(--success-soft);
+  padding:1px 6px;border-radius:5px;font-weight:500;flex:0 0 auto}
+.sep{height:.5px;background:rgba(0,0,0,.09)}
+.mi{display:flex;align-items:center;gap:10px;padding:8px 13px;
+  font-size:13px;color:var(--text-1);cursor:pointer;white-space:nowrap;
+  background:none;border:none;font-family:inherit;width:100%;text-align:left}
+.mi:hover{background:rgba(0,0,0,.045)}
+.mi .ico{flex:0 0 auto;display:flex;width:16px;justify-content:center}
+.mi .txt{flex:0 0 auto;white-space:nowrap}
+.mi .spacer{flex:1 1 auto;min-width:0}
+.mi .badge{flex:0 0 auto;font-size:11px;color:var(--brand);
+  background:var(--brand-soft);padding:1px 6px;border-radius:6px;font-weight:500}
+.mi.danger:hover{background:rgba(0,0,0,.045)}
+
+/* 菜单栏图标 */
+.mb-app img{width:14px;height:14px;display:block}
+
+/* ============ 弹窗 ============ */
+.overlay{position:absolute;inset:0;background:rgba(20,22,26,.30);
+  display:flex;align-items:center;justify-content:center;z-index:20;
+  animation:ovIn .15s ease}
+@keyframes ovIn{from{opacity:0}to{opacity:1}}
+.dialog{width:340px;background:#fff;border-radius:var(--r-win);
+  box-shadow:0 16px 48px rgba(0,0,0,.30);overflow:hidden;
+  animation:winIn .2s cubic-bezier(.32,.72,0,1);
+  position:relative;left:auto;top:auto;transform:none}
+.dialog .dbody{padding:20px 22px;display:flex;flex-direction:column;gap:12px}
+.dialog h3{font-size:14px;font-weight:500}
+.dialog p{font-size:12.5px;color:var(--text-2);line-height:1.65}
+.dialog .acts{display:flex;gap:8px;margin-top:4px}
+.dialog .acts .btn{flex:1}
+
+/* ============ 简洁版登录窗口（绑定 / 退出后登录页） ============ */
+/* 绑定窗口比原先多一行副标题，13px 间距会让窗口顶到上限并挤出滚动条，收 2px 即可 */
+.win.auth .body{gap:11px;padding:20px 24px 18px}
+.win.auth .tabs{background:#F4F5F7;border-radius:10px}
+/* 6 种方式竖排：图标 13 + 文字 11，44px 刚好留出上下各 4px 呼吸 */
+.win.auth .tabs button{height:42px;font-size:11px;border-radius:8px;gap:3px}
+.win.auth .tabs button svg{width:15px;height:15px}
+.win.auth .btn-block{height:44px;min-height:44px;font-size:13.5px;border-radius:10px}
+.win.auth .footrow{margin-top:1px}
+/* 窗口要用 position:relative 兜住弹窗类绝对定位（注销确认等仍是弹窗） */
+.win.auth{position:relative}
+
+/* ============ 卡片式设置窗口 ============ */
+.win.set{width:400px}
+.setrow{display:flex;align-items:center;gap:11px;padding:9px 0}
+.setrow .ico{width:22px;height:22px;border-radius:6px;background:var(--bg-field);
+  display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.setrow .meta{flex:1;min-width:0}
+.setrow .meta .t{font-size:13px;color:var(--text-1)}
+.setrow .meta .s{font-size:11px;color:var(--text-3);line-height:1.45}
+.setrow .ctl{flex:0 0 auto}
+.groupname{font-size:11px;color:var(--text-3);font-weight:500;
+  letter-spacing:.3px;margin-top:3px}
+.sw{width:38px;height:22px;border-radius:11px;background:#D3D7DD;
+  position:relative;cursor:pointer;border:none;padding:0;flex:0 0 auto;
+  transition:background .16s ease}
+.sw::after{content:"";position:absolute;top:2px;left:2px;
+  width:18px;height:18px;border-radius:50%;background:#fff;
+  box-shadow:0 1px 3px rgba(0,0,0,.22);transition:transform .16s cubic-bezier(.32,.72,0,1)}
+.sw.on{background:var(--success)}
+.sw.on::after{transform:translateX(16px)}
+.about{display:flex;align-items:center;gap:11px;padding:12px;
+  background:var(--bg-field);border-radius:var(--r-field);margin-top:3px}
+.about img{width:38px;height:38px;display:block;flex:0 0 auto}
+.about .txt{flex:1;min-width:0}
+.about .txt .n{font-size:13.5px;font-weight:500}
+.about .txt .v{font-size:11.5px;color:var(--text-3);
+  font-family:ui-monospace,Menlo,Consolas,monospace}
+
+/* ============ 访问应用门户（浏览器窗口） ============ */
+.win.browser{width:520px}
+.urlbar{height:32px;flex:0 0 auto;display:flex;align-items:center;gap:8px;
+  padding:0 12px;background:#F6F7F9;border-bottom:.5px solid var(--border-card)}
+.urlbar .pill{flex:1;height:21px;background:#fff;border-radius:10px;
+  border:.5px solid var(--border-card);display:flex;align-items:center;
+  padding:0 10px;font-size:11px;color:var(--text-3);gap:5px}
+.apps{padding:16px 20px;display:grid;
+  grid-template-columns:repeat(4,1fr);gap:10px}
+.app{display:flex;flex-direction:column;align-items:center;gap:6px;
+  padding:11px 6px;border-radius:var(--r-field);cursor:pointer;
+  transition:background .12s ease;border:1px solid transparent}
+.app:hover{background:var(--bg-hover);border-color:var(--border-card)}
+.app .sq{width:34px;height:34px;border-radius:9px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;color:#fff;font-weight:500}
+.app .nm{font-size:11px;color:var(--text-2);text-align:center;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.sso{display:flex;align-items:center;gap:7px;justify-content:center;
+  font-size:11.5px;color:#1D6B32;background:var(--success-soft);
+  padding:7px 11px;border-radius:var(--r-field)}
+
+/* ============ Dock ============ */
+.dock{
+  position:absolute;bottom:10px;left:50%;transform:translateX(-50%);
+  display:flex;gap:7px;padding:7px 9px;
+  background:rgba(255,255,255,.40);backdrop-filter:blur(24px);
+  border:.5px solid rgba(255,255,255,.50);border-radius:16px;
+  box-shadow:0 6px 22px rgba(0,0,0,.16);z-index:5}
+.dock i{width:34px;height:34px;border-radius:8px;display:block}
+.dock .d1{background:linear-gradient(180deg,#4FA3F7,#1E6FD9)}
+.dock .d2{background:linear-gradient(180deg,#F5F7FA,#C9D2DC)}
+.dock .d3{background:linear-gradient(180deg,#FFB84D,#E8890B)}
+.dock .d4{background:linear-gradient(180deg,#6FCB6F,#2E8B2E)}
+.dock .d5{background:linear-gradient(180deg,#B58BE8,#7A4FC0)}
+.dock .elogon{background:#fff;display:flex;align-items:center;
+  justify-content:center;border:.5px solid rgba(0,0,0,.08);cursor:pointer;
+  transition:transform .12s ease}
+.dock .elogon:hover{transform:translateY(-3px)}
+.dock .elogon:active{transform:translateY(-1px) scale(.96)}
+.dock .elogon img{width:24px;height:24px;display:block}
+
+/* ============ 右侧流程轨道 ============ */
+.rail{
+  width:290px;flex:0 0 auto;background:#FBFCFD;border-left:1px solid var(--border-card);
+  display:flex;flex-direction:column;overflow:hidden}
+.rail-h{padding:14px 16px 12px;border-bottom:1px solid var(--border-card);
+  display:flex;align-items:flex-start;gap:8px}
+.rail-h .t{flex:1}
+.rail-h h2{font-size:13px;font-weight:500}
+.rail-h p{font-size:11px;color:var(--text-3);margin-top:2px}
+.rail-h .fold{
+  background:none;border:none;cursor:pointer;color:var(--text-3);
+  font-size:15px;line-height:1;padding:2px 4px;font-family:inherit}
+.rail-h .fold:hover{color:var(--text-1)}
+.rail-b{flex:1;overflow-y:auto;padding:12px 16px 18px}
+.rail-b::-webkit-scrollbar{width:6px}
+.rail-b::-webkit-scrollbar-thumb{background:#D8DCE2;border-radius:3px}
+
+.secname{font-size:10.5px;color:var(--text-3);font-weight:500;
+  letter-spacing:.4px;margin:14px 0 7px}
+.secname:first-child{margin-top:0}
+
+.node{
+  display:flex;align-items:flex-start;gap:9px;padding:7px 9px;
+  border-radius:9px;cursor:pointer;border:1px solid transparent;
+  transition:background .12s ease,border-color .12s ease;margin-bottom:2px}
+.node:hover{background:var(--bg-hover)}
+.node.cur{background:var(--brand-soft);border-color:var(--brand-mid)}
+.node.cur .nm{color:var(--brand);font-weight:500}
+.node .dot{width:15px;height:15px;border-radius:50%;flex:0 0 auto;
+  border:1.5px solid #CDD3DA;margin-top:2px;position:relative;
+  display:flex;align-items:center;justify-content:center;
+  background:#fff;transition:border-color .15s,background .15s}
+.node.done .dot{border-color:var(--success);background:var(--success)}
+.node.cur .dot{border-color:var(--brand);background:var(--brand)}
+.node .dot::after{content:"";width:5px;height:5px;border-radius:50%;background:#fff;
+  opacity:0;transition:opacity .15s}
+.node.cur .dot::after,.node.done .dot::after{opacity:1}
+.node .nm{font-size:12px;color:var(--text-1);line-height:1.45}
+.node .sub{font-size:10.5px;color:var(--text-3);line-height:1.4;margin-top:1px}
+
+.statebox{margin-top:14px;padding:11px 13px;background:#fff;
+  border:1px solid var(--border-card);border-radius:var(--r-field)}
+.statebox .st{font-size:10.5px;color:var(--text-3);font-weight:500;
+  letter-spacing:.4px;margin-bottom:7px}
+.kv{display:flex;justify-content:space-between;gap:10px;font-size:11px;
+  padding:2.5px 0}
+.kv .k{color:var(--text-3)}
+.kv .v{color:var(--text-1);font-family:ui-monospace,Menlo,Consolas,monospace;
+  text-align:right;word-break:break-all}
+.kv .v.on{color:#1D6B32}
+.kv .v.off{color:var(--text-3)}
+
+.netpick{display:grid;grid-template-columns:repeat(2,1fr);gap:5px;margin-top:7px}
+.netpick button{
+  font-size:11px;font-family:inherit;padding:6px 4px;border-radius:7px;
+  border:1px solid var(--border-field);background:#fff;color:var(--text-2);
+  cursor:pointer;transition:all .12s ease}
+.netpick button:hover{background:var(--bg-hover)}
+.netpick button.on{background:var(--brand);border-color:var(--brand);color:#fff}
+/* 认证方式那组是 6 档（1~6 种），两列会占三行，改三列两行 */
+.netpick.mth{grid-template-columns:repeat(3,1fr)}
+
+.tools{display:flex;gap:6px;margin-top:12px}
+.tools button{
+  flex:1;font-size:11.5px;font-family:inherit;padding:8px 6px;
+  border-radius:8px;border:1px solid var(--border-field);background:#fff;
+  color:var(--text-2);cursor:pointer;transition:all .12s ease}
+.tools button:hover{background:var(--bg-hover);color:var(--text-1)}
+.tools button.pri{background:var(--brand);border-color:var(--brand);color:#fff}
+.tools button.pri:hover{background:var(--brand-hover)}
+
+.log{margin-top:12px;max-height:150px;overflow-y:auto;
+  background:#F7F8FA;border:1px solid var(--border-card);
+  border-radius:var(--r-field);padding:9px 11px}
+.log .li{font-size:10.5px;color:var(--text-2);line-height:1.6;
+  padding:1.5px 0;font-family:ui-monospace,Menlo,Consolas,monospace;
+  word-break:break-all}
+.log .li b{color:var(--brand);font-weight:500}
+
+/* 轨道折叠态 */
+.shell.folded .rail{width:0;border-left:none}
+.shell.folded .rail>*{display:none}
+.rail-open{
+  position:absolute;right:12px;top:38px;z-index:40;display:none;
+  background:rgba(255,255,255,.94);border:.5px solid rgba(0,0,0,.12);
+  border-radius:9px;padding:6px 11px;font-size:11.5px;color:var(--text-2);
+  cursor:pointer;font-family:inherit;box-shadow:0 3px 12px rgba(0,0,0,.14)}
+.shell.folded .rail-open{display:block}
+.rail-open:hover{background:#fff;color:var(--text-1)}
+/* 嵌入形态（v1.0.9）· 必须写在上面那条**之后** ——
+   同为 2 个 class 的选择器，后写的赢；写前面会被 `.shell.folded .rail-open` 覆盖。
+   这里再升一级到 3 个 class，彻底压住，避免以后有人调整顺序又踩回去。 */
+html.embedded .shell.folded .rail-open{display:none}
+/* 但 v1.0.13 起，交互说明页用 rail=1 让轨道展开 ——
+   既然轨道能收起，就必须能再展开，所以 rail-on 时把这条按钮放回来。
+   选择器升到 5 个 class，无论写在哪都压得住上面那条。 */
+html.embedded.rail-on .shell.folded .rail-open{display:block}
+html.embedded .tools{display:none}
+html.embedded .notes,html.embedded .notes-mask{display:none!important}
+/* 嵌入形态：iframe 视口比独立打开矮得多，Dock 是 absolute 不占流，
+   .win 的 max-height:100% 会一路撑到容器底 → 底部按钮被 Dock 盖住。
+   给桌面区补一条底部让位，窗口自己就收进来了。
+   注意：不要再给 .win .body 加 padding —— 那会让窗口更高、max-height 收不下，
+   反而把顶部品牌区裁掉（第一版就是这么错的）。 */
+html.embedded .desk-wrap{padding-bottom:56px}
+html.embedded .dock{bottom:8px}
+/* 嵌入形态下窗口内容常比视口高，必须让滚动条可见 ——
+   否则内部滚动是隐形的，研发会以为内容被裁掉了。 */
+html.embedded .win .body{scrollbar-width:thin;scrollbar-color:#C9CDD3 transparent}
+html.embedded .win .body::-webkit-scrollbar{width:7px}
+html.embedded .win .body::-webkit-scrollbar-track{background:transparent}
+html.embedded .win .body::-webkit-scrollbar-thumb{
+  background:#C9CDD3;border-radius:4px}
+html.embedded .win .body::-webkit-scrollbar-thumb:hover{background:#AEB5BF}
+
+/* Toast */
+.toast{
+  position:absolute;bottom:78px;left:50%;transform:translateX(-50%);
+  background:rgba(28,30,34,.92);color:#fff;font-size:12px;
+  padding:9px 17px;border-radius:9px;z-index:60;
+  animation:toastIn .22s cubic-bezier(.32,.72,0,1);white-space:nowrap;
+  box-shadow:0 6px 22px rgba(0,0,0,.24)}
+@keyframes toastIn{from{opacity:0;transform:translate(-50%,10px)}
+  to{opacity:1;transform:translate(-50%,0)}}
+
+/* 成功勾 */
+.tickbox{display:flex;flex-direction:column;align-items:center;gap:10px;padding:8px 0}
+.tick{width:46px;height:46px;border-radius:50%;background:var(--success-soft);
+  display:flex;align-items:center;justify-content:center;
+  animation:pop .32s cubic-bezier(.32,.72,0,1)}
+@keyframes pop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+.tickbox .tt{font-size:14px;font-weight:500}
+.tickbox .ts{font-size:11.5px;color:var(--text-3)}
+
+/* ============ 本页交互说明浮层（v1.0.12）============
+   与左侧流程轨道同源不同职：
+     流程轨道 = 整条流程的节点地图（跳到某一步）
+     本页说明 = 眼下这一屏有哪些交互点（对照着做）
+   形态：右侧滑出浮层，盖在桌面之上，不占布局宽度。
+   样式上刻意与轨道区分：轨道是浅灰底，说明浮层用纯白底 + 左缘投影，
+   并给每条交互点一个蓝色 ID 标签，方便与交互表/PRD 对照。 */
+/* v1.0.12：改成右侧滑出的浮层 —— 不再占布局宽度。
+   之前是 .shell 的第三个 flex 成员，三栏并存时桌面区被压扁，
+   里面的模拟 macOS 窗口跟着缩，原型就不像原型了。
+   现在 position:fixed 脱离文档流，桌面区宽度恒定，说明浮在上面。 */
+.notes{
+  position:fixed;top:0;right:0;bottom:0;z-index:52;
+  width:380px;max-width:88vw;
+  background:#fff;border-left:1px solid var(--border-card);
+  box-shadow:-10px 0 34px rgba(16,18,22,.10);
+  display:flex;flex-direction:column;overflow:hidden;
+  transform:translateX(100%);
+  transition:transform .26s cubic-bezier(.32,.72,0,1);
+  will-change:transform}
+.notes.open{transform:translateX(0)}
+
+/* 遮罩：只用来接「点外部关闭」，颜色极淡 —— 原型不该因为看说明而变暗 */
+.notes-mask{
+  position:fixed;inset:0;z-index:51;background:transparent;
+  display:none}
+.notes-mask.open{display:block}
+.notes-h{padding:14px 16px 12px;border-bottom:1px solid var(--border-card);
+  display:flex;align-items:flex-start;gap:8px}
+.notes-h .t{flex:1;min-width:0}
+.notes-h h2{font-size:13px;font-weight:500}
+.notes-h p{font-size:11px;color:var(--text-3);margin-top:2px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.notes-h .fold{
+  background:none;border:none;cursor:pointer;color:var(--text-3);
+  font-size:13px;line-height:1;padding:3px 5px;font-family:inherit;border-radius:6px}
+.notes-h .fold:hover{color:var(--text-1);background:var(--bg-hover)}
+
+.notes-b{flex:1;overflow-y:auto;padding:10px 12px 20px}
+.notes-b::-webkit-scrollbar{width:6px}
+.notes-b::-webkit-scrollbar-thumb{background:#D8DCE2;border-radius:3px}
+
+/* 界面定位：这一屏是干嘛的 */
+.notes-desc{
+  font-size:11.5px;line-height:1.62;color:var(--text-2);
+  background:var(--brand-soft);border-radius:8px;padding:9px 11px;margin-bottom:10px}
+.notes-desc b{color:var(--brand);font-weight:500}
+
+/* 一条交互点 */
+.np{border:1px solid var(--border-card);border-radius:9px;margin-bottom:7px;overflow:hidden}
+.np-h{display:flex;align-items:flex-start;gap:7px;padding:8px 10px;cursor:pointer}
+.np-h:hover{background:var(--bg-hover)}
+.np-h .arw{font-size:8px;color:var(--text-3);margin-top:4px;flex:0 0 auto;
+  transition:transform .15s}
+.np.open .np-h .arw{transform:rotate(90deg)}
+.np-h .tx{flex:1;min-width:0}
+.np-h .id{
+  font-family:ui-monospace,Menlo,Consolas,monospace;font-size:9.5px;
+  color:var(--brand);background:var(--brand-soft);padding:1px 5px;
+  border-radius:5px;display:inline-block;margin-bottom:3px}
+.np-h .do{font-size:11.5px;line-height:1.5;color:var(--text-1)}
+.np-b{display:none;padding:0 10px 10px 24px}
+.np.open .np-b{display:block}
+.np-r{display:flex;gap:7px;padding:5px 0;border-top:1px solid #F2F3F5}
+.np-r .k{flex:0 0 52px;font-size:10.5px;color:var(--text-3);padding-top:1px}
+.np-r .v{flex:1;min-width:0;font-size:11px;line-height:1.6;color:var(--text-2)}
+.np-r .v.q{color:var(--text-1)}
+.np-r .v .ok{color:#248A3D}
+.np-r .v .er{color:#B3261E}
+.np-r .v.mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px}
+.notes-empty{font-size:11.5px;color:var(--text-3);padding:14px 4px;line-height:1.7}
+@media (max-width:720px){.notes{width:100%;max-width:100%}}
+
+</style>
+</head>
+<body data-page-node-id="YTavQOvDmcfAETUakdjuaD">
+
+<div class="shell" id="shell" data-page-node-id="hMxXinLh6UmAyUvhWIyLhI">
+
+  <div class="desk-wrap" data-page-node-id="z8Kvj5s10Sp7CQmQgOGVnf">
+    <div class="menubar" data-page-node-id="uOOOJQ3CLCTQBov73aWL69">
+      <div class="left" data-page-node-id="qMOjBPHgBmj1LDzlSVlXqq">
+        <span class="apple" data-page-node-id="IZd06WVV20GrovLtvdT3lF">&#63743;</span>
+        <span id="mbAppName" data-page-node-id="e5Q3PkO09sOUtFBCjFgeFE">访达</span>
+        <span data-page-node-id="ZKwmRs9tCBnFTE96cWzAok">文件</span><span data-page-node-id="Z1xKyp68J4JM4XM3y5ZJd4">编辑</span><span data-page-node-id="yacDxpU8KFXjh3DKrB6J96">显示</span>
+      </div>
+      <div class="right" data-page-node-id="k4xZQqqXUEki0HJgO0DmEz">
+  <div class="mb-app" id="mbElogon" style="display:none"
+          onclick="onMenubarClick(event)" title="E 登录" data-page-node-id="eyDEf5NaysgpHxS6pTxGWf">
+          <img src="assets/logo-color-128.png" alt="E登录" id="mbElogonImg" data-page-node-id="mRY8vHE66C5G2GoDLCDJc8" />
+        </div>
+        <span id="mbNet" data-page-node-id="h6W37IX6KvZoXYtPNJypE8">&#9679;</span>
+        <span data-page-node-id="OxqENBINtJ00fCO0S36bZh">100%</span>
+        <span id="mbClock" data-page-node-id="WXQ3hSaDv99NPHWZytCS73">14:25</span>
+      </div>
+    </div>
+
+    <div class="desk" id="desk" data-page-node-id="r3H1u7jG791AjWXVEXLXnp"></div>
+
+    <div class="dock" data-page-node-id="k7rrJvZyQwzaHYVhSXsy51">
+      <i class="d1" data-page-node-id="TrwClQTGQLJGVLlFCmNVQ5"></i><i class="d2" data-page-node-id="F4tzyVtPXtSW97ZWa8FuQn"></i>
+      <i class="d4" id="dockBrowser" title="浏览器" data-page-node-id="xcrfn2SPjctXTM96ghtwB5"></i>
+      <i class="d3" data-page-node-id="GDAkcdTap5xkWjx5AQzogS"></i>
+      <i class="elogon" id="dockElogon" title="E 登录" onclick="reopenWin()" data-page-node-id="McB8fUVme0hpq2N1FsjKnx">
+        <img src="assets/logo-color-128.png" alt="E登录" data-page-node-id="sAXVKAYotsYXQCkPhwTGSA" />
+      </i>
+      <i class="d5" data-page-node-id="IKJDIuXzH6EAuOrSYOQyWG"></i>
+    </div>
+
+    <button class="rail-open" onclick="toggleRail()" data-page-node-id="2nvA8oUrkgk2Vi43vESoTG">&#9664; 流程轨道</button>
+  </div>
+
+  <div class="rail" id="rail" data-page-node-id="4EiGitDYCWSbCNEizJc8gs">
+    <div class="rail-h" data-page-node-id="l9k3jgWIog4dz6QjPh2lTF">
+      <div class="t" data-page-node-id="ddJ0dd5HDFPbr8UQnH7Pll">
+        <h2 data-page-node-id="AC1hyQwONArqe3jdXrvaHl">联动流程轨道</h2>
+        <p data-page-node-id="MUaAZLVOxxcJSlwGYwR8hq">点节点可直接跳到那一步</p>
+      </div>
+      <button class="fold" onclick="toggleRail()" title="收起" data-page-node-id="ZDODP5zg8jzHLO6Zoa14tf">&#9654;</button>
+    </div>
+    <div class="rail-b" data-page-node-id="9CWuGElSIBDVPi6am7txc8">
+      <div id="railNodes" data-page-node-id="EemFsulxMQfCNpxaqnv4QW"></div>
+      <div class="statebox" data-page-node-id="w9mrAK43dsDtloFGJqKlDP">
+        <div class="st" data-page-node-id="5WoBP19YjzIFoWgoRQ2vKH">当前状态</div>
+        <div class="kv" data-page-node-id="u1rHemPSmXGxBpDL7w6iR9"><span class="k" data-page-node-id="fIpiOCQmCzb46o89xE4AsB">绑定关系</span><span class="v" id="stBind" data-page-node-id="T8OKhbeoO3ZAhMer3Ukp4c">—</span></div>
+        <div class="kv" data-page-node-id="UK0J3i6NGBAFEB7S2mpMuZ"><span class="k" data-page-node-id="8gfIsHZ0NSFElH683CQxNb">本机 macOS 账户</span><span class="v" id="stMac" data-page-node-id="hu5ZDKfCQVBUVnTjlPGo4h">—</span></div>
+        <div class="kv" data-page-node-id="a3NSwDPw6p2nM5gXff64FC"><span class="k" data-page-node-id="XQFtsf1o0Dce41LRxrhHGb">本机绑定记录</span><span class="v" id="stBindIam" data-page-node-id="4cAnajTkoa658VRKUTJrTg">—</span></div>
+        <div class="kv" data-page-node-id="MupZdVjEuDyfpaipdgX9tc"><span class="k" data-page-node-id="tWbWSEZG38rCbEdcxrpSnU">登录态</span><span class="v" id="stLogin" data-page-node-id="8cawn47kCCxIf4CnIHydXy">—</span></div>
+        <div class="kv" data-page-node-id="xfm8wDELRd89CQWEE1n1TX"><span class="k" data-page-node-id="P9W9iaORptBmanrndCyelq">当前界面</span><span class="v" id="stView" data-page-node-id="erNCEbh2EPbHXbwTxkEYDB">—</span></div>
+        <div class="kv" data-page-node-id="Jx2lKypBrsjKWCGUFbm9sb"><span class="k" data-page-node-id="1J4SOdXBkWaVG8cc8Mdu3e">网络</span><span class="v" id="stNet" data-page-node-id="iYQD49eRcfXzwrf6ebXbMG">—</span></div>
+      </div>
+      <div class="statebox" data-page-node-id="Q2MUnXsnudMlb8eAe4isvS">
+        <div class="st" data-page-node-id="gagO8zafL8uleSgiyDR6xw">网络状态（真实原型里是自动检测，这里手动切）</div>
+        <div class="netpick" id="netPick" data-page-node-id="FqkQAtWmOQQ2izNFh9CNJ1">
+          <button data-net="ok" class="on" data-page-node-id="yqSXiOfQD2xRlf0ZPiWZJJ">正常</button>
+          <button data-net="weak" data-page-node-id="c4mECwK4vpvGiAorqB3nuK">较弱</button>
+          <button data-net="off" data-page-node-id="EVVFG4dOaHjtBOebAP1x7h">断开</button>
+          <button data-net="re" data-page-node-id="nfHnCim6wWKIDHEJI4815k">重连中</button>
+        </div>
+      </div>
+      <div class="statebox">
+        <div class="st">密码状态（真实环境由 IAM 在凭据校验通过时返回）</div>
+        <div class="netpick" id="pwdPick">
+          <button data-pwd="normal" class="on">正常</button>
+          <button data-pwd="initial">初始密码</button>
+          <button data-pwd="expired">已过期</button>
+          <button data-pwd="soon">即将过期</button>
+        </div>
+      </div>
+      <div class="statebox">
+        <div class="st">剩余天数 N（仅「即将过期」用，后台返回，默认 3）</div>
+        <div class="netpick" id="daysPick">
+          <button data-days="1">1 天</button>
+          <button data-days="3" class="on">3 天</button>
+          <button data-days="7">7 天</button>
+          <button data-days="15">15 天</button>
+        </div>
+      </div>
+      <div class="statebox">
+        <div class="st">二次验证策略（真实环境由后台按用户 / 角色下发）</div>
+        <div class="netpick" id="secPick">
+          <button data-sec="0" class="on">关</button>
+          <button data-sec="1">开</button>
+        </div>
+      </div>
+      <div class="statebox">
+        <div class="st">后台开通的认证方式（可开 1~6 种，看 tab 怎么排）</div>
+        <div class="netpick mth" id="mthPick">
+          <button data-mth="1">1 种</button>
+          <button data-mth="2">2 种</button>
+          <button data-mth="3">3 种</button>
+          <button data-mth="4">4 种</button>
+          <button data-mth="5">5 种</button>
+          <button data-mth="6" class="on">6 种</button>
+        </div>
+      </div>
+      <div class="tools" data-page-node-id="AbNiL5PPYbbfeEo4RU2koM">
+        <button onclick="resetAll()" data-page-node-id="bZBp7HayWGVLU7htD5lr2F">重来一遍</button>
+        <button class="pri" onclick="autoPlay()" data-page-node-id="JnNgRWvzWksbXfV3s9O6BH">自动走一遍</button>
+        <button id="btnNotes" onclick="toggleNotes()" title="在右侧浮层查看本页全部交互点" data-page-node-id="cVd17vSIevkGvOSmcXNIsu">本页交互说明</button>
+      </div>
+      <div class="st" style="margin:14px 0 0;font-size:10.5px;color:#9CA3AF;font-weight:500;letter-spacing:.4px" data-page-node-id="3pOCVdCOgVgvNbth8D0wKr">操作日志</div>
+      <div class="log" id="log" data-page-node-id="Rith2OCeutznop08ZJUPAW"></div>
+    </div>
+  </div>
+
+
+</div>
+
+<script>
+/* =========================================================
+   E 登录 Mac 版 · 联动原型
+   一个状态机 + 一组渲染函数，界面切换靠重渲染，不靠跳页
+   ========================================================= */
+
+var S = {
+  bind: false,          // 是否已绑定 IAM 账号
+  login: false,         // 是否已登录（IAM 会话）
+  view: 'bind',         // 当前界面
+  method: 'pw',         // 登录方式 pw|qr|sms|otp
+  user: '',             // 上次登录的统一身份账号（只用于「您好，XXX」回显）
+
+  /* ── 三个「账号」字段，各司其职，禁止互相代替（v1.0.8）───────────
+     以前只有一个 osUser，既当「本机 macOS 账户名」用（绑定页那行只读展示），
+     又当「绑定记录里的统一身份账号」用（退出页比对 / 档案返显 / 注销文案），
+     而它本身还是个**写死的常量** —— 于是无论用户绑了谁，
+     退出后登录页都声称「本机已绑定账号：zhangsan」。这就是本轮要修的病根。
+
+     macUser  本机 macOS 账户名。系统给的值（真实环境 = NSUserName() / whoami），
+              只读，任何业务逻辑都不许改写它。
+     bindIam  本机绑定记录里的统一身份账号 ——「本机已绑定账号」的唯一真相来源。
+              写入点唯一：绑定成功那一刻（commitBind）；
+              清空点唯一：注销成功那一刻（commitUnbind）。
+              初始为空 = 这台机器上还没有绑定记录。
+     user     上次登录的统一身份账号，只喂「您好，XXX」。
+              退出登录**不清**（要回显），注销才清。
+
+     注意 macUser 与 bindIam 是两回事：设备转交后新员工用的是自己的 macOS 账户，
+     但机器上的绑定记录还留着原员工的 IAM 账号 ——「原绑定用户离职」这条死锁正是这么来的。 */
+  macUser: 'zhangsan',  // 本机 macOS 账户名（模拟 whoami，只读）
+  bindIam: '',          // 本机绑定记录：统一身份账号（唯一写入口见 commitBind）
+  device: 'MacBook Pro',
+  net: 'ok',            // ok|weak|off|re
+  lang: 'zh',           // 界面语言 zh|en
+  modal: null,          // 当前弹窗
+  winOpen: true,        // 窗口是否展开（关闭/最小化后为 false）
+  winMax: false,        // 窗口是否最大化
+
+  /* ── v1.0.16 认证链（改密 / 二次验证）─────────────────────────
+     enabled   后台开通了哪几种认证方式。真实客户端由后台下发，原型在这里模拟，
+               用来演示「配 6 种」和「只配 2 种」两种排布。
+     step      窗口内的推进步骤。null = 正常登录表单；'chpw' = 正在改密。
+               改密与二次验证都是**整页替换窗口内容**，不是盖一层蒙层。
+     chpw      改密上下文：{ reason:'initial'|'expired'|'soon' }，决定标题与能否跳过。
+     second    二次验证上下文：{ cur:'sms'|'otp'|'pw'|'face'|'fp', err }。
+               非空即表示当前整页显示的是二次验证页，不新开窗口。 */
+  enabled: ['pw','qr','sms','face','fp','otp'],
+  step: null,
+  chpw: null,
+  second: null,
+  /*    demo      演示开关。真实环境这些值全由后台策略决定，原型用开关模拟，
+               免得为了看一条分支去改代码。
+                 pwdState    正常 / 初始密码 / 已过期 / 即将过期
+                 second      二次验证开不开
+                 secondWays  策略允许的二次验证方式（默认给全，验证页里可切） */
+  demo: { pwdState:'normal', second:false,
+          pwdDays:3,
+          secondWays:['sms','face','fp','otp'], secondWay:'sms' },
+
+  data: {},             // 表单暂存
+  log: []
+};
+
+
+/* =========================================================
+   本页交互说明的数据（v1.0.11）
+   NOTES        —— 72 条交互点全文，来自《交互表 v1.0》
+   NODE_POINTS  —— 每个界面列出哪些交互点（界面级索引）
+   NODE_DESC    —— 每个界面的一句话定位
+   这三个都由 _过程产物/r31/ 的脚本从交互表导出，改表后重跑即可同步，
+   不要在原型里手改 —— 手改会在下次重跑时被覆盖。
+   ========================================================= */
+var NOTES = {"M-BIND-001": {"g": "首次绑定","page": "绑定引导窗口","do": "OS 登录后 CS 程序首次自启（自动）","ok": "自动弹出绑定引导窗口，顶部为品牌区与标题，中部为登录方式切换，下部为 macOS 账户名与提交按钮","err": "CS 未自启 → 用户从菜单栏图标手动打开","copy": "关联统一身份账号 / 关联后，开机将自动登录"},"M-BIND-002": {"g": "首次绑定","page": "绑定引导窗口","do": "点【账密登录】","ok": "表单切换为 账号 + 密码 + macOS 账户名（只读）","err": "无","copy": "请输入统一身份账号 / 请输入密码"},"M-BIND-003": {"g": "首次绑定","page": "绑定引导窗口","do": "点【扫码登录】","ok": "表单切换为二维码区域，前端持续轮询扫码结果。二维码居中展示，下方提示用哪个 App 扫","err": "无可用扫码通道 → 该 tab 不展示","copy": "扫码登录 / 请使用手机 E 登录 App 或企业微信扫码"},"M-BIND-004": {"g": "首次绑定","page": "绑定引导窗口","do": "（自动）二维码失效 / 扫码后","ok": "二维码有效期 120 秒；过期后就地盖一层遮罩，提供【点击刷新】重新获取，不退出当前 tab。扫码成功后在手机上确认，客户端收到结果自动进入绑定","err": "用户取消扫码 → 二维码保持可扫状态；刷新失败 → 提示重试","copy": "等待扫码… / 二维码已过期 / 点击刷新 / 扫码成功，请在手机上确认"},"M-BIND-005": {"g": "首次绑定","page": "绑定引导窗口","do": "点【短信登录】","ok": "表单切换为 手机号 + 验证码","err": "后台未配置短信认证 → 该入口不展示","copy": "短信登录 / 请输入手机号码"},"M-BIND-006": {"g": "首次绑定","page": "绑定引导窗口","do": "点【动态口令】","ok": "表单切换为口令输入框","err": "后台未配置 OTP → 该入口不展示","copy": "口令登录 / 请输入动态口令"},"M-BIND-007": {"g": "首次绑定","page": "绑定引导窗口","do": "输入 IAM 账号（账号 / 手机号）","ok": "默认以统一身份用户名作为输入框提示，提示文案支持后台自定义修改；账号与手机号共用一个输入框，按输入内容自动识别走哪种校验","err": "留空提交 → 提示必填；格式不符 → 提示输入格式错误","copy": "请输入统一身份账号 / 请输入手机号码 / 账号格式不正确"},"M-BIND-008": {"g": "首次绑定","page": "绑定引导窗口","do": "点【获取验证码】并输入验证码","ok": "点击按钮：先弹滑块防人机校验，通过后按钮进入倒计时，向手机号下发短信验证码；同一行控件内输入收到的验证码，输入满位后自动校验","err": "格式不符 / 号码不存在 → 点击时即提示；验证码填错 / 已过期 → 分别提示，验证码框不清空","copy": "请填写手机号码 / 手机号码不存在 / 手机号码格式不正确 / 验证码不正确 / 验证码已过期"},"M-BIND-009": {"g": "首次绑定","page": "绑定引导窗口","do": "输入 OS 账号名","ok": "默认读取 macOS 本地账户名；多值时可下拉单选，仅一个值时直接回显只读","err": "本机无可用账户 → 提示手动输入","copy": "请输入 macOS 账户名"},"M-BIND-010": {"g": "首次绑定","page": "绑定引导窗口","do": "点【绑定登录】","ok": "全部校验通过 → 窗口内弹出成功提示 → 约 2 秒后窗口自动关闭 → 菜单栏常驻图标点亮为原色，同时完成一次 IAM 登录。全程无需用户点击确认，不做独立成功页","err": "IAM 账号已被其他终端绑定 / OS 账密错误 / IAM 账号已被锁定 / 网络异常，分别给出对应提示，窗口保持打开且不清空已填内容","copy": "绑定成功"},"M-BIND-011": {"g": "首次绑定","page": "绑定引导窗口","do": "（系统自动）绑定成功后","ok": "菜单栏图标点亮为「已登录」态（logo 原色），窗口关闭，后续开机自动登录","err": "自动登录失败（OS 账号变更 / IAM 会话过期）→ 弹出窗口要求重新登录，图标转为「未登录」态","copy": "详见「日常自动登录」流程"},"M-BIND-012": {"g": "首次绑定","page": "绑定引导窗口","do": "（系统自动）绑定提交通过后","ok": "在【本机绑定记录】里写入本次认证通过的统一身份账号 —— 这是「本机已绑定账号」的唯一写入点。此后退出后登录页的账号比对、忘记密码的账号行返显、注销二次确认的文案，读的都是这个值。写什么就报什么：绑定 lisi 后，退出页的提示即为「本机已绑定账号：lisi」，而不是永远写着某个写死的账号。注意它与窗口里那行只读的「本机 macOS 账户」是两个字段 —— 后者是系统给的账户名（whoami），前者是绑定关系的右端。","err": "写盘失败 → 绑定不成立，提示重试、不进入已绑定态。否则会出现「IAM 会话已建立、但本地绑定记录是空的」这种不一致：退出后登录页会因为读不到记录而跳过账号比对，等于绑定白做。","copy": "绑定成功"},"M-BIND-013": {"g": "首次绑定","page": "首次绑定成功后（自动）","do": "绑定关系写入本机的同一时刻（自动）","ok": "为该统一身份账号自动分配一个档案手机号，写入 IAM 档案，规则为「138 开头 + 按序编号」（第 n 个绑定账号取 1381000000n），所有号码均为合法 11 位国内手机号。该号用于短信登录与忘记密码-短信渠道的返显。同一账号重复绑定拿到同一个号（按档案已有记录返回，不重复发号）；解绑不回收号码。","err": "档案中已有该账号 → 复用原号，不另行分配","copy": "无提示（后台自动完成）"},"M-BIND-014": {"g": "首次绑定","page": "绑定引导窗口 / 登录窗口（短信登录）","do": "在手机号输入框中输入内容","ok": "边输边验：输入内容须为 11 位国内手机号（1 开头、第二位 3-9、其后 9 位数字）。校验通过则「绑定并登录」/「登录」按钮解锁；未通过则按钮保持置灰不可点。格式不符时点击提交，提示「请输入正确的 11 位手机号码」。该规则同样适用于忘记密码页的手机号渠道。","err": "格式不符 → 按钮置灰；强行提交 → 提示「请输入正确的 11 位手机号码」","copy": "请输入正确的 11 位手机号码"},"M-PWD-001": {"g": "忘记密码","page": "绑定引导窗口 / 登录页 / 退出后登录页","do": "账密认证失败后（自动）","ok": "在失败提示下方展示【忘记密码】文字入口，点入后在同一个 CS 窗口内进入找回密码，不跳页","err": "账号已被锁定 / 网络异常 → 不展示该入口","copy": "忘记密码"},"M-PWD-002": {"g": "忘记密码","page": "忘记密码（单页）","do": "进入找回密码页（自动）","ok": "一页承载全部三步，自上而下依次为：① 选验证方式 + 填用户名/手机号；② 获取并输入验证码；③ 填新密码。没有「下一步」按钮，也不跳页。页面顶部常驻会话倒计时；第 3 步的密码表单在验证码通过前置灰不可填，通过后自动解锁","err": "无任何可用验证方式 → 提示联系管理员","copy": "请在 04:58 内完成全部操作"},"M-PWD-003": {"g": "忘记密码","page": "忘记密码（单页）","do": "选择验证方式（短信 / 邮箱 / 钉钉）","ok": "同一位置切换输入项：手机号 / 邮箱地址 / 钉钉扫码。切换不清空已填内容、不重置倒计时","err": "后台未配置的方式 → 该 tab 不展示","copy": "短信验证 / 邮箱验证 / 钉钉验证"},"M-PWD-004": {"g": "忘记密码","page": "忘记密码（单页）","do": "点【获取验证码】","ok": "就地弹出滑块防人机校验（不占独立一行、不弹新窗口）；拖动通过后才下发验证码，按钮随即进入 59 秒倒计时重发状态。验证码输入框与【获取验证码】按钮在同一行，框在左、按钮在右","err": "滑块未拖到位 → 校验失败并重置滑块；验证码下发失败 → 提示重试，倒计时回退","copy": "向右拖动滑块完成验证 / 验证码已发送 / 59s 后重发"},"M-PWD-005": {"g": "忘记密码","page": "忘记密码（单页）","do": "输入验证码","ok": "校验通过 → 页面下半部分的新密码表单就地解锁（不跳页、不新增弹窗），光标自动聚焦到新密码框","err": "验证码错误 / 已过期 → 分别提示；超时 → 提示操作已超时并提供【重新开始】","copy": "验证码不正确 / 验证码已过期 / 操作已超时，请重新开始找回密码"},"M-PWD-006": {"g": "忘记密码","page": "忘记密码（单页）","do": "输入新密码","ok": "输入时实时提示密码策略符合情况（未满足项逐条标红并说明原因，不是笼统提示）","err": "不满足策略 / 两次输入不一致 → 提示具体是哪一项，「确认修改」置灰","copy": "密码要求\n1. 长度为 8-20 个字符\n2. 至少包含数字、大写字母、小写字母、特殊字符中的 3 种\n3. 未使用弱口令（账号名、姓名拼音、生日、连续或重复数字等）"},"M-PWD-007": {"g": "忘记密码","page": "忘记密码（单页）","do": "点【确认修改】","ok": "修改成功 → 提示并返回登录页，用户用新密码登录","err": "与原密码相同 / 命中历史密码限制 → 提示","copy": "密码修改成功，请使用新密码登录"},"M-PWD-008": {"g": "忘记密码","page": "忘记密码（单页）","do": "（页面展示）账号行预填值","ok": "账号行的预填值按【本机绑定记录】里的那个统一身份账号返显（不是常量，也不是绑定页显示的「本机 macOS 账户名」—— 两者是两个字段） —— 绑定谁就返显谁，绑了 lisi 就显示 lisi 那一套，不写死。三项取该账号在 IAM 档案里已绑定的联系方式（脱敏展示，仍可编辑）。默认绑定 zhangsan 时：手机号 138****8888 / 邮箱 zhangsan@corp.com / 钉钉 zhangsan。档案里没有的账号，邮箱按「账号 + 企业域名」派生、钉钉用账号本身","err": "手机号无法从账号名派生 → 留空，由用户自己填，不编造","copy": "请输入手机号码 / 请输入邮箱地址 / 请输入钉钉账号"},"M-PWD-009": {"g": "忘记密码","page": "忘记密码（单页）","do": "选择【短信验证】渠道 / 点【获取验证码】","ok": "手机号自动返显「本机已绑定的那个账号」档案中的手机号（绑定谁就返显谁）；返显值可编辑。点【获取验证码】前做格式校验：仅手机号渠道校验 11 位国内号，邮箱渠道与钉钉渠道不套用手机号规则。校验不通过则不下发验证码，提示「请输入正确的 11 位手机号码」。","err": "手机号格式不符 → 不下发验证码并提示；档案中无该账号 → 输入框留空由用户填写","copy": "请输入正确的 11 位手机号码"},"M-AUTO-001": {"g": "日常自动登录","page": "菜单栏（后台）","do": "macOS 登录成功（自动）","ok": "E 登录 CS 程序随系统登录自启，读取本机已绑定的 IAM 账号","err": "CS 未随系统启动 → 用户从菜单栏图标手动唤起","copy": "无提示（全程静默）"},"M-AUTO-002": {"g": "日常自动登录","page": "菜单栏（后台）","do": "系统自动（读取本地绑定关系）","ok": "使用本地保存的凭证向 IAM 发起静默认证，不弹窗、不打断用户桌面","err": "本地无绑定关系 → 转入首次绑定流程","copy": "无提示（全程静默）"},"M-AUTO-003": {"g": "日常自动登录","page": "菜单栏（后台）","do": "静默认证通过（自动）","ok": "菜单栏图标切换为「已登录」态，IAM 会话建立，访问集成应用免登录","err": "无","copy": "无提示（全程静默）"},"M-AUTO-004": {"g": "日常自动登录","page": "登录窗口","do": "静默认证失败（自动）","ok": "自动弹出登录窗口，预填上次登录的账号，用户只需补凭证。失败原因不同，提示语与窗口标题也不同，让用户一眼知道该干什么","err": "① 凭证失效 / 会话过期 → 标题「登录状态已失效」，副文案「为保障账号安全，请重新登录」；② 网络异常 → 标题「网络连接异常」，副文案「请检查网络后重试」，窗口内提供【重试】按钮；③ IAM 账号被锁定 → 标题「账号已被锁定」，副文案「请联系管理员解锁后再试」","copy": "登录状态已失效，为保障账号安全，请重新登录 / 网络连接异常，请检查网络后重试 / 账号已被锁定，请联系管理员解锁后再试"},"M-AUTO-005": {"g": "日常自动登录","page": "登录窗口","do": "OS 账号发生变更（自动）","ok": "检测到当前 OS 账号与绑定关系不一致 → 弹出绑定引导窗口，要求重新完成绑定。原绑定关系仍在，新绑定成功后再覆盖（避免误操作把绑定弄丢）","err": "无","copy": "当前操作系统账号已变更，请重新关联统一身份账号"},"M-LOGIN-001": {"g": "手动登录","page": "登录窗口","do": "从菜单栏点【登录】","ok": "弹出独立登录窗口（非全屏、非代填），展示上次使用的登录方式","err": "已有会话 → 直接展示已登录状态，不重复登录","copy": "请选择登录方式"},"M-LOGIN-002": {"g": "手动登录","page": "登录窗口","do": "点【账密登录】","ok": "表单切换为 账号 + 密码；账号与手机号共用输入框，按内容自动识别","err": "留空提交 → 提示必填","copy": "请输入统一身份账号 / 请输入密码"},"M-LOGIN-003": {"g": "手动登录","page": "登录窗口","do": "点【扫码登录】","ok": "表单切换为二维码，前端轮询扫码结果","err": "二维码过期 → 自动刷新并提示","copy": "扫码登录 / 二维码已过期"},"M-LOGIN-004": {"g": "手动登录","page": "登录窗口","do": "点【短信登录】","ok": "表单切换为 手机号 + 验证码；点【获取验证码】后进入倒计时","err": "后台未配置短信认证 → 该入口不展示；号码格式错 / 验证码错 → 分别提示","copy": "请输入手机号码 / 验证码不正确"},"M-LOGIN-005": {"g": "手动登录","page": "登录窗口","do": "点【动态口令】","ok": "表单切换为口令输入框","err": "后台未配置 OTP → 该入口不展示；口令错误 → 提示剩余重试次数","copy": "请输入动态口令 / 动态口令不正确"},"M-LOGIN-006": {"g": "手动登录","page": "二次验证页","do": "首因素校验通过后，策略要求二次验证（自动）","ok": "窗口内容**整页切换**为二次验证页（不是叠一层弹窗，也不是新开窗口）：顶部品牌区 + 标题「需要二次验证」+ 方式切换 + 验证区 + 主按钮 + 「返回上一级认证登录」。可用的方式由后台策略下发，且排掉与首因素相同的方式；首因素已是人脸 / 指纹时不再给生物识别，兜底至少给短信（方式集合永不为空）。人脸 / 指纹沿用同一套采集区，只做认证、不做录入","err": "验证不通过 → 提示并留在本页，已填内容不清空；点「返回上一级」→ 本次二次验证作废，首因素结果同时失效，需重新完成首因素认证","copy": "需要二次验证 / 为了保障您的账户安全，请完成二次验证 / 返回上一级认证登录"},"M-LOGIN-007": {"g": "手动登录","page": "登录窗口","do": "认证全部通过（自动）","ok": "窗口内提示登录成功 → 窗口自动关闭 → 菜单栏图标点亮为「已登录」态","err": "密码错误 / 账号已被锁定 / 账号不存在 / 网络异常 → 分别提示，窗口保持打开","copy": "登录成功 / 账号或密码错误 / 账号已被锁定"},"M-MENU-001": {"g": "菜单栏常驻","page": "菜单栏图标","do": "（系统自动）状态变化时","ok": "两态：已登录（logo 原色正常显示）／未登录（黑色版图标 + 降透明度 35%）。不做「异常」态。已登录态需在代码里关闭 macOS 的 template image 渲染（setTemplate:NO）才能显示原色","err": "无","copy": "无（仅图标形态变化，不弹提示）"},"M-MENU-002": {"g": "菜单栏常驻","page": "菜单栏下拉面板","do": "点菜单栏图标","ok": "展开下拉面板（宽 320px）。顶部为只读绑定关系区：头像 +「您好，XXX」+「已绑定本机 · 设备名」+ 已登录 状态标。此区不可点击、不展开二级菜单，仅作信息展示。菜单项为「图标 + 文字 + 弹性留白 + 尾部角标」四栏，文字一律完整展示——不换行、不折行、不出现省略号；角标靠右对齐","err": "取不到账号信息 → 降级只展示「已登录」","copy": "您好，XXX / 已绑定本机"},"M-MENU-003": {"g": "菜单栏常驻","page": "菜单栏下拉面板","do": "点面板内【访问应用门户】","ok": "展开 IAM 集成应用入口列表，点击即以单点方式在浏览器打开。该入口显隐由后台开关统一控制：开关关闭时整个入口不展示","err": "后台开关关闭 → 该入口不展示，面板只留「设置」「注销绑定账号」「退出登录」；已授权应用为空 → 提示暂无可用应用","copy": "访问应用门户 / 暂无可用应用"},"M-MENU-004": {"g": "菜单栏常驻","page": "菜单栏下拉面板","do": "点面板内【设置】","ok": "打开设置窗口（独立窗口）：通用 / 登录后 / 关于三组","err": "无","copy": "设置"},"M-MENU-005": {"g": "菜单栏常驻","page": "菜单栏下拉面板","do": "点面板内【注销绑定账号】","ok": "直接进入注销确认流程（二次确认 + 身份验证），详见「注销绑定账号」流程。该行文字用常规色（非红色），仅图标保留红色描边作风险轻提示——因为注销有完整的二次确认 + 身份验证兜底，不需要再用整行飘红施压","err": "无","copy": "注销绑定账号"},"M-MENU-006": {"g": "菜单栏常驻","page": "菜单栏下拉面板","do": "点面板内【退出登录】","ok": "弹出二次确认，确认后清除 IAM 会话，图标转为「未登录」态并保留绑定关系。该行文字用常规色（非红色），因为退出完全可逆、随时可登回来，按 macOS 原生菜单规范红色只留给破坏性且不可逆的操作","err": "取消 → 关闭确认框，保持已登录状态","copy": "确定要退出登录吗？"},"M-MENU-007": {"g": "菜单栏常驻","page": "菜单栏下拉面板（未登录态）","do": "点面板内的主行动按钮（自动按本机绑定记录分流）","ok": "按「本机有没有绑定记录」展示不同去向：① 有绑定记录 → 按钮文案「登录统一身份」，点击进入登录页，可一键登录；② 无绑定记录（全新机器）→ 按钮文案「关联统一身份账号」，点击进入首次绑定引导页。绑定关系区同步区分：有记录显示「未登录 / 已绑定 XXX，可一键登录」，无记录显示「尚未关联 / 本机还没有关联统一身份账号」。","err": "取不到绑定记录 → 按无记录处理，引导去绑定，不会进到登录页","copy": "登录统一身份 / 关联统一身份账号 / 未登录 / 尚未关联"},"M-SET-001": {"g": "设置","page": "菜单栏下拉面板","do": "点面板内【设置】","ok": "打开设置窗口（独立窗口，400 宽），带返回箭头回面板。页面按「通用 / 登录后 / 关于」三组排布，每行为「图标 + 标题 + 说明 + 右侧控件」","err": "无","copy": "设置"},"M-SET-002": {"g": "设置","page": "设置","do": "切换语言（中文 / EN）","ok": "分段控件直接切换，无需进二级页；切换后全界面文案跟随","err": "无","copy": "中文 / EN / 语言切换"},"M-SET-003": {"g": "设置","page": "设置","do": "切换「开机自动启动」开关","ok": "开启 → 登录 macOS 后自动运行 Elogon 并按绑定关系自动登录；关闭 → 下次开机需手动登录","err": "关闭时给出明确后果提示，避免用户误以为解绑","copy": "开机自动启动 / 已关闭开机自动登录，下次开机需手动登录统一身份。绑定关系仍保留。"},"M-SET-004": {"g": "设置","page": "设置","do": "切换「自动打开应用门户」开关","ok": "开启 → 登录成功后自动展开门户界面，无需手动点击；关闭 → 登录后不自动展开","err": "后台未开放门户功能 → 该行不展示","copy": "自动打开应用门户"},"M-SET-005": {"g": "设置","page": "设置","do": "切换「登录成功后关闭窗口」开关","ok": "开启 → 进入应用门户后自动收起客户端窗口，转为后台保持在线；关闭 → 窗口保持打开","err": "关闭「自动打开应用门户」时，本项无意义 → 一并置灰","copy": "登录成功后关闭窗口"},"M-SET-006": {"g": "设置","page": "设置","do": "（页面展示）关于分组","ok": "展示品牌 logo + 产品名 Elogon + 版本号 V1.8.4.2.021301；下方提供「检查更新」「用户协议」入口","err": "有新版本 → 提示并可下载","copy": "Elogon / V1.8.4.2.021301 / 检查更新 / 用户协议"},"M-EXIT-001": {"g": "退出与切换","page": "菜单栏下拉面板","do": "点【退出登录】","ok": "弹出二次确认弹窗，说明退出后需重新登录，但绑定关系保留","err": "无","copy": "确定要退出登录吗？退出后需重新登录，绑定关系将保留"},"M-EXIT-002": {"g": "退出与切换","page": "确认弹窗","do": "点【取消】","ok": "关闭弹窗，保持当前登录态，不产生任何会话变更","err": "无","copy": "取消"},"M-EXIT-003": {"g": "退出与切换","page": "确认弹窗","do": "点【确定】","ok": "清除 IAM 会话与浏览器侧单点状态，窗口切为「未登录」态","err": "网络异常导致服务端会话未清除 → 本次退出仅清本地，下次登录强制重新认证","copy": "已退出登录"},"M-EXIT-004": {"g": "退出与切换","page": "退出后登录页","do": "（页面展示）","ok": "页面上部以标题回显当前用户「您好，XXX」（不另配副标题）；下方直接承接认证方式表单（默认账密），不额外列入口按钮。顶部展示品牌 logo","err": "取不到用户名 → 降级只展示「您好」，不展示账号","copy": "您好，XXX"},"M-EXIT-005": {"g": "退出与切换","page": "退出后登录页","do": "默认展示认证方式表单","ok": "沿用该用户上次使用的登录方式；可切换到扫码 / 短信 / 动态口令","err": "无","copy": "请输入统一身份账号 / 请输入密码"},"M-EXIT-006": {"g": "退出与切换","page": "退出后登录页","do": "直接提交认证（自动）","ok": "判定拆两层：① 凭据认证 —— 账号密码对不对，由 IAM 服务端回答；② 账号比对 —— 凭据对了，再看是不是本机绑定的那个账号。两层都通过 → 复用当前绑定关系直接登录，窗口关闭回到菜单栏已登录态，可反复登录","err": "①层失败 → 只报凭据错误，绝不透露本机绑定了谁；②层失败 → 提示「登录失败，本机已绑定账号：XXX」，同时开放自助解绑（见 M-EXIT-008）","copy": "登录成功 / 账号或密码错误 / 登录失败，本机已绑定账号：zhangsan"},"M-EXIT-007": {"g": "退出与切换","page": "退出后登录页","do": "（页面展示）认证失败态","ok": "账号框与密码框一并标红（对齐 macOS 原生登录失败表现），下方出现错误条告知本机绑定的是谁；底部「注销绑定账号」入口仅在此态出现，与「忘记密码」同行、排在它左侧。正常退出后（用户自己退出、准备重新登录）不出现该入口","err": "用户修改账号输入 → 失败提示自动撤掉（错误条 + 红框 + 解绑入口一并消失），回到正常态","copy": "登录失败，本机已绑定账号：XXX（读本机绑定记录，绑谁报谁） / 注销绑定账号"},"M-EXIT-008": {"g": "退出与切换","page": "退出后登录页（认证失败态）","do": "点底部【注销绑定账号】","ok": "进入解绑二次确认弹窗，告知本机绑定的是哪个账号、以及「你已通过统一身份认证」，注销后可直接重新关联自己的账号。确认后直接解绑（不再验密码），回到绑定引导窗口。这条路径专治「原绑定用户离职」的死锁：来者已用真实凭据通过 IAM 认证，原用户密码此时拿不到，若再要求验原密码等于没解","err": "取消 → 关闭弹窗，仍停在退出后登录页，绑定关系与已退出状态都不变；服务端解除失败 → 提示重试，本地绑定关系不先行清除","copy": "确定要注销绑定账号吗？/ 本机当前绑定的是「XXX」。你已通过统一身份认证，注销后绑定关系将解除，可直接重新关联你自己的账号。"},"M-EXIT-009": {"g": "退出与切换","page": "退出后登录页（认证失败态）","do": "（系统行为）渲染失败提示","ok": "「本机已绑定账号」的值取自【本机绑定记录】，不是常量、也不是绑定页显示的 macOS 账户名。绑定记录为空时不提示、也不做账号比对 —— 没有记录可比，不凭空拦人。记录里的账号与「本机 macOS 账户名」是两个字段：设备转交后会分离（新员工用的是自己的 macOS 账户，记录里仍是原员工的 IAM 账号），这条分离正是「原绑定用户离职」死锁成立的前提。","err": "读不到绑定记录 → 视为未绑定，走首次绑定流程，不做账号比对。（不得用任何写死的默认账号兜底 —— 那会谎报本机绑定了谁。）","copy": "登录失败，本机已绑定账号：XXX"},"M-CANCEL-001": {"g": "注销绑定账号","page": "菜单栏下拉面板 / 退出后登录页","do": "找到注销入口（两处）","ok": "注销绑定账号共两处入口，都是「一级可见、一次点击直达」：① 菜单栏下拉面板一级（已登录态，平铺、不藏二级菜单）；② 退出后登录页底部「注销绑定账号」—— 仅认证失败态出现，即「凭据已通过 IAM 认证、但账号不是本机绑定的那个」。两处进入的是同一套解绑动作，不各做一套，差异只在验证门槛（见 M-CANCEL-004）","err": "无","copy": "注销绑定账号"},"M-CANCEL-002": {"g": "注销绑定账号","page": "注销确认弹窗","do": "点【注销绑定账号】","ok": "弹出注销确认弹窗，明确告知将解除本机账号与统一身份账号的绑定关系，并说明后果：后续需重新绑定才能自动登录。注销不需要管理员审批","err": "无","copy": "注销后，本机账号与统一身份账号的绑定关系将解除，需重新绑定后才能自动登录"},"M-CANCEL-003": {"g": "注销绑定账号","page": "注销确认弹窗","do": "点【取消】","ok": "关闭弹窗，保持当前绑定关系与登录态不变","err": "无","copy": "取消"},"M-CANCEL-004": {"g": "注销绑定账号","page": "注销确认弹窗 / 身份验证","do": "点【确认注销】","ok": "按路径分两种 —— A 已登录态（菜单栏面板入口）：先要求输入当前 IAM 账号密码验证身份，通过后解绑；二次验证是为了防止他人趁用户离开电脑时误注销。B 认证失败态（登录页入口）：不重复验证，确认即解绑 —— 来者已在登录页用真实凭据通过 IAM 认证，证明是合法员工，只是不是本机绑定的那位","err": "A 路径密码错误 → 提示并保留在验证步骤；B 路径取消 → 回到退出后登录页","copy": "请输入当前账号密码以确认注销 / 账号或密码错误"},"M-CANCEL-005": {"g": "注销绑定账号","page": "注销确认弹窗","do": "身份验证通过（自动）","ok": "解除绑定关系、清除本地凭证与 IAM 会话，回到绑定引导窗口，等待用户重新绑定。A、B 两条路径结果一致；都不向本人发送注销通知（已裁定），靠操作日志与服务端记录事后追查","err": "服务端解除失败 → 提示重试，本地绑定关系不先行清除","copy": "注销成功，请重新绑定账号"},"M-CANCEL-006": {"g": "注销绑定账号","page": "绑定引导窗口","do": "（自动）从注销流程返回","ok": "展示空白的绑定引导窗口（无预填账号），走一遍完整绑定流程。采用「先注销再重绑」而不是「直接换绑」，是为了守住 OS 账号 ↔ IAM 账号的 1:1 关系：任一时刻本机 OS 账号只对应一个 IAM 账号，系统才能凭 OS 账号唯一定位到该自动登录哪个 IAM 账号","err": "无","copy": "关联统一身份账号"},"M-CANCEL-007": {"g": "注销绑定账号","page": "菜单栏下拉面板","do": "（页面展示）注销入口的层级","ok": "注销绑定账号直接平铺在菜单栏面板一级列表，与「设置」「退出登录」同级；顶部绑定关系区为只读展示，不承载任何点击行为，不做二级菜单","err": "无","copy": "注销绑定账号"},"M-CANCEL-008": {"g": "注销绑定账号","page": "注销绑定账号（方案论证）","do": "（设计裁定）认证失败态用什么验证身份","ok": "不用 macOS 系统密码验证 —— macOS 上客户端拿不到也验证不了系统密码：LocalAuthentication 只返回布尔结果，且弹的是系统自己的认证面板；Authorization Services 是申请特权操作，同样不向 App 暴露密码。在自家弹窗里放「请输入系统密码」再本地校验，技术上落不了地。验证对象改为由 IAM 回答「你是谁」—— 与来者那次登录提交合并，不额外增加步骤。备选（已否决）：唤起 macOS 原生授权框 / 仅强二次确认 / 走 IT 审批","err": "无","copy": "—"},"M-CANCEL-009": {"g": "注销绑定账号","page": "注销绑定账号","do": "（系统自动）解绑成功后","ok": "清空【本机绑定记录】—— 这是「本机已绑定账号」的唯一清空点。清空后回到绑定引导窗口，可重新关联任意统一身份账号；此时退出后登录页不再做账号比对。注意「退出登录」只清 IAM 会话、【不动】绑定记录 —— 这正是「退出」与「注销」的分界线。","err": "服务端解除失败 → 提示重试，【本地绑定记录不先行清除】，避免出现「本地以为解绑了、服务端还绑着」的不一致。","copy": "注销成功 / 绑定关系已解除，请重新关联账号 / 去关联"},"M-NET-001": {"g": "网络状态提示","page": "全局（所有需要联网的页面）","do": "网络正常","ok": "不展示任何提示条。页面布局不为其预留占位，避免正常态下白白占一行高度","err": "无","copy": "无提示（正常态静默）"},"M-NET-002": {"g": "网络状态提示","page": "全局","do": "网络较弱（自动检测）","ok": "窗口顶部通栏浮出一条浅黄提示条：「当前网络较弱，操作可能较慢」，不遮挡内容、不弹窗。恢复后自动消失（约 2 秒）。此时提交类按钮仍可点击","err": "持续弱网 → 提示条常驻不自动消失","copy": "当前网络较弱，操作可能较慢"},"M-NET-003": {"g": "网络状态提示","page": "全局","do": "网络断开（自动检测）","ok": "窗口顶部通栏浮出浅红提示条：「网络已断开，请检查网络连接」，并提供【重试】按钮。同时禁用所有提交类按钮（获取验证码 / 绑定登录 / 确认修改 / 登录），但不清空用户已填内容，恢复联网后按钮自动恢复可点","err": "无","copy": "网络已断开，请检查网络连接 / 重试"},"M-NET-004": {"g": "网络状态提示","page": "全局","do": "网络重连中（自动检测）","ok": "顶部提示条换成浅蓝：「正在重新连接…」，接口失败重连时同样复用此条。位置与其余三态一致","err": "多次重连失败 → 转为「网络已断开」态，给出【重试】","copy": "正在重新连接…"},"M-NET-005": {"g": "网络状态提示","page": "全局","do": "网络恢复（自动检测）","ok": "短暂展示浅绿提示条：「网络已恢复」，约 2 秒后自动消失，不打断用户当前操作","err": "无","copy": "网络已恢复"},"M-NET-006": {"g": "网络状态提示","page": "全局","do": "四种状态的位置与视觉规则","ok": "位置：统一做成<b>窗口顶部通栏贴边条</b>（紧贴标题栏下方、内容区之上），不占内容区布局、不参与滚动，不放在错误提示的位置。因为网络是环境状态（全局），账号密码错误是操作结果（局部），两者不能混在同一个位置，否则用户会误以为错误提示是网络导致的。颜色：较弱 #FFF4E5 底 / #8A4B00 字；断开 #FFEDEC 底 / #A32620 字；重连 #EAF3FF 底 / #0C447C 字；恢复 #EAF9EE 底 / #1D6B32 字。同一时刻只展示一条，按「断开 > 重连 > 较弱 > 恢复」优先级取最高","err": "无","copy": "当前网络较弱，操作可能较慢 / 网络已断开，请检查网络连接 / 正在重新连接… / 网络已恢复"},"M-CHPW-001": {"g": "修改密码","page": "修改密码页","do": "账号密码认证成功、账号比对通过后，服务端返回密码状态「初始密码」（自动）","ok": "整页切到改密页：抬头「您好，XXX」回显本次通过认证的账号；副标题灰字「初始密码请修改后继续登录」；两个密码框 + 策略清单 +【确定】。**不设取消、不设跳过**","err": "取不到账号 → 抬头降级只显示「您好」，不编造账号","copy": "您好，XXX / 初始密码请修改后继续登录"},"M-CHPW-002": {"g": "修改密码","page": "修改密码页","do": "账号密码认证成功、账号比对通过后，服务端返回「已过期」（自动）","ok": "整页切到改密页：抬头「您好，XXX」，副标题灰字「登录密码已过期请重新设置」；**不设取消、不设跳过**","err": "取不到账号 → 抬头降级只显示「您好」","copy": "您好，XXX / 登录密码已过期请重新设置"},"M-CHPW-003": {"g": "修改密码","page": "修改密码页","do": "账号密码认证成功、账号比对通过后，服务端返回「即将过期」及剩余天数 N（自动）","ok": "整页切到改密页：抬头「您好，XXX」，副标题灰字「密码还有 N 天过期请及时修改」（N 加粗、与正文同字号同色，不放大不飘色）。N 取服务端返回值（原型默认 3 天），客户端不自己算。底部给【跳过，直接登录】","err": "服务端未回 N → 按默认 3 天渲染，不卡住用户；N ≤ 0 按 1 处理；N > 90 按 90 封顶","copy": "您好，XXX / 密码还有 3 天过期请及时修改 / 跳过，直接登录"},"M-CHPW-004": {"g": "修改密码","page": "修改密码页","do": "在【新密码】输入框输入内容","ok": "逐条实时判定，每条前的符号三态：未输入灰点 · / 已满足绿勾 ✓（#1D6B32）/ 不满足红叉 ✕（#A32620）。敲到第 8 位长度就该变绿，不用等提交","err": "三条规则分别判定、分别标出，不合并成一句「格式不对」","copy": "长度为 8-20 个字符 / 至少包含数字、大写字母、小写字母、特殊字符中的 3 类 / 不能使用弱口令（账号名、连续或重复数字等）"},"M-CHPW-005": {"g": "修改密码","page": "修改密码页","do": "两次输入不一致","ok": "提示「两次输入的密码不一致」，**两个框都不清空**，用户就地改","err": "无","copy": "两次输入的密码不一致"},"M-CHPW-006": {"g": "修改密码","page": "修改密码页","do": "点【确定】但策略未满足","ok": "列出**具体未满足项**并命中的那条保持红叉：长度不在 8-20 位之间 / 字符种类不足 3 类 / 命中了弱口令规则；留在本页，已输内容保留","err": "拼一句「密码格式不正确：…」放在按钮上方，不用 toast 一闪而过","copy": "密码格式不正确：长度不在 8-20 位之间；字符种类不足 3 类；命中了弱口令规则"},"M-CHPW-007": {"g": "修改密码","page": "修改密码页","do": "点【确定】且三项全部合规","ok": "新密码写入 IAM、旧密码立即失效；**不直接登录、不关窗口**，回到判定顺序继续判二次验证，账号密码不用再输一遍","err": "服务端失败 → 提示重试，保留已输内容，不当作改密成功","copy": "确定"},"M-CHPW-008": {"g": "修改密码","page": "修改密码页","do": "点【跳过，直接登录】（仅「即将过期」分支有这一项）","ok": "放弃本次改密，直接进入二次验证判定；密码状态保持「即将过期」，到期后会被强制改密","err": "另外两支（初始 / 已过期）不显示该入口","copy": "跳过，直接登录"},"M-SEC-001": {"g": "二次验证","page": "二次验证页","do": "首因素通过且后台策略要求二次验证（自动）","ok": "窗口内容**整页切换**为二次验证页（不叠弹层、不新开窗口）：品牌区 + 标题「需要二次验证」+ 方式切换 + 验证区 + 主按钮 + 「返回上一级认证登录」","err": "策略为关 → 不出现本页，直接收尾","copy": "需要二次验证 / 为了保障您的账户安全，请完成二次验证"},"M-SEC-002": {"g": "二次验证","page": "二次验证页","do": "（自动）计算可用方式集合","ok": "后台开通集 ∩ 策略候选集；排除扫码（只能当首因素）；排除与首因素相同的方式；首因素为生物识别时不再给任何生物识别（人脸 + 指纹同属「你是谁」）。集合永不为空，兜底给短信","err": "算出来为空 → 兜底短信，界面不出现「暂无可用方式」的空态","copy": "—"},"M-SEC-003": {"g": "二次验证","page": "二次验证页","do": "点其他方式的 tab","ok": "同页切换验证区；已填内容按方式分别暂存，切回不丢","err": "无","copy": "短信 / 动态口令 / 人脸 / 指纹"},"M-SEC-004": {"g": "二次验证","page": "二次验证页","do": "二次方式为短信","ok": "带出该账号在 IAM 档案里的手机号（脱敏展示、可改）；【获取验证码】与输入框同一行，点击后 60 秒倒计时","err": "号码格式不符 → 不下发并提示；验证码错误 / 过期 → 分别提示，框不清空","copy": "请输入正确的 11 位手机号码 / 获取验证码 / 验证码不正确 / 验证码已过期"},"M-SEC-005": {"g": "二次验证","page": "二次验证页","do": "二次方式为动态口令","ok": "显示口令输入框，满位自动校验","err": "口令错误 → 提示并保留在页，给出剩余重试次数","copy": "请输入动态口令 / 动态口令不正确"},"M-SEC-006": {"g": "二次验证","page": "二次验证页","do": "二次方式为人脸","ok": "取景框 + 扫描线 + 三列提示（光线 / 取景框内 / 正视屏幕）；**一颗主按钮**：初始为【开始人脸识别】→ 点击后变「识别中…」→ 通过后变【验证】，不做两颗按钮。全程无「录入 / 绑定 / 首次采集」字眼","err": "比对不通过 → 可重试，不自动降级到其他方式","copy": "请将面部置于取景框内 / 保持光线充足 / 开始人脸识别 / 识别中… / 验证"},"M-SEC-007": {"g": "二次验证","page": "二次验证页","do": "二次方式为指纹","ok": "大号指纹线稿 + 一句提示；主按钮同样随状态变化：【开始指纹校验】→「校验中…」→【验证】","err": "校验不通过 → 可重试","copy": "请将手指放在 Touch ID 上 / 开始指纹校验 / 校验中… / 验证"},"M-SEC-008": {"g": "二次验证","page": "二次验证页","do": "点【验证】且通过","ok": "二次验证完成，继续原流程收尾（建立会话 / 写绑定记录），**不重走首因素**","err": "无","copy": "验证"},"M-SEC-009": {"g": "二次验证","page": "二次验证页","do": "点【返回上一级认证登录】","ok": "本次二次验证作废、**首因素结果同时失效**，回登录表单重新选方式（不是退回上一步的改密页）","err": "无","copy": "返回上一级认证登录"},"M-SEC-010": {"g": "二次验证","page": "二次验证页","do": "点【验证】但未通过","ok": "提示并留在本页，已填内容不清空，按钮恢复可点","err": "连续失败达上限 → 按后台策略锁定，提示联系管理员","copy": "验证不通过，请重试"},"M-BIND-015": {"g": "首次绑定","page": "绑定引导窗口（人脸认证区）","do": "点【人脸】","ok": "整页切为人脸认证区：圆形取景框 + 头肩剪影 + 扫描线 + 三列取景提示（保持光线充足 / 脸在取景框内 / 面部正对屏幕）。**一颗主按钮**：初始为【开始人脸识别】→ 点击后「识别中…」→ 通过后变【绑定并登录】。全程不出现录入 / 绑定 / 首次采集","err": "比对不通过 → 提示可重试；后台未开通人脸 → 该 tab 不展示","copy": "请将面部置于取景框内 / 保持光线充足 / 开始人脸识别 / 识别中… / 绑定并登录"},"M-BIND-016": {"g": "首次绑定","page": "绑定引导窗口（指纹认证区）","do": "点【指纹】","ok": "整页切为指纹认证区：大号指纹线稿 + 一句提示，不套取景框。主按钮【开始指纹校验】→「校验中…」→【绑定并登录】。同样不做录入 / 绑定","err": "校验不通过 → 提示可重试；后台未开通指纹 → 该 tab 不展示","copy": "请将手指放在 Touch ID 上 / 开始指纹校验 / 校验中… / 绑定并登录"},"M-LOGIN-008": {"g": "手动登录","page": "登录窗口（人脸认证区）","do": "点【人脸】","ok": "整页切为人脸认证区（取景框 + 剪影 + 扫描线 + 三列提示），主按钮【开始人脸识别】→「识别中…」→【登录】","err": "比对不通过 → 可重试；后台未开通 → 该 tab 不展示","copy": "请将面部置于取景框内 / 开始人脸识别 / 识别中… / 登录"},"M-LOGIN-009": {"g": "手动登录","page": "登录窗口（指纹认证区）","do": "点【指纹】","ok": "整页切为指纹认证区（大号线稿 + 一句提示），主按钮【开始指纹校验】→「校验中…」→【登录】","err": "校验不通过 → 可重试；后台未开通 → 该 tab 不展示","copy": "请将手指放在 Touch ID 上 / 开始指纹校验 / 校验中… / 登录"}};
+var NODE_POINTS = {"bind": ["M-BIND-001","M-BIND-002","M-BIND-003","M-BIND-004","M-BIND-005","M-BIND-006","M-BIND-007","M-BIND-008","M-BIND-009","M-BIND-010","M-BIND-011","M-BIND-012","M-BIND-013","M-BIND-014","M-BIND-015","M-BIND-016"],"bindfail": ["M-BIND-012"],"menubar": ["M-AUTO-001","M-AUTO-002","M-AUTO-003","M-AUTO-004","M-AUTO-005","M-MENU-001","M-NET-001","M-NET-002","M-NET-003","M-NET-004","M-NET-005","M-NET-006","M-MENU-007"],"panel": ["M-MENU-002","M-MENU-003","M-MENU-004","M-MENU-005","M-MENU-006","M-MENU-007","M-EXIT-001","M-EXIT-002","M-EXIT-003","M-CANCEL-001","M-CANCEL-002"],"apps": ["M-MENU-003"],"settings": ["M-SET-001","M-SET-002","M-SET-003","M-SET-004","M-SET-005","M-SET-006"],"exitok": ["M-EXIT-003","M-EXIT-004","M-EXIT-005","M-EXIT-006"],"loginagain": ["M-CANCEL-001","M-EXIT-005","M-EXIT-006","M-EXIT-007","M-EXIT-008","M-EXIT-009","M-LOGIN-001","M-LOGIN-002","M-LOGIN-003","M-LOGIN-004","M-LOGIN-005","M-LOGIN-006","M-LOGIN-007","M-LOGIN-008","M-LOGIN-009","M-PWD-001"],"forgot": ["M-PWD-002","M-PWD-003","M-PWD-004","M-PWD-005","M-PWD-006","M-PWD-007","M-PWD-008","M-PWD-009"],"cancel1": ["M-CANCEL-002","M-CANCEL-003","M-CANCEL-004"],"cancel2": ["M-CANCEL-005","M-CANCEL-006","M-CANCEL-007"],"cancel3": ["M-CANCEL-008","M-CANCEL-009"],"chpw": ["M-CHPW-001","M-CHPW-002","M-CHPW-003","M-CHPW-004","M-CHPW-005","M-CHPW-006","M-CHPW-007","M-CHPW-008"],"second": ["M-SEC-001","M-SEC-002","M-SEC-003","M-SEC-004","M-SEC-005","M-SEC-006","M-SEC-007","M-SEC-008","M-SEC-009","M-SEC-010"]};
+var NODE_DESC = {"bind": "CS 程序首次自启后弹出的绑定引导窗口。账号与 macOS 账户名关联成功后，后续开机自动登录 IAM。","bindfail": "绑定失败态。窗口保持打开、已填内容不清空，用户可就地改后重试。","menubar": "菜单栏图标常驻态 —— 桌面上本来就没有窗口，这里只展示图标两态与网络提示条。","panel": "点菜单栏图标展开的下拉面板。顶部是绑定关系区，下面按「高频→低频、安全→危险」排列功能项。","apps": "访问应用门户。已通过统一身份单点登录，点击任一应用免密进入。","settings": "设置窗口，独立窗口带返回箭头。分「通用 / 登录后 / 关于」三段。","exitok": "退出登录完成态。清除 IAM 会话，但本机绑定关系保留。","loginagain": "退出后的登录页。仅允许本机已绑定的账号登录，页头回显「您好，XXX」。","forgot": "忘记密码，单页一站式完成：选验证方式 → 填信息 → 重置密码，不跳页。","cancel1": "注销绑定账号的二次确认。明确告知后果后才继续。","cancel2": "注销前的身份验证，由 IAM 认证核验本人身份。","cancel3": "注销完成态。绑定关系已解除，引导回空白绑定页重新关联。","chpw": "认证链第 2 关。凭据与账号比对都过了，但密码是初始密码 / 已过期 / 即将过期 —— 在这一页整页改完才放行，改完不重新登录，直接接着判二次验证。","second": "认证链第 3 关。要不要验、能验哪几种由后台策略决定，这一页只负责怎么验：整页推进、方式可切、带「返回上一级认证登录」。"};
+
+/* ---------- 界面定义（同时驱动轨道和渲染） ---------- */
+var FLOW = [
+  { sec:'① 首次绑定', items:[
+    { id:'bind',      nm:'绑定引导窗口', sub:'6 种方式 · 含改密 / 二次验证' },
+    { id:'bind-err',  nm:'绑定失败',     sub:'账号已绑其他终端等' },
+  ]},
+  { sec:'② 绑定后日常', items:[
+    { id:'menubar',   nm:'菜单栏常驻',   sub:'图标点亮为 logo 原色' },
+    { id:'panel',     nm:'下拉面板',     sub:'绑定关系 / 四个功能项' },
+    { id:'apps',      nm:'访问应用门户', sub:'单点进入集成应用' },
+    { id:'settings',  nm:'设置',         sub:'通用 / 登录后 / 关于' },
+  ]},
+  { sec:'③ 退出与换人', items:[
+    { id:'exitok',    nm:'退出登录',     sub:'清会话，保留绑定' },
+    { id:'loginagain',nm:'退出后登录页', sub:'您好，XXX · 含改密与二次验证' },
+    { id:'forgot',    nm:'忘记密码',     sub:'单页一站式' },
+  ]},
+  { sec:'④ 注销解绑', items:[
+    { id:'cancel1',   nm:'注销二次确认', sub:'说明后果' },
+    { id:'cancel2',   nm:'身份验证',     sub:'输入当前密码' },
+    { id:'cancel3',   nm:'注销完成',     sub:'回空白绑定页' },
+  ]},
+];
+
+
+/* ---------- 本页交互说明（v1.0.12：右侧滑出浮层）---------- */
+var notesOpen = false;
+
+function setNotes(open){
+  notesOpen = !!open;
+  var el = document.getElementById('notes');
+  var mk = document.getElementById('notesMask');
+  if(el) el.classList.toggle('open', notesOpen);
+  if(mk) mk.classList.toggle('open', notesOpen);
+  var b = document.getElementById('btnNotes');
+  if(b){ b.classList.toggle('on', notesOpen); b.textContent = notesOpen ? '收起说明' : '本页交互说明'; }
+  if(notesOpen) renderNotes();
+}
+
+function toggleNotes(){ setNotes(!notesOpen); }
+function closeNotes(){ if(notesOpen) setNotes(false); }
+
+/* Esc 关闭说明浮层。
+   优先级排在模态框之后 —— 有模态框时 Esc 应该先关模态框（原型里模态框另有关闭按钮，
+   这里只保证不会「一次 Esc 把两层一起关掉」）。 */
+document.addEventListener('keydown', function(e){
+  if(e.key !== 'Escape' && e.keyCode !== 27) return;
+  if(!notesOpen) return;
+  if(S.modal) return;
+  closeNotes();
+});
+
+/* 当前界面在 NODE_POINTS 里的键。
+   panel / panel-off 是同一个界面的两态（登录/未登录），
+   说明都归到 panel —— 登录态判定不该影响「这屏能做什么」的清单。 */
+function notesKey(){
+  /* 改密页与二次验证页是"整页替换窗口内容"的步骤页，S.view 仍是 bind / loginagain，
+     但它们的交互点是另一套 —— 按步骤优先，才能看到那 18 条而不是宿主页的清单 */
+  if(S.step === 'chpw') return 'chpw';
+  if(S.second) return 'second';
+  var v = S.view;
+  if(v === 'panel-off') v = 'panel';
+  return v;
+}
+
+function renderNotes(){
+  var body = document.getElementById('notesBody');
+  if(!body) return;
+  var key = notesKey();
+  var ids = NODE_POINTS[key] || [];
+
+  /* 标题副文案：这一屏是干嘛的 */
+  var sub = document.getElementById('notesSub');
+
+  if(!ids.length){
+    if(sub) sub.textContent = curName();
+    body.innerHTML = '<div class="notes-empty">这个界面还没有登记交互点。<br>' +
+      '（如属遗漏，请在《E登录_Mac版_交互表》补一行，再重跑导出脚本）</div>';
+    return;
+  }
+
+  if(sub) sub.textContent = curName() + ' · 共 ' + ids.length + ' 条';
+
+  var html = '';
+  if(NODE_DESC[key]){
+    html += '<div class="notes-desc"><b>这一屏</b>：' + NODE_DESC[key] + '</div>';
+  }
+
+  ids.forEach(function(id){
+    var n = NOTES[id];
+    if(!n) return;
+    var rows = '';
+    if(n.do) rows += '<div class="np-r"><span class="k">触发</span>' +
+      '<span class="v q">' + esc(n.do) + '</span></div>';
+    if(n.ok) rows += '<div class="np-r"><span class="k">预期</span>' +
+      '<span class="v"><span class="ok">&#10003;</span> ' + esc(n.ok) + '</span></div>';
+    if(n.err && n.err !== '无') rows += '<div class="np-r"><span class="k">异常</span>' +
+      '<span class="v"><span class="er">!</span> ' + esc(n.err) + '</span></div>';
+    if(n.copy) rows += '<div class="np-r"><span class="k">提示语</span>' +
+      '<span class="v mono">「' + esc(n.copy) + '」</span></div>';
+    if(n.page) rows += '<div class="np-r"><span class="k">页面</span>' +
+      '<span class="v">' + esc(n.page) + '</span></div>';
+
+    html += '<div class="np" data-id="' + id + '">' +
+      '<div class="np-h"><span class="arw">&#9654;</span><div class="tx">' +
+        '<span class="id">' + id + '</span>' +
+        '<div class="do">' + esc(n.do) + '</div>' +
+      '</div></div>' +
+      '<div class="np-b">' + rows + '</div>' +
+    '</div>';
+  });
+
+  body.innerHTML = html;
+  body.scrollTop = 0;
+}
+
+/* 说明栏里点标题展开/收起该条。
+   委托到 document 而不是 notesBody 本身 —— 浮层 DOM 在 </body> 前，
+   比这段 script 靠后，若直接绑元素会拿到 null 并在顶层抛错，
+   把 script 后续所有 var 赋值一起带走。 */
+document.addEventListener('click', function(e){
+  var hd = e.target.closest && e.target.closest('#notesBody .np-h');
+  if(hd) hd.parentNode.classList.toggle('open');
+});
+
+
+/* ---------- 工具 ---------- */
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+
+function logIt(t){
+  var d=new Date(); var hh=String(d.getHours()).padStart(2,'0');
+  var mm=String(d.getMinutes()).padStart(2,'0'); var ss=String(d.getSeconds()).padStart(2,'0');
+  S.log.unshift('<b>'+hh+':'+mm+':'+ss+'</b> '+t);
+  if(S.log.length>60) S.log.pop();
+}
+
+function toast(msg){
+  var el=document.createElement('div');
+  el.className='toast'; el.textContent=loc(msg);
+  document.getElementById('desk').appendChild(el);
+  setTimeout(function(){ el.style.transition='opacity .3s'; el.style.opacity='0';
+    setTimeout(function(){ el.remove(); },320); }, 1900);
+}
+
+function toggleRail(){
+  document.getElementById('shell').classList.toggle('folded');
+}
+
+/* ---------- 网络条 ---------- */
+var NETCFG = {
+  weak:{ cls:'net-weak', txt:'当前网络较弱，操作可能较慢' },
+  off: { cls:'net-off',  txt:'网络已断开，请检查网络连接' },
+  re:  { cls:'net-re',   txt:'正在重新连接…' },
+  ok:  { cls:'net-ok',   txt:'网络已恢复' }
+};
+function netIcon(color){
+  return '<svg width="13" height="13" viewBox="0 0 13 13" fill="none">'+
+    '<path d="M1.6 5.2C3 3.9 4.7 3.2 6.5 3.2s3.5.7 4.9 2" stroke="'+color+'" stroke-width="1.2" stroke-linecap="round"/>'+
+    '<path d="M3.6 7.4c.9-.8 1.9-1.2 2.9-1.2s2 .4 2.9 1.2" stroke="'+color+'" stroke-width="1.2" stroke-linecap="round"/>'+
+    '<path d="M2.6 11.4l7.8-9.4" stroke="'+color+'" stroke-width="1.4" stroke-linecap="round"/></svg>';
+}
+function netBar(){
+  if(S.net==='ok') return '';
+  var c=NETCFG[S.net];
+  var col = S.net==='off' ? '#A32620' : S.net==='weak' ? '#8A4B00' : '#0C447C';
+  var retry = S.net==='off' ? '<button class="retry" onclick="doReconnect()">重试</button>' : '';
+  return '<div class="netbar '+c.cls+'">'+netIcon(col)+esc(c.txt)+retry+'</div>';
+}
+function doReconnect(){
+  S.net='re'; logIt('点【重试】，进入重连'); render();
+  setTimeout(function(){ S.net='ok'; logIt('网络已恢复');
+    render(); setTimeout(function(){ if(S.net==='ok'){ S.net='ok'; } render(); },2000); }, 1300);
+}
+
+/* =========================================================
+   界面语言（zh / en）
+   —— 做法：渲染出来的 HTML / 文本在出口再过一遍 loc()，用字典做整串替换。
+      好处是不用去两百多个调用点逐个包函数，漏译面小；
+      loc() 在 zh 下是恒等函数，重复调用也安全（英文里不含中文键）。
+   ========================================================= */
+var EN = {
+  "① 首次绑定": "1 · First-time binding",
+  "② 绑定后日常": "2 · Daily use",
+  "③ 退出与换人": "3 · Sign out and switch user",
+  "④ 注销解绑": "4 · Unbind account",
+  "绑定引导窗口": "Binding guide",
+  "账密 / 扫码 / 短信 / 口令": "Password / QR / SMS / OTP",
+  "绑定失败": "Binding failed",
+  "账号已绑其他终端等": "Account bound elsewhere",
+  "登录失败，本机已绑定账号：": "Sign-in failed. Bound account: ",
+  "本机当前绑定的是「": "This Mac is bound to ",
+  "」。你已通过统一身份认证，注销后绑定关系将解除，可直接重新关联你自己的账号。": ". You have already passed IAM authentication. Unbinding removes this link, after which you can bind your own account.",
+  "被拦后点【注销绑定账号】→ 弹二次确认（凭据已认证，无需再验密码）": "Unbind tapped from the blocked state - confirm dialog (credential already verified)",
+  "凭据认证通过，但 ": "Credential verified, but ",
+  " → 开放自助解绑": " - self-service unbind enabled",
+  "确认注销 → 解除绑定、清本地凭证与 IAM 会话": "Confirmed. Unbound and cleared local credentials and IAM session.",
+  "登录成功": "Signed in",
+  "演示：改用 lisi 登录，看拦截效果": "Demo: signing in as lisi to show the block",
+  "演示：原绑定用户已离职 → 走自助解绑": "Demo: bound owner has left - using self-service unbind",
+  "lisi 完成绑定 → 本机绑定记录已变为 lisi": "lisi bound - the bound record on this Mac is now lisi",
+  "登录失败：": "Sign-in failed: ",
+  " 不是本机绑定账号 ": " is not the bound account ",
+  "菜单栏常驻": "Menu bar resident",
+  "图标点亮为 logo 原色": "Icon lights up in brand color",
+  "下拉面板": "Dropdown panel",
+  "绑定关系 / 四个功能项": "Binding plus four actions",
+  "访问应用门户": "Open the app portal",
+  "单点进入集成应用": "SSO into integrated apps",
+  "通用 / 登录后 / 关于": "General / After sign-in / About",
+  "退出登录": "Sign out",
+  "清会话，保留绑定": "Clear session, keep binding",
+  "退出后登录页": "Sign-in page after exit",
+  "您好，XXX": "Hello, XXX",
+  "忘记密码": "Forgot password",
+  "单页一站式": "Single-page flow",
+  "注销二次确认": "Unbind confirmation",
+  "说明后果": "Explain consequences",
+  "身份验证": "Identity verification",
+  "输入当前密码": "Enter current password",
+  "注销完成": "Unbind complete",
+  "回空白绑定页": "Back to empty binding page",
+  "当前网络较弱，操作可能较慢": "Weak network — actions may be slow",
+  "网络已断开，请检查网络连接": "Network disconnected — check your connection",
+  "正在重新连接…": "Reconnecting…",
+  "网络已恢复": "Network restored",
+  "点【重试】，进入重连": "Retry: reconnecting",
+  ">重试</button>": ">Retry</button>",
+  "E登录 已登录": "Elogon · signed in",
+  "E登录 未登录": "Elogon · signed out",
+  "E登录": "Elogon",
+  "E 登录 · 应用门户": "Elogon · App portal",
+  "E 登录 App": "Elogon app",
+  "点下方 Dock 中的 E 登录图标，可重新打开": "Click the Elogon icon in the Dock to reopen",
+  "已关闭，可点 Dock 上的 E 登录图标重新打开": "Closed — click the Elogon icon in the Dock to reopen",
+  "从 Dock 图标重新打开窗口": "Reopened from the Dock icon",
+  "E 登录": "Elogon",
+  "浏览器": "Browser",
+  "访达": "Finder",
+  "文件": "File",
+  "编辑": "Edit",
+  "显示": "View",
+  "关闭": "Close",
+  "最小化": "Minimize",
+  "最大化": "Maximize",
+  "已绑定本机 · ": "Bound to this Mac · ",
+  "已绑定 ": "Bound: ",
+  "已绑定": "Bound",
+  "本机 macOS 账户": "macOS account",
+  "本机绑定记录": "Bound record",
+  "（无）": "(none)",
+  "绑定记录写入 → 本机已绑定账号：": "Binding record written - bound account: ",
+  "绑定记录清除 → 解除了 ": "Binding record cleared - unbound ",
+  "，可一键登录": " — one-click sign-in",
+  "登录统一身份": "Sign in to unified ID",
+  ">注销绑定账号<": ">Unbind account<",
+  ">退出登录<": ">Sign out<",
+  "OA 办公": "OA",
+  "邮件系统": "Mail",
+  "人事系统": "HR",
+  "财务报销": "Expense",
+  "项目管理": "Projects",
+  "知识库": "Wiki",
+  "数据平台": "Data",
+  "工单系统": "Tickets",
+  "已通过统一身份单点登录，无需再次输入密码": "Signed in via unified ID single sign-on — no password needed",
+  "切换需要使用的语言": "Choose the app language",
+  "语言切换": "Language",
+  "登录 macOS 后自动运行并按绑定关系登录": "Sign in with the bound account at login",
+  "开机自动启动": "Launch at login",
+  "登录成功后自动展开门户界面": "Open the portal right after sign-in",
+  "自动打开应用门户": "Open the app portal automatically",
+  "收起客户端窗口，转为后台保持在线": "Collapse the window and stay online",
+  "登录成功后关闭窗口": "Close window after sign-in",
+  ">关于<": ">About<",
+  "已是最新版本": "Already up to date",
+  ">检查更新</button>": ">Check for updates</button>",
+  "首次登录": "First-time sign-in",
+  "请将您的统一身份账号与本机账号关联": "Link your unified ID account to this Mac",
+  "该统一身份账号已被其他终端绑定": "This unified ID account is already bound to another device",
+  ">绑定并登录</button>": ">Link and sign in</button>",
+  ">登录</button>": ">Sign in</button>",
+  ">忘记密码</button>": ">Forgot password</button>",
+  "账密登录": "Password",
+  "扫码登录": "QR code",
+  "短信登录": "SMS",
+  "动态口令": "OTP",
+  "扫码": "QR",
+  "短信": "SMS",
+  "统一身份用户名": "Unified ID username",
+  "统一身份用户密码": "Unified ID password",
+  "请输入统一身份账号": "Enter your unified ID account",
+  "请输入密码": "Enter your password",
+  "显示密码": "Show password",
+  "隐藏密码": "Hide password",
+  "将关联到该 macOS 本机账户": "Linked to this macOS account",
+  "请使用手机 <b>E 登录 App</b> 或企业微信扫码<br>二维码有效期 <b>120 秒</b>": "Scan with the <b>Elogon app</b> or WeCom on your phone<br>The code is valid for <b>120 seconds</b>",
+  "，过期后需重新获取": " — refresh after it expires",
+  "二维码已过期，请刷新后重试": "QR code expired — refresh and try again",
+  "二维码已过期": "QR code expired",
+  ">点击刷新<": ">Refresh<",
+  "等待扫码…": "Waiting for scan…",
+  ">模拟二维码过期</button>": ">Simulate expiry</button>",
+  "手机号码": "Mobile number",
+  "短信验证码": "SMS code",
+  ">获取验证码<": ">Get code<",
+  "请输入手机号码": "Enter your mobile number",
+  "请输入验证码": "Enter the code",
+  "请输入动态口令": "Enter your OTP",
+  "请先填写手机号码": "Enter your mobile number first",
+  "验证码不正确": "Incorrect code",
+  "请在 ": "Complete everything within ",
+  " 内完成全部操作": "",
+  ">找回密码<": ">Reset password<",
+  "短信": "SMS",
+  "手机号": "Mobile",
+  "邮箱": "Email",
+  "钉钉": "DingTalk",
+  "短信验证": "SMS",
+  "邮箱验证": "Email",
+  "钉钉验证": "DingTalk",
+  ">用户名 / 手机号 / 邮箱<": ">Username / mobile / email<",
+  "请输入用户名、手机号或邮箱": "Enter username, mobile or email",
+  "请输入邮箱地址": "Enter your email address",
+  "请输入钉钉账号": "Enter your DingTalk ID",
+  ">验证码<": ">Code<",
+  ">设置新密码": ">Set a new password",
+  "您好，": "Hello, ",
+  "收起": "Collapse",
+  "（完成验证后解锁）": "(unlocks after verification)",
+  ">新密码<": ">New password<",
+  "请设置新的登录密码": "Set a new login password",
+  "请输入新密码": "Enter a new password",
+  ">确认新密码<": ">Confirm new password<",
+  "请再次输入新密码": "Re-enter the new password",
+  "请再次输入新的登录密码": "Re-enter the new login password",
+  ">确认修改</button>": ">Confirm</button>",
+  ">返回登录</button>": ">Back to sign-in</button>",
+  "aria-label=\"返回登录\"": "aria-label=\"Back to sign-in\"",
+  "aria-label=\"密码要求\"": "aria-label=\"Password requirements\"",
+  ">密码要求<": ">Password requirements<",
+  "长度为 8-20 个字符": "8-20 characters",
+  "至少包含数字、大写字母、小写字母、特殊字符中的 3 种": "At least 3 of: digits, uppercase, lowercase, symbols",
+  "未使用弱口令": "Not a weak password",
+  "请先完成验证码校验": "Verify the code first",
+  "两次输入的密码不一致": "The two passwords do not match",
+  "新密码不满足密码策略": "The new password does not meet the policy",
+  "密码已重置，请用新密码登录": "Password reset — sign in with the new password",
+  "切换验证渠道：": "Verification channel: ",
+  "提交新密码 → 重置成功，返回登录页": "New password submitted — reset done, back to sign-in",
+  "操作超时，请重新发起": "Timed out — please start again",
+  "忘密码操作超时，已重置": "Password reset timed out — reset",
+  "s 后重发": "s to resend",
+  "验证码已发送（演示：请输入 123456）": "Code sent (demo: enter 123456)",
+  "校验通过，下发短信验证码，按钮进入倒计时": "Verified — SMS code sent, countdown starts",
+  "验证码校验通过，就地解锁新密码表单": "Code verified — new password form unlocked",
+  "验证码填错，提示重填（不清空输入）": "Wrong code — prompt to retry without clearing input",
+  ">安全验证<": ">Security check<",
+  "向右拖动滑块完成验证": "Drag the slider to verify",
+  "拖动到最右侧即通过": "Drag to the far right to pass",
+  "松开完成验证": "Release to verify",
+  ">验证通过<": ">Verified<",
+  "滑块拖动通过": "Slider passed",
+  "滑块未拖到位，校验失败并重置": "Slider not far enough — reset",
+  "点【获取验证码】，弹出滑块防人机校验": "Get code: slider CAPTCHA shown",
+  "校通过，下发验证码，按钮进入 59 秒倒计时": "Verified — code sent, 59s countdown starts",
+  "注销成功": "Unbound",
+  "绑定关系已解除，请重新关联账号": "The binding has been removed — please link your account again",
+  "关联统一身份账号": "Link unified ID account",
+  ">去关联</button>": ">Link now</button>",
+  "窗口已关闭，可从菜单栏图标重新打开": "Window closed — reopen from the menu bar icon",
+  "窗口已最小化到 Dock": "Minimized to the Dock",
+  "窗口已关闭": "Window closed",
+  ">重新打开窗口</button>": ">Reopen window</button>",
+  "确定要退出登录吗？": "Sign out?",
+  "退出后需重新登录，绑定关系将保留。": "Please sign in again. The binding is kept.",
+  "确定要注销绑定账号吗？": "Unbind this account?",
+  "注销后，本机账号与统一身份账号的绑定关系将解除，需重新绑定后才能自动登录。": "This removes the link between this Mac and your unified ID account. Link again to enable auto sign-in.",
+  ">确认注销</button>": ">Unbind</button>",
+  ">取消</button>": ">Cancel</button>",
+  ">确定</button>": ">OK</button>",
+  ">返回</button>": ">Back</button>",
+  "请输入当前账号密码以确认注销": "Enter your current password to confirm",
+  ">密码<": ">Password<",
+  "请输入当前密码": "Enter your current password",
+  "请输入当前账号密码": "Enter your current password",
+  "尚未绑定账号": "No account bound yet",
+  "还没有绑定账号，先完成绑定": "No account bound yet — bind first",
+  "还没有绑定账号": "No account bound yet",
+  "当前未登录，请先登录": "Not signed in — please sign in first",
+  "网络已断开，无法提交": "No network — cannot submit",
+  "网络已断开，无法登录": "No network — cannot sign in",
+  "绑定成功": "Linked successfully",
+  "已退出登录": "Signed out",
+  "已重置到初始状态": "Reset to the initial state",
+  "演示完成": "Demo finished",
+  "自动演示结束": "Auto demo finished",
+  "点击菜单栏 E 登录图标，打开下拉面板": "Clicked the menu bar icon — panel opened",
+  "点击菜单栏 E 登录图标，打开未登录态面板": "Clicked the menu bar icon — signed-out panel opened",
+  "再次点击图标，收起下拉面板": "Icon clicked again — panel collapsed",
+  "点【关闭】：窗口收起": "Close: window collapsed",
+  "点【最小化】：窗口缩入 Dock": "Minimize: window into the Dock",
+  "点【最大化】：窗口铺满桌面": "Maximize: window fills the desktop",
+  "点【最大化】：还原窗口尺寸": "Maximize: window restored",
+  "点【退出登录】，弹二次确认": "Sign out: confirmation shown",
+  "点【注销绑定账号】，弹二次确认": "Unbind: confirmation shown",
+  "演示跳转：自动补上「已绑定 ": "Demo jump: auto-filled bound ",
+  "演示跳转：自动补上「已登录」": "Demo jump: auto-filled signed in",
+  "进入「": "Entered ",
+  "」": "”",
+  "点「": "Opened “",
+  "」，以单点方式在浏览器打开": "” in the browser via SSO",
+  "已通过单点登录打开「": "Opened via SSO: “",
+  "网络状态切到「": "Network switched to “",
+  "「": "“",
+  "切换登录方式 → ": "Switch method → ",
+  "切换开关 ": "Toggle ",
+  " → 开": " → on",
+  " → 关": " → off",
+  "界面语言切换为 ": "UI language switched to ",
+  "模拟二维码过期": "Simulate QR expiry",
+  "二维码 120 秒到期，就地盖遮罩": "QR expired after 120s — overlay shown",
+  "点【点击刷新】，重新获取二维码": "Refresh: new QR requested",
+  "绑定校验通过 → 窗口内提示成功 → 约 2 秒后自动关闭": "Binding verified → success in window → auto-close in about 2s",
+  "窗口关闭，收进菜单栏；图标点亮为 logo 原色": "Window closed into the menu bar; icon lit in brand color",
+  "登录成功 → 窗口自动关闭 → 图标点亮为已登录": "Signed in → window auto-closed → icon lit",
+  "确认退出：清 IAM 会话与浏览器单点态，保留绑定关系": "Sign out confirmed: IAM session and browser SSO cleared, binding kept",
+  "身份验证通过 → 解除绑定、清本地凭证与 IAM 会话": "Verified → unbound, local credentials and IAM session cleared",
+  "点【确认注销】→ 进入身份验证": "Unbind → identity verification",
+  "重置：回到首次绑定": "Reset: back to first-time binding",
+  "完成统一身份认证 → 绑定成功、IAM 会话建立": "Unified ID authenticated → bound, IAM session established",
+  "窗口收起 → 菜单栏图标点亮为已登录": "Window collapsed → menu bar icon lit",
+  "经浏览器访问门户 → 自动单点，无需再输密码": "Portal opened in the browser → auto SSO, no password",
+  "换人登录完成 → 回到已登录态": "User switched → back to signed-in state",
+  "开始自动演示全流程": "Auto demo started",
+  "原型启动：当前未绑定，等待首次绑定": "Prototype started: nothing bound yet, waiting for first-time binding",
+  "联动流程轨道": "Flow track",
+  "点节点可直接跳到那一步": "Click a node to jump to that step",
+  "流程轨道": "Flow track",
+  "当前状态": "Current state",
+  "绑定关系": "Binding",
+  "登录态": "Session",
+  "当前界面": "Screen",
+  "网络状态（真实原型里是自动检测，这里手动切）": "Network (auto-detected in the real app — switch it manually here)",
+  "网络": "Network",
+  "正常": "OK",
+  "较弱": "Weak",
+  "已断开": "Offline",
+  "断开": "Offline",
+  "重连中": "Reconnecting",
+  "重来一遍": "Restart",
+  "自动走一遍": "Auto demo",
+  "操作日志": "Activity log",
+  "（还没有操作）": "(no activity yet)",
+  "未绑定": "Not bound",
+  "已登录": "Signed in",
+  "未登录": "Signed out",
+  "设置": "Settings"
+};
+
+/* 长键先替换：否则「设置」会先把「设置页」这类长词拆坏。
+   同长度保持声明序（现代浏览器 sort 稳定）。 */
+var EN_KEYS = Object.keys(EN).sort(function(a, b){ return b.length - a.length; });
+
+function loc(str){
+  if(S.lang !== 'en' || !str) return str;
+  var out = String(str), i, k;
+  for(i = 0; i < EN_KEYS.length; i++){
+    k = EN_KEYS[i];
+    if(out.indexOf(k) >= 0) out = out.split(k).join(EN[k]);
+  }
+  return out;
+}
+
+/* 只替换文本节点，不碰标签与属性 —— 保护 JS 维护的 class / id / on*
+   注意：改写是不可逆的，所以要把原文挂在节点上缓存一份，
+   否则切回中文时静态外壳（菜单栏 / 流程轨道）会卡在英文回不来。
+   节点被 textContent= 或 innerHTML= 换掉时缓存会自然失效，不用手动清。 */
+function locEl(root){
+  if(!root) return;
+  var w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null, false);
+  var n, list = [];
+  while((n = w.nextNode())){ if(n.nodeValue && n.nodeValue.trim()) list.push(n); }
+  for(var i = 0; i < list.length; i++){
+    var t = list[i];
+    if(t.__zh === undefined) t.__zh = t.nodeValue;
+    t.nodeValue = (S.lang === 'en') ? loc(t.__zh) : t.__zh;
+  }
+}
+
+/* 静态外壳：菜单栏 / 流程轨道 / 状态栏 / 日志（这些不在 renderDesk 的字符串里） */
+function localizeChrome(){
+  var root = document.getElementById('shell');
+  locEl(root);
+  /* title 是属性，locEl 碰不到 —— 菜单栏图标 / Dock 图标 / 收起按钮靠它，同样要缓存原文 */
+  var ts = root.querySelectorAll('[title]');
+  for(var i = 0; i < ts.length; i++){
+    var e = ts[i];
+    if(e.__zhTitle === undefined) e.__zhTitle = e.title;
+    e.title = (S.lang === 'en') ? loc(e.__zhTitle) : e.__zhTitle;
+  }
+}
+
+/* 切换界面语言（设置页「语言切换」分段控件调它） */
+function setLang(l){
+  if(S.lang === l) return;
+  S.lang = l;
+  logIt('界面语言切换为 ' + (l === 'en' ? 'English' : '中文'));
+  render();
+  toast(l === 'en' ? 'Language switched to English' : '界面语言已切换为中文');
+}
+
+/* ---------- 渲染 ---------- */
+function render(){
+  renderDesk();
+  renderMenuBar();
+  renderRail();
+  renderState();
+  localizeChrome();
+  /* v1.0.11：切界面时同步刷新「本页交互说明」。
+     只在面板展开时刷新 —— 收起时刷了也没人看，白跑一遍 DOM。 */
+  if(notesOpen) renderNotes();
+}
+
+function renderMenuBar(){
+  var img=document.getElementById('mbElogonImg');
+  document.getElementById('mbElogon').style.display = S.bind ? 'flex' : 'none';
+  if(S.bind){
+    img.src = S.login ? 'assets/logo-color-128.png' : 'assets/logo-mono-black-128.png';
+    img.style.opacity = S.login ? '1' : '.35';
+    img.alt = S.login ? 'E登录 已登录' : 'E登录 未登录';
+  }
+  var nm=document.getElementById('mbAppName');
+  nm.textContent = (S.view==='apps') ? '浏览器' : (S.view==='settings') ? 'E 登录' : '访达';
+}
+
+function netBannerInBody(){ return ''; }
+
+function renderDesk(){
+  var d=document.getElementById('desk');
+  var h='';
+
+  function winOpen(title, inner, cls){
+    return '<div class="win '+(cls||'')+(S.winMax?' maxed':'')+'">'+
+      '<div class="titlebar" onmousedown="dragWinStart(event)">'+
+        '<div class="lights">'+
+          '<i class="lt-close" onclick="winClose(event)" title="关闭"></i>'+
+          '<i class="lt-min" onclick="winMin(event)" title="最小化"></i>'+
+          '<i class="lt-max" onclick="winMax(event)" title="最大化"></i>'+
+        '</div>'+
+      '<div class="t">'+esc(title)+'</div></div>'+
+      netBar() + inner + '</div>';
+  }
+
+  switch(S.view){
+
+  /* ===== 绑定引导窗口 ===== */
+  case 'bind': case 'bind-err': {
+    /* v1.0.16：改密是认证链里的一步，就地替换窗口内容，不新开窗口、不跳页 */
+    if(S.step === 'chpw'){ h += winOpen('E 登录', chpwBody(), 'auth'); break; }
+    /* v1.0.17：二次验证同样是整页切换 —— 与改密、与登录表单一套版式，不是弹层 */
+    if(S.second){ h += winOpen('E 登录', secondPage(), 'auth'); break; }
+    var err = S.view==='bind-err';
+    h += winOpen('E 登录',
+      '<div class="body">'+
+        '<div class="brand">'+
+          '<div class="logo-box"><img src="assets/logo-color-128.png"'+
+          ' width="42" height="42" alt="E登录" /></div>'+
+          '<h1>首次登录</h1>'+
+          '<p>请将您的统一身份账号与本机账号关联</p></div>'+
+        loginTabs()+
+        loginForm(err)+
+        osField()+
+        (err ? errBlock(S.data.errMsg||'该统一身份账号已被其他终端绑定') : '')+
+        ((S.method==='face'||S.method==='fp')
+          ? bioCta(S.method, bioSt(S.method), '绑定并登录', 'doBind()', S.net==='off')
+          : '<button class="btn btn-primary btn-block"'+
+            ((S.net==='off' || !bindReady())?' disabled':'')+
+            ' onclick="doBind()">绑定并登录</button>')+
+      '</div>', 'auth');
+    break;
+  }
+
+  /* ===== 菜单栏面板 ===== */
+  case 'panel': {
+    h += '<div class="pop">'+
+      '<div class="bindrow">'+
+        '<div class="avatar">'+esc(S.user? S.user.charAt(0).toUpperCase():'—')+'</div>'+
+        '<div class="meta"><div class="hi">您好，'+esc(S.user||'—')+'</div>'+
+        '<div class="id">已绑定本机 · '+esc(S.device)+'</div></div>'+
+        '<span class="badge-ok">已登录</span>'+
+      '</div>'+
+      '<div class="sep"></div>'+
+      '<button class="mi" onclick="go(\'apps\')">'+
+        '<span class="ico">'+icoGrid('#6B7280')+'</span>'+
+        '<span class="txt">访问应用门户</span><span class="spacer"></span>'+
+        '<span class="badge">12</span></button>'+
+      '<button class="mi" onclick="go(\'settings\')">'+
+        '<span class="ico">'+icoGear()+'</span><span class="txt">设置</span></button>'+
+      '<button class="mi danger" onclick="askCancel()">'+
+        '<span class="ico">'+icoBan()+'</span>'+
+        '<span class="txt">注销绑定账号</span></button>'+
+      '<div class="sep"></div>'+
+      '<button class="mi danger" onclick="askExit()">'+
+        '<span class="ico">'+icoOut()+'</span>'+
+        '<span class="txt">退出登录</span></button>'+
+    '</div>';
+    break;
+  }
+
+  /* ===== 未登录面板 ===== */
+  case 'panel-off': {
+    h += '<div class="pop">'+
+      '<div class="bindrow">'+
+        '<div class="avatar" style="background:#C9CDD3">'+
+          '<svg width="15" height="15" viewBox="0 0 15 15" fill="none">'+
+          '<circle cx="7.5" cy="5.4" r="2.6" stroke="#fff" stroke-width="1.4"/>'+
+          '<path d="M2.6 13c0-2.3 2.2-3.6 4.9-3.6s4.9 1.3 4.9 3.6" stroke="#fff" stroke-width="1.4" stroke-linecap="round"/>'+
+          '</svg></div>'+
+        '<div class="meta"><div class="hi" style="color:#6B7280">'+
+        (S.bindIam? '未登录' : '尚未关联')+'</div>'+
+        '<div class="id">'+(S.bindIam
+          ? '已绑定 '+esc(S.bindIam)+'，可一键登录'
+          : '本机还没有关联统一身份账号')+'</div></div>'+
+      '</div>'+
+      '<div class="sep"></div>'+
+      /* v1.0.10 分流：这个面板同时服务两种场景，去向必须不同 ——
+         有绑定记录 → 进登录页（可一键登录）
+         无绑定记录 → 进绑定引导页（首次关联；若去登录页，页面会说「您好，」而无人可问候） */
+      (S.bindIam
+        ? '<button class="mi" onclick="go(\'loginagain\')">'+
+            '<span class="ico">'+icoOut('#6B7280')+'</span>'+
+            '<span class="txt">登录统一身份</span><span class="spacer"></span>'+
+            '<span class="badge">1</span></button>'
+        : '<button class="mi" onclick="go(\'bind\')">'+
+            '<span class="ico">'+icoOut('#6B7280')+'</span>'+
+            '<span class="txt">关联统一身份账号</span><span class="spacer"></span>'+
+            '<span class="badge">1</span></button>')+
+      '<button class="mi" onclick="go(\'settings\')">'+
+        '<span class="ico">'+icoGear()+'</span><span class="txt">设置</span></button>'+
+    '</div>';
+    break;
+  }
+
+  /* ===== 应用门户 ===== */
+  case 'apps': {
+    var apps=[['OA 办公','#007AFF','O'],['邮件系统','#34C759','M'],
+      ['人事系统','#FF9500','H'],['财务报销','#AF52DE','F'],
+      ['项目管理','#FF3B30','P'],['知识库','#5AC8FA','K'],
+      ['数据平台','#5856D6','D'],['工单系统','#FF2D55','T']];
+    var grid=apps.map(function(a){
+      return '<div class="app" onclick="openApp(\''+a[0]+'\')">'+
+        '<div class="sq" style="background:'+a[1]+'">'+a[2]+'</div>'+
+        '<div class="nm">'+a[0]+'</div></div>'; }).join('');
+    h += winOpen('E 登录 · 应用门户',
+      '<div class="urlbar"><div class="pill">'+
+        '<svg width="9" height="11" viewBox="0 0 9 11" fill="none">'+
+        '<rect x="1" y="4.6" width="7" height="5.4" rx="1.3" stroke="#9CA3AF" stroke-width="1"/>'+
+        '<path d="M2.8 4.6V3.2a1.7 1.7 0 013.4 0v1.4" stroke="#9CA3AF" stroke-width="1"/></svg>'+
+        'sso.company.com/portal</div></div>'+
+      '<div class="apps">'+grid+'</div>'+
+      '<div style="padding:0 20px 18px"><div class="sso">'+
+        '<svg width="12" height="12" viewBox="0 0 12 12" fill="none">'+
+        '<circle cx="6" cy="6" r="5" stroke="#1D6B32" stroke-width="1.3"/>'+
+        '<path d="M3.6 6.1l1.7 1.7 3.1-3.4" stroke="#1D6B32" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>'+
+        '已通过统一身份单点登录，无需再次输入密码</div></div>', 'browser');
+    break;
+  }
+
+  /* ===== 设置 ===== */
+  case 'settings': {
+    h += winOpen('设置',
+      '<div class="body" style="gap:11px">'+
+        row('语言切换','切换需要使用的语言',
+          '<div class="seg">'+
+            '<span class="'+(S.lang==='zh'?'on':'')+'" onclick="setLang(\'zh\')">中文</span>'+
+            '<span class="'+(S.lang==='en'?'on':'')+'" onclick="setLang(\'en\')">EN</span>'+
+          '</div>', icoLang())+
+        row('开机自动启动','登录 macOS 后自动运行并按绑定关系登录',
+          sw('swBoot', true), icoPower())+
+        '<div class="divider"></div>'+
+        row('自动打开应用门户','登录成功后自动展开门户界面',
+          sw('swPortal', true), icoGrid('#6B7280'))+
+        row('登录成功后关闭窗口','收起客户端窗口，转为后台保持在线',
+          sw('swClose', false), icoMin())+
+        '<div class="divider"></div>'+
+        '<div class="groupname">关于</div>'+
+        '<div class="about">'+
+          '<img src="assets/logo-color-128.png" alt="E登录" />'+
+          '<div class="txt"><div class="n">Elogon</div>'+
+          '<div class="v">V1.8.4.2.021301</div></div>'+
+          '<button class="btn btn-secondary" style="height:28px;font-size:11.5px"'+
+          ' onclick="toast(\'已是最新版本\')">检查更新</button>'+
+        '</div>'+
+      '</div>');
+    break;
+  }
+
+  /* ===== 退出后登录页 ===== */
+  case 'loginagain': case 'forgot': {
+    if(S.view==='loginagain'){
+      /* 改密页在退出后登录页同样就地把表单顶掉 —— 两个入口共用同一个认证链 */
+      if(S.step === 'chpw'){ h += winOpen('E 登录', chpwBody(), 'auth'); break; }
+      if(S.second){ h += winOpen('E 登录', secondPage(), 'auth'); break; }
+      var lerr = !!S.data.loginErr;
+      h += winOpen('E 登录',
+        '<div class="body">'+
+          '<div class="brand">'+
+            '<div class="logo-box"><img src="assets/logo-color-128.png"'+
+            ' width="42" height="42" alt="E登录" /></div>'+
+            '<h1>您好，'+esc(S.user)+'</h1></div>'+
+          loginTabs()+
+          loginForm(lerr)+
+          (lerr ? errBlock(S.data.loginErr) : '')+
+          ((S.method==='face'||S.method==='fp')
+            ? bioCta(S.method, bioSt(S.method), '登录', 'doLogin()', S.net==='off')
+            : '<button class="btn btn-primary btn-block"'+
+              ((S.net==='off' || !bindReady())?' disabled':'')+
+              ' onclick="doLogin()">登录</button>')+
+          '<div class="footrow">'+
+            (S.data.canUnbind
+              ? '<button class="lnk danger" onclick="askCancelFromLock()">'+
+                '注销绑定账号</button>' : '')+
+            '<button class="lnk" onclick="go(\'forgot\')">忘记密码</button>'+
+          '</div>'+
+        '</div>', 'auth');
+    } else {
+      h += winOpen('E 登录',
+        '<div class="body" style="gap:11px">'+
+          forgotPage()+
+        '</div>');
+    }
+    break;
+  }
+
+  /* ===== 注销完成 → 回空白绑定页 ===== */
+  case 'cancel3': {
+    h += winOpen('E 登录',
+      '<div class="body">'+
+        '<div class="tickbox"><div class="tick">'+
+          '<svg width="24" height="24" viewBox="0 0 24 24" fill="none">'+
+          '<path d="M5.5 12.4l4.4 4.4 8.6-9.2" stroke="#34C759" stroke-width="2.2"'+
+          ' stroke-linecap="round" stroke-linejoin="round"/></svg></div>'+
+          '<div class="tt">注销成功</div>'+
+          '<div class="ts">绑定关系已解除，请重新关联账号</div></div>'+
+        '<div class="divider"></div>'+
+        '<div class="brand"><img src="assets/logo-color-128.png" width="40" height="40" alt="E登录" />'+
+        '<h1 style="font-size:14px">关联统一身份账号</h1></div>'+
+        '<button class="btn btn-primary btn-block" onclick="go(\'bind\')">去关联</button>'+
+      '</div>');
+    break;
+  }
+
+  /* ===== 桌面空白：窗口已关闭，等待从 Dock 或菜单栏唤起 ===== */
+  case 'deskblank': {
+    h += '<div class="deskblank-tip">'+
+      '<div class="dbi"><img src="assets/logo-color-128.png" width="34" height="34" alt="E登录" /></div>'+
+      '<div class="dbt">窗口已关闭</div>'+
+      '<div class="dbs">点下方 Dock 中的 E 登录图标，可重新打开</div>'+
+      '<button class="btn btn-primary" onclick="reopenWin()">重新打开窗口</button>'+
+    '</div>';
+    break;
+  }
+  }
+
+  /* ===== 弹窗 ===== */
+  if(S.modal==='exit'){
+    h += '<div class="overlay"><div class="dialog"><div class="dbody">'+
+      '<h3>确定要退出登录吗？</h3>'+
+      '<p>退出后需重新登录，绑定关系将保留。</p>'+
+      '<div class="acts">'+
+        '<button class="btn btn-secondary" onclick="closeModal()">取消</button>'+
+        '<button class="btn btn-primary" onclick="doExit()">确定</button></div>'+
+      '</div></div></div>';
+  }
+  if(S.modal==='cancel'){
+    /* fromLock：从「认证失败」态发起的解绑（原绑定用户可能已离职，走这条路）。
+       两条路径的差异只在措辞，以及要不要再验一次密码。 */
+    var fromLock=(S.data.cancelFrom==='lock');
+    h += '<div class="overlay"><div class="dialog"><div class="dbody">'+
+      '<h3>确定要注销绑定账号吗？</h3>'+
+      '<p>'+(fromLock
+        ? '本机当前绑定的是「'+esc(S.bindIam||'—')+'」。你已通过统一身份认证，'+
+          '注销后绑定关系将解除，可直接重新关联你自己的账号。'
+        : '注销后，本机账号与统一身份账号的绑定关系将解除，需重新绑定后才能自动登录。')+'</p>'+
+      '<div class="acts">'+
+        '<button class="btn btn-secondary" onclick="closeModal()">取消</button>'+
+        /* 死锁路径不再经过「输密码」那一步：本机绑的是别人的账号，
+           新用户根本不知道那个密码，弹出来只会让人以为走不下去 ——
+           而且 doCancel() 在 lock 路径下压根不校验这个字段，
+           等于问了一个不用回答的问题。确认即解绑。 */
+        '<button class="btn btn-primary" onclick="'+
+          (fromLock ? 'doCancel()' : 'toCancel2()')+'">确认注销</button></div>'+
+      '</div></div></div>';
+  }
+  if(S.modal==='cancel2'){
+    h += '<div class="overlay"><div class="dialog"><div class="dbody">'+
+      '<h3>注销绑定账号</h3>'+
+      '<p>请输入当前账号密码以确认注销</p>'+
+      '<div class="field"><label>密码</label>'+
+      '<input class="input" type="password" id="cancelPw" placeholder="请输入当前密码"'+
+      ' onkeydown="if(event.key===\'Enter\')doCancel()" /></div>'+
+      (S.data.cancelErr ? errBlock(S.data.cancelErr) : '')+
+      '<div class="acts">'+
+        '<button class="btn btn-secondary" onclick="closeModal()">返回</button>'+
+        '<button class="btn btn-primary" onclick="doCancel()">确认注销</button></div>'+
+      '</div></div></div>';
+  }
+
+  d.innerHTML = loc(h);
+}
+
+/* ---------- 组件片段 ---------- */
+function icoGrid(c){ return '<svg width="15" height="15" viewBox="0 0 15 15" fill="none">'+
+  ['1.8,1.8','8.2,1.8','1.8,8.2','8.2,8.2'].map(function(p){
+    var xy=p.split(','); return '<rect x="'+xy[0]+'" y="'+xy[1]+
+    '" width="5" height="5" rx="1.2" stroke="'+c+'" stroke-width="1.3"/>'; }).join('')+'</svg>'; }
+function icoGear(){ return '<svg width="15" height="15" viewBox="0 0 15 15" fill="none">'+
+  '<circle cx="7.5" cy="7.5" r="2.2" stroke="#6B7280" stroke-width="1.3"/>'+
+  '<path d="M7.5 1.6v1.8M7.5 11.6v1.8M1.6 7.5h1.8M11.6 7.5h1.8M3.3 3.3l1.3 1.3M10.4 10.4l1.3 1.3M11.7 3.3l-1.3 1.3M4.6 10.4l-1.3 1.3" stroke="#6B7280" stroke-width="1.3" stroke-linecap="round"/></svg>'; }
+function icoBan(){ return '<svg width="15" height="15" viewBox="0 0 15 15" fill="none">'+
+  '<circle cx="7.5" cy="7.5" r="5.8" stroke="#FF3B30" stroke-width="1.3"/>'+
+  '<path d="M4.3 4.3l6.4 6.4" stroke="#FF3B30" stroke-width="1.3" stroke-linecap="round"/></svg>'; }
+function icoOut(c){ return '<svg width="15" height="15" viewBox="0 0 15 15" fill="none">'+
+  '<path d="M5.6 2.2H3.4a1 1 0 00-1 1v8.6a1 1 0 001 1h2.2" stroke="'+(c||'#FF3B30')+'" stroke-width="1.3" stroke-linecap="round"/>'+
+  '<path d="M9.4 4.8L12.6 8l-3.2 3.2M12.6 8H6" stroke="'+(c||'#FF3B30')+'" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>'; }
+function icoLang(){ return '<svg width="14" height="14" viewBox="0 0 14 14" fill="none">'+
+  '<circle cx="7" cy="7" r="5.6" stroke="#6B7280" stroke-width="1.2"/>'+
+  '<path d="M1.4 7h11.2M7 1.4c1.6 1.7 2.4 3.8 2.4 5.6S8.6 10.9 7 12.6C5.4 10.9 4.6 8.8 4.6 7S5.4 3.1 7 1.4z" stroke="#6B7280" stroke-width="1.2"/></svg>'; }
+function icoPower(){ return '<svg width="14" height="14" viewBox="0 0 14 14" fill="none">'+
+  '<path d="M7 1.6v5" stroke="#6B7280" stroke-width="1.3" stroke-linecap="round"/>'+
+  '<path d="M3.4 3.6a5 5 0 107.2 0" stroke="#6B7280" stroke-width="1.3" stroke-linecap="round"/></svg>'; }
+function icoMin(){ return '<svg width="14" height="14" viewBox="0 0 14 14" fill="none">'+
+  '<rect x="1.6" y="2.6" width="10.8" height="8.8" rx="1.6" stroke="#6B7280" stroke-width="1.2"/>'+
+  '<path d="M1.6 9.4h10.8" stroke="#6B7280" stroke-width="1.2"/></svg>'; }
+
+/* ---------- 表单内嵌图标（16px，currentColor 便于跟随状态变色） ---------- */
+function icoUser(){ return '<svg width="16" height="16" viewBox="0 0 16 16" fill="none">'+
+  '<circle cx="8" cy="5.6" r="2.7" stroke="currentColor" stroke-width="1.3"/>'+
+  '<path d="M2.9 13.7c0-2.4 2.3-3.9 5.1-3.9s5.1 1.5 5.1 3.9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>'; }
+function icoLock(){ return '<svg width="16" height="16" viewBox="0 0 16 16" fill="none">'+
+  '<rect x="3.1" y="6.9" width="9.8" height="6.7" rx="1.9" stroke="currentColor" stroke-width="1.3"/>'+
+  '<path d="M5.5 6.9V5.2a2.5 2.5 0 015 0v1.7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>'; }
+function icoEye(){ return '<svg width="16" height="16" viewBox="0 0 16 16" fill="none">'+
+  '<path d="M1.5 8S3.8 3.8 8 3.8 14.5 8 14.5 8s-2.3 4.2-6.5 4.2S1.5 8 1.5 8z" stroke="currentColor" stroke-width="1.25"/>'+
+  '<circle cx="8" cy="8" r="1.95" stroke="currentColor" stroke-width="1.25"/></svg>'; }
+function icoEyeOff(){ return '<svg width="16" height="16" viewBox="0 0 16 16" fill="none">'+
+  '<path d="M1.5 8S3.8 3.8 8 3.8c1 0 1.9.23 2.7.6M14.5 8s-2.3 4.2-6.5 4.2c-1.1 0-2-.27-2.9-.7" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/>'+
+  '<path d="M6.4 6.4a2.3 2.3 0 003.2 3.2" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/>'+
+  '<path d="M2.4 2.4l11.2 11.2" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></svg>'; }
+function icoPhone(){ return '<svg width="16" height="16" viewBox="0 0 16 16" fill="none">'+
+  '<rect x="4.2" y="1.9" width="7.6" height="12.2" rx="1.8" stroke="currentColor" stroke-width="1.3"/>'+
+  '<path d="M6.9 12.2h2.2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>'; }
+function icoShield(){ return '<svg width="16" height="16" viewBox="0 0 16 16" fill="none">'+
+  '<path d="M8 1.9l5 1.9v4.3c0 2.9-2 5.1-5 6.1-3-1-5-3.2-5-6.1V3.8l5-1.9z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>'+
+  '<path d="M6.1 8l1.5 1.5 2.6-3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>'; }
+function icoLaptop(){ return '<svg width="16" height="16" viewBox="0 0 16 16" fill="none">'+
+  '<rect x="2.9" y="3.6" width="10.2" height="7.1" rx="1.4" stroke="currentColor" stroke-width="1.3"/>'+
+  '<path d="M1.2 12.9h13.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>'; }
+function icoKey(){ return '<svg width="16" height="16" viewBox="0 0 16 16" fill="none">'+
+  '<circle cx="5.4" cy="5.4" r="2.9" stroke="currentColor" stroke-width="1.3"/>'+
+  '<path d="M7.6 7.6l6.1 6.1M11.2 11.2l1.4-1.4M9.3 9.3l1.4-1.4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>'; }
+function icoMail(){ return '<svg width="16" height="16" viewBox="0 0 16 16" fill="none">'+
+  '<rect x="1.9" y="3.4" width="12.2" height="9.2" rx="1.7" stroke="currentColor" stroke-width="1.3"/>'+
+  '<path d="M2.7 4.7L8 8.5l5.3-3.8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>'; }
+function icoInfo(){ return '<svg width="16" height="16" viewBox="0 0 16 16" fill="none">'+
+  '<circle cx="8" cy="8" r="6.1" stroke="currentColor" stroke-width="1.25"/>'+
+  '<path d="M8 7.2v4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>'+
+  '<circle cx="8" cy="4.9" r=".85" fill="currentColor"/></svg>'; }
+function icoChev(){ return '<svg width="12" height="12" viewBox="0 0 12 12" fill="none">'+
+  '<path d="M3 4.6l3 3 3-3" stroke="currentColor" stroke-width="1.5"'+
+  ' stroke-linecap="round" stroke-linejoin="round"/></svg>'; }
+
+/* v1.0.20 新增：密码策略清单的实时三态符号（对勾 / 叉）
+   —— 与上面同款 1.25 描边，尺寸交给外层 CSS 控制，这里只给 viewBox */
+function icoTick(){ return '<svg width="11" height="11" viewBox="0 0 12 12" fill="none">'+
+  '<path d="M2.4 6.3l2.4 2.4 4.8-5.2" stroke="currentColor" stroke-width="1.5"'+
+  ' stroke-linecap="round" stroke-linejoin="round"/></svg>'; }
+function icoCross(){ return '<svg width="11" height="11" viewBox="0 0 12 12" fill="none">'+
+  '<path d="M3.2 3.2l5.6 5.6M8.8 3.2L3.2 8.8" stroke="currentColor" stroke-width="1.5"'+
+  ' stroke-linecap="round"/></svg>'; }
+
+/* v1.0.16 新增：扫码 / 人脸 / 指纹 —— 与上面对齐 16x16 stroke 风格 */
+function icoQr(){ return '<svg width="16" height="16" viewBox="0 0 16 16" fill="none">'+
+  '<rect x="2.2" y="2.2" width="4.6" height="4.6" rx="1" stroke="currentColor" stroke-width="1.3"/>'+
+  '<rect x="9.2" y="2.2" width="4.6" height="4.6" rx="1" stroke="currentColor" stroke-width="1.3"/>'+
+  '<rect x="2.2" y="9.2" width="4.6" height="4.6" rx="1" stroke="currentColor" stroke-width="1.3"/>'+
+  '<path d="M9.4 9.4h2.2v2.2M13.8 9.4v4.4M9.4 13.8h2.2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>'; }
+function icoFace(){ return '<svg width="16" height="16" viewBox="0 0 16 16" fill="none">'+
+  '<path d="M1.9 5.2V3.9c0-1.1.9-2 2-2h1.3M10.8 1.9h1.3c1.1 0 2 .9 2 2v1.3M14.1 10.8v1.3c0 1.1-.9 2-2 2h-1.3M5.2 14.1H3.9c-1.1 0-2-.9-2-2v-1.3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>'+
+  '<circle cx="5.9" cy="6.6" r=".85" fill="currentColor"/><circle cx="10.1" cy="6.6" r=".85" fill="currentColor"/>'+
+  '<path d="M6 9.9c.6.65 1.25.95 2 .95s1.4-.3 2-.95" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>'; }
+function icoFinger(){ return '<svg width="16" height="16" viewBox="0 0 16 16" fill="none">'+
+  '<path d="M8 2.1c-3.2 0-5.8 2.6-5.8 5.8v1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>'+
+  '<path d="M13.8 7.9c0-3.2-2.6-5.8-5.8-5.8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>'+
+  '<path d="M4.6 9.6a3.4 3.4 0 016.8 0v1.7c0 .8.2 1.5.6 2.1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>'+
+  '<path d="M6.9 9.9c0-.6.5-1.1 1.1-1.1s1.1.5 1.1 1.1v2.3c0 .7.2 1.3.5 1.9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>'; }
+
+/* =========================================================
+   v1.0.16 · 认证方式注册表
+   一次定义，三处共用：首因素切换条、二次验证页、日志里的中文名。
+   以前每个函数里各写一遍 ['pw','qr','sms','otp'] 和一张中文名映射表，
+   加两种方式要改四五处，漏一处就出现「切换成功但界面没变」这种鬼问题。
+
+   两个字段的差别要分清：
+     sec:false —— 只能当首因素，不能拿来当二次验证（扫码）。
+     bio:true  —— 生物识别。首因素用过它，二次验证就不再给同一个，
+                  同一个器官验两次等于没验。
+   ========================================================= */
+var METHODS = [
+  { id:'pw',   nm:'账密', ic:icoLock,   ai:'账密登录', sec:true,  bio:false },
+  { id:'qr',   nm:'扫码', ic:icoQr,     ai:'扫码登录', sec:false, bio:false },
+  { id:'sms',  nm:'短信', ic:icoPhone,  ai:'短信登录', sec:true,  bio:false },
+  { id:'face', nm:'人脸', ic:icoFace,   ai:'人脸识别', sec:true,  bio:true  },
+  { id:'fp',   nm:'指纹', ic:icoFinger, ai:'指纹识别', sec:true,  bio:true  },
+  { id:'otp',  nm:'口令', ic:icoKey,    ai:'动态口令', sec:true,  bio:false }
+];
+
+/* 演示用：后台开通 1~6 种时的组合。
+   顺序不是 METHODS 的展示顺序，而是「客户实际会怎么分期开通」：
+   账密打底 → 加短信 → 加扫码 → 加口令 → 加人脸 → 加指纹。
+   这样每一种都能单独看到「少开一种时 tab 怎么排」，而不是只有全开和两格两档。
+   注意：tab 条本身仍按 METHODS 顺序渲染，所以新加的方式不一定出现在最右边 ——
+   那是故意的，后台下发的是「集合」，客户端不该因为顺序不同就换位置。 */
+var MTH_PRESETS = {
+  '1': ['pw'],
+  '2': ['pw','sms'],
+  '3': ['pw','sms','qr'],
+  '4': ['pw','sms','qr','otp'],
+  '5': ['pw','sms','qr','otp','face'],
+  '6': ['pw','sms','qr','otp','face','fp']
+};
+function methodById(id){
+  for(var i=0;i<METHODS.length;i++){ if(METHODS[i].id===id) return METHODS[i]; }
+  return METHODS[0];
+}
+/* 当前可用的方式。真实客户端由后台下发「已开通 ∩ 已绑定」，
+   原型用 S.enabled 模拟后台配置，默认 6 种全开。 */
+function enabledMethods(){
+  var on = S.enabled || METHODS.map(function(m){ return m.id; });
+  return METHODS.filter(function(m){ return on.indexOf(m.id) >= 0; });
+}
+
+function row(t,s,ctl,ico){
+  return '<div class="setrow"><div class="ico">'+(ico||'')+'</div>'+
+    '<div class="meta"><div class="t">'+esc(t)+'</div>'+
+    '<div class="s">'+esc(s)+'</div></div>'+
+    '<div class="ctl">'+ctl+'</div></div>';
+}
+function sw(id,on){
+  return '<button class="sw'+(on?' on':'')+'" id="'+id+'" onclick="toggleSw(this)"></button>';
+}
+
+function errBlock(msg){
+  return '<div class="errmsg"><svg width="12" height="12" viewBox="0 0 12 12" fill="none">'+
+    '<circle cx="6" cy="6" r="5" stroke="#FF3B30" stroke-width="1.2"/>'+
+    '<path d="M6 3.4v3.2M6 8.5v.1" stroke="#FF3B30" stroke-width="1.3" stroke-linecap="round"/></svg>'+
+    '<span>'+esc(msg)+'</span></div>';
+}
+
+function loginTabs(){
+  /* v1.0.16：由 METHODS + 后台配置渲染，不再写死 4 项。
+     只渲染可用方式 —— 没开通的整条不出现（不置灰、不占位），
+     与 Windows 版「只渲染可用认证方式」的口径一致。 */
+  var list = enabledMethods();
+  /* 只开通了一种 / 一种都没开通时不留切换条 ——
+     一颗 tab 没有「切换」的含义，占着一条反而像坏了两格。
+     表单本身就是当前方式，用户不需要在这里选。 */
+  if(list.length <= 1) return '';
+  return '<div class="tabs">'+list.map(function(it){
+    return '<button class="'+(S.method===it.id?'on':'')+
+      '" title="'+esc(it.ai)+'"'+
+      ' onclick="setMethod(\''+it.id+'\')">'+it.ic()+
+      '<span>'+esc(it.nm)+'</span></button>'; }).join('')+'</div>';
+}
+
+/* ---------- 简洁版表单构件：图标内嵌输入框 ---------- */
+/* 用法：ipt(id, placeholder, 图标, {val,type,bad,ro,eye,user,tail}) */
+function ipt(id, ph, ico, o){
+  o = o || {};
+  var cls = 'ipt'+(o.eye?' has-eye':'')+(o.code?' has-code':'')+(o.info?' has-info':'');
+  return '<div class="'+cls+'">'+
+    '<span class="lead">'+ico+'</span>'+
+    '<input class="input'+(o.bad?' bad':'')+'"'+
+      (id ? ' id="'+id+'"' : '')+
+      (o.type ? ' type="'+o.type+'"' : '')+
+      (o.val !== undefined ? ' value="'+esc(o.val)+'"' : '')+
+      (o.ro ? ' readonly' : '')+
+      ' placeholder="'+esc(ph)+'"'+
+      (o.oninput ? ' oninput="'+o.oninput+'"'
+        : (o.user ? ' oninput="onUserInput(this.value)"' : ' oninput="onUserInput()"'))+' />'+
+    (o.eye ? '<button class="eye" type="button" tabindex="-1" aria-label="显示密码"'+
+      ' onclick="togglePw(\''+id+'\',this)">'+icoEye()+'</button>' : '')+
+    (o.info ? '<button class="info" type="button" tabindex="-1" aria-label="密码要求"'+
+      ' onclick="toggleReq(this)">'+icoInfo()+'</button>' : '')+
+    (o.tail || '')+
+  '</div>';
+}
+/* 取输入框值（忘记密码页不整页重渲染，直接读 DOM） */
+function valOf(id){ var e=document.getElementById(id); return e ? (e.value||'') : ''; }
+
+/* 密码明文/密文切换 */
+function togglePw(id,btn){
+  var el=document.getElementById(id); if(!el || !btn) return;
+  var show = (el.type === 'password');
+  el.type = show ? 'text' : 'password';
+  btn.innerHTML = show ? icoEyeOff() : icoEye();
+  btn.setAttribute('aria-label', show ? '隐藏密码' : '显示密码');
+}
+
+/* 生物识别区（人脸 / 指纹）。
+   v1.0.18：视觉对齐沁给的参考图 —— 人脸是大圆取景框 + 人像剪影 + 扫描线
+   + 三列取景提示 + 大按钮；指纹是大号蓝色线稿。
+
+   ★ 口径（沁 2026-11-05 确认）：录入 / 绑定不在本客户端做，用户在企业侧
+   已经具备人脸与指纹，客户端这一步**只做认证**。所以这里没有任何
+   「录入」「绑定」「首次采集」的入口与文案，只有「识别 → 通过」。
+   影像与模板也不落本机，是第三方引擎比完只回一个 是/否。 */
+
+/* 人像剪影：只画头肩轮廓，不画具体五官 —— 这是取景位示意，不是摄像头画面 */
+function personSilhouette(){
+  return '<svg class="psn" viewBox="0 0 120 120" width="112" height="112" fill="none">'+
+    '<circle cx="60" cy="46" r="16.5" fill="#BFD8F7"/>'+
+    '<path d="M60 66.5c-16.4 0-28 9.7-30.6 24.6-.5 2.9 1.7 5.6 4.7 5.6h51.8c3 0 '+
+    '5.2-2.7 4.7-5.6C88 76.2 76.4 66.5 60 66.5z" fill="#BFD8F7"/>'+
+  '</svg>';
+}
+function biotick(){
+  return '<svg width="34" height="34" viewBox="0 0 24 24" fill="none">'+
+    '<path d="M5.5 12.4l4.4 4.4 8.6-9.2" stroke="#34C759" stroke-width="2.2"'+
+    ' stroke-linecap="round" stroke-linejoin="round"/></svg>';
+}
+/* 三列取景提示的小图标：光线 / 取景框 / 正脸 */
+function icoSun(){ return '<svg viewBox="0 0 20 20" fill="none">'+
+  '<circle cx="10" cy="10" r="3.5" stroke="currentColor" stroke-width="1.4"/>'+
+  '<path d="M10 2.2v1.6M10 16.2v1.6M2.2 10h1.6M16.2 10h1.6M4.5 4.5l1.1 1.1'+
+  'M14.4 14.4l1.1 1.1M15.5 4.5l-1.1 1.1M5.6 14.4l-1.1 1.1" stroke="currentColor"'+
+  ' stroke-width="1.4" stroke-linecap="round"/></svg>'; }
+function icoScanFrame(){ return '<svg viewBox="0 0 20 20" fill="none">'+
+  '<path d="M2.8 6.8V4.6c0-1 .8-1.8 1.8-1.8h2.2M13.2 2.8h2.2c1 0 1.8.8 1.8 1.8v2.2'+
+  'M17.2 13.2v2.2c0 1-.8 1.8-1.8 1.8h-2.2M6.8 17.2H4.6c-1 0-1.8-.8-1.8-1.8v-2.2"'+
+  ' stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>'+
+  '<circle cx="10" cy="8.6" r="1.9" stroke="currentColor" stroke-width="1.3"/>'+
+  '<path d="M6.4 13.4c.6-1.5 2-2.3 3.6-2.3s3 .8 3.6 2.3" stroke="currentColor"'+
+  ' stroke-width="1.3" stroke-linecap="round"/></svg>'; }
+function icoFaceFront(){ return '<svg viewBox="0 0 20 20" fill="none">'+
+  '<circle cx="10" cy="10" r="7.2" stroke="currentColor" stroke-width="1.4"/>'+
+  '<circle cx="7.4" cy="8.6" r=".95" fill="currentColor"/>'+
+  '<circle cx="12.6" cy="8.6" r=".95" fill="currentColor"/>'+
+  '<path d="M7.6 12.3c.6.7 1.4 1.05 2.4 1.05s1.8-.35 2.4-1.05" stroke="currentColor"'+
+  ' stroke-width="1.3" stroke-linecap="round"/></svg>'; }
+/* 指纹大图：参考图的蓝色粗线稿（同心拱 + 两条向下的纹路） */
+function fpBig(){
+  return '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.4"'+
+    ' stroke-linecap="round">'+
+    '<path d="M6.6 31.6C6.6 17.5 18 6.1 32 6.1s25.4 11.4 25.4 25.5"/>'+
+    '<path d="M12.7 34.4c0-10.7 8.6-19.3 19.3-19.3s19.3 8.6 19.3 19.3"/>'+
+    '<path d="M18.8 38.1c0-7.3 5.9-13.2 13.2-13.2s13.2 5.9 13.2 13.2"/>'+
+    '<path d="M25.1 41.4c0-3.8 3.1-6.9 6.9-6.9s6.9 3.1 6.9 6.9v4.1c0 4.4 1.3 8.3 3.6 11.6"/>'+
+    '<path d="M11.9 42.6c.4 5.6 2.4 10.7 5.6 14.9"/>'+
+    '<path d="M52.1 42.6c-.4 5.6-2.4 10.7-5.6 14.9"/>'+
+    '<path d="M18.9 46.6c.6 4.1 2.1 7.9 4.3 11.2"/>'+
+    '<path d="M45.1 46.6c-.6 4.1-2.1 7.9-4.3 11.2"/>'+
+  '</svg>';
+}
+
+/* 采集区主体（首因素与二次验证共用），只吃 kind 与状态 */
+function bioCore(kind, st){
+  st = st || 'idle';
+  var isFace = (kind === 'face');
+  var cls = st==='busy' ? 'busy' : (st==='ok' ? 'ok' : '');
+  var stText = st==='busy' ? (isFace ? '正在识别，请保持面向屏幕' : '正在比对指纹…')
+             : st==='ok'   ? (isFace ? '人脸识别通过' : '指纹校验通过')
+             : (isFace ? '请将面部置于取景框内' : '请将手指放在 Touch ID 上');
+
+  var core = isFace
+    ? '<div class="maskwrap '+cls+'">'+ personSilhouette()+
+        (st==='busy' ? '<i class="scanline"></i>' : '')+
+        (st==='ok' ? '<div class="okmark">'+biotick()+'</div>' : '')+
+      '</div>'
+    : '<div class="fpbig '+cls+'">'+ fpBig()+
+        (st==='ok' ? '<div class="okmark">'+biotick()+'</div>' : '')+
+      '</div>';
+
+  var tips = isFace
+    ? '<div class="biotips'+(st==='ok'?' gone':'')+'">'+
+        '<div class="tip">'+icoSun()+'<span>保持光线充足</span></div>'+
+        '<div class="tip">'+icoScanFrame()+'<span>脸在取景框内</span></div>'+
+        '<div class="tip">'+icoFaceFront()+'<span>面部正对屏幕</span></div>'+
+      '</div>'
+    : '';
+
+  /* 通过之后取景提示就没用了 —— 收起但保留占位，
+     否则成功那一刻窗口会矮一截，看着像闪了一下。 */
+  return core+
+    '<div class="ttl">'+esc(stText)+'</div>'+
+    tips;
+}
+
+/* 人脸 / 指纹页的主按钮：一个按钮走完全程。
+   未识别时是「开始人脸识别」，识别中是禁用态，通过后才变成真正的
+   「登录 / 绑定并登录 / 验证」。参考图本身就是一颗大按钮，两段式更贴。 */
+function bioCta(kind, st, label, action, off, fn){
+  fn = fn || 'simBio';
+  if(st === 'busy'){
+    return '<button class="btn btn-primary btn-block" disabled>识别中…</button>';
+  }
+  if(st === 'ok'){
+    return '<button class="btn btn-primary btn-block"'+(off?' disabled':'')+
+      ' onclick="'+action+'">'+label+'</button>';
+  }
+  return '<button class="btn btn-primary btn-block" onclick="'+fn+'(\''+kind+'\')">'+
+    (kind==='face' ? '开始人脸识别' : '开始指纹校验')+'</button>';
+}
+
+/* 首因素（账密页切到人脸 / 指纹时用） */
+function bioBox(kind){
+  var b = S.data.bio || {};
+  var st = (b.kind===kind) ? (b.st||'idle') : 'idle';
+  return '<div class="bio2">'+bioCore(kind, st)+'</div>';
+}
+/* 取某个方式当前的识别状态（渲染时算 CTA 用） */
+function bioSt(kind){
+  var b = S.data.bio || {};
+  return (b.kind===kind) ? (b.st||'idle') : 'idle';
+}
+
+/* 模拟生物识别：调起 → 采集中 → 比对通过。真实客户端在这 1 秒里做两件事：
+   ① 授权 SDK 拿到采集结果；② 把结果交第三方引擎比对，拿回 是/否。 */
+var bioTimer=null;
+function simBio(kind){
+  clearTimeout(bioTimer);
+  S.data.bio = { kind:kind, st:'busy' };
+  logIt('调起'+(kind==='face'?'人脸':'指纹')+'识别 → 交第三方引擎比对');
+  render();
+  bioTimer = setTimeout(function(){
+    S.data.bio = { kind:kind, st:'ok' };
+    logIt((kind==='face'?'人脸':'指纹')+'比对通过');
+    render();
+  }, 1100);
+}
+
+/* 二次验证页里也用同一套采集区，结构更紧凑 —— 见 secondBody() */
+
+/* =========================================================
+   v1.0.16 · 改密页（强制 / 可跳过）
+   Windows 版第 4.5.3 节的移植。三处口径保持一致：
+     ① 密码策略只定义一次（见 pwIssues），改密与找回密码共用；
+     ② 不合规时不仅说「格式不对」，还要列出具体没满足哪一条；
+     ③ 强制分支不设「取消」「跳过」—— 初始密码与已过期都不给退路。
+   ========================================================= */
+var PW_RULES = [
+  { k:'len',  t:'长度为 8-20 个字符' },
+  { k:'kind', t:'至少包含数字、大写字母、小写字母、特殊字符中的 3 类' },
+  { k:'weak', t:'不能使用弱口令（账号名、连续或重复数字等）' }
+];
+
+/* 逐条判定，返回未满足项。改密页与忘记密码页都用它，避免两处策略跑偏。 */
+function pwIssues(pw, account){
+  var bad = [];
+  if(!(pw.length >= 8 && pw.length <= 20)) bad.push('len');
+  var kinds = 0;
+  if(/[0-9]/.test(pw)) kinds++;
+  if(/[A-Z]/.test(pw)) kinds++;
+  if(/[a-z]/.test(pw)) kinds++;
+  if(/[^A-Za-z0-9]/.test(pw)) kinds++;
+  if(kinds < 3) bad.push('kind');
+  var low = (pw||'').toLowerCase();
+  var acc = (account||'').toLowerCase();
+  var weak = /^(123456|12345678|password|admin|qwerty|abc123|111111|000000)/.test(low)
+          || /(.)\1{3,}/.test(pw)
+          || /0123456789/.test(pw)
+          || (acc && low.indexOf(acc) >= 0);
+  if(weak) bad.push('weak');
+  return bad;
+}
+
+/* 剩余天数 N —— 由服务端在返回密码状态时一并下发（真实环境取接口字段），
+   原型里由演示开关给值，默认 3 天。N 只用于「即将过期」这一支：
+   过期与初始密码不带天数，所以没有 N 也不该影响它们。 */
+function chpwDays(){
+  var n = parseInt((S.demo && S.demo.pwdDays), 10);
+  if(isNaN(n) || n < 1) n = 3;
+  if(n > 90) n = 90;          /* 超过 90 天就不叫「即将过期」了，防后台配错 */
+  return n;
+}
+
+/* 改密页只可能在「账号密码」这一种首因素验过之后出现 —— 所以抬头回显是谁，
+   让用户确认「拦的是我自己的账号」，而不是一台转手后不知道自己是谁的机器。
+   副标题一句话讲完「为什么拦你 / 还剩多久」，不带逗号句号，统一灰色：
+   这里不是报错，是流程中的一步，飘红飘黄反而像出了事故。 */
+function chpwUser(){
+  return S.data.authUser || S.bindIam || S.user || '';
+}
+function chpwReasonText(reason){
+  var n = chpwDays();
+  var who = chpwUser();
+  var t = who ? ('您好，' + who) : '您好';   /* 取不到账号就只留「您好」，不编造 */
+  if(reason === 'expired') return { t:t, s:'登录密码已过期请重新设置' };
+  if(reason === 'soon')    return { t:t, s:'密码还有 <b>'+n+'</b> 天过期请及时修改' };
+  return { t:t, s:'初始密码请修改后继续登录' };
+}
+
+/* 规则逐条实时判定：输入即给结果，不用等提交才被告知哪条不合格。
+   符号三态 —— 未输入灰点 / 满足绿勾 / 不满足红叉。 */
+function chpwRuleRow(r, st){
+  var mk = st==='ok' ? '<span class="bul">'+icoTick()+'</span>'
+         : st==='no' ? '<span class="bul">'+icoCross()+'</span>'
+         : '<span class="bul">·</span>';
+  return '<div class="it '+(st||'')+'" data-k="'+r.k+'">'+mk+
+    '<span>'+esc(r.t)+'</span></div>';
+}
+function chpwRuleState(pw, k){
+  if(!pw) return '';
+  return (pwIssues(pw, S.data.authUser || S.user).indexOf(k) >= 0) ? 'no' : 'ok';
+}
+function onChpwInput(v){
+  var c = S.chpw; if(!c) return;
+  c.p1 = v || '';
+  var box = document.querySelector('.chpw .reqbox');
+  if(!box) return;
+  PW_RULES.forEach(function(r){
+    var el = box.querySelector('.it[data-k="'+r.k+'"]');
+    if(!el) return;
+    var st = chpwRuleState(c.p1, r.k);
+    el.className = 'it ' + st;
+    el.innerHTML = chpwRuleRow(r, st);
+  });
+}
+
+function chpwBody(){
+  var c = S.chpw || { reason:'initial', err:null, bad:[] };
+  var T = chpwReasonText(c.reason);
+  var canSkip = (c.reason === 'soon');
+  var bad = c.bad || [];
+  var pw = c.p1 || '';
+
+  var rules = PW_RULES.map(function(r){
+    /* 提交过一次失败后，即使框里没内容也把不合格项标出来 —— 那是有依据的判定，不是猜 */
+    var st = chpwRuleState(pw, r.k) || (bad.indexOf(r.k) >= 0 ? 'no' : '');
+    return chpwRuleRow(r, st);
+  }).join('');
+
+  return '<div class="body chpw">'+
+    '<div class="brand" style="gap:7px">'+
+      '<div class="logo-box"><img src="assets/logo-color-128.png"'+
+      ' width="38" height="38" alt="E登录" /></div>'+
+      '<h1 style="font-size:15px">'+esc(T.t)+'</h1>'+
+      '<p>'+T.s+'</p>'+
+    '</div>'+
+    ipt('chNew','新密码',icoLock(), { type:'password', eye:true, val:pw,
+      oninput:'onChpwInput(this.value)' })+
+    ipt('chNew2','确认新密码',icoLock(), { type:'password', eye:true, val:c.p2||'' })+
+    '<div class="reqbox">'+rules+'</div>'+
+    (c.err ? '<div class="errmsg">'+esc(c.err)+'</div>' : '')+
+    '<button class="btn btn-primary btn-block" onclick="submitChpw()">确定</button>'+
+    (canSkip
+      ? '<div class="footrow"><button class="lnk" onclick="skipChpw()">'+
+        '跳过，直接登录</button></div>' : '')+
+  '</div>';
+}
+
+/* 提交改密。校验顺序：两次一致 → 策略合规 → 通过。 */
+function submitChpw(){
+  function v(id){ var e=document.getElementById(id); return e ? (e.value||'') : ''; }
+  var p1 = v('chNew'), p2 = v('chNew2');
+  var c = S.chpw || (S.chpw = { reason:'initial' });
+  /* 整页重渲染会重建输入框，先把已输的内容收进状态，渲染时再回填 ——
+     否则用户每被提示一次就得重新敲一遍密码。 */
+  c.p1 = p1; c.p2 = p2;
+
+  if(!p1){ c.err='请输入新密码'; render(); return; }
+  if(p1 !== p2){ c.err='两次输入的密码不一致'; c.bad=[]; render(); return; }
+
+  var bad = pwIssues(p1, S.data.authUser || S.user);
+  if(bad.length){
+    /* 只说「格式不对」等于让用户自己猜，必须点出是哪一条 */
+    var names = bad.map(function(k){
+      return { len:'长度不在 8-20 位之间', kind:'字符种类不足 3 类',
+               weak:'命中了弱口令规则' }[k] || k;
+    });
+    c.bad = bad;
+    c.err = '密码格式不正确：' + names.join('；');
+    logIt('新密码不合规 → ' + names.join('、'));
+    render();
+    return;
+  }
+
+  c.err=null; c.bad=[];
+  S.data.pwdState = 'normal';
+  logIt('改密成功（' + (c.reason==='initial'?'初始密码':'过期密码') + '）→ 回到判定顺序，继续判二次验证');
+  S.step=null; S.chpw=null;
+  render();
+  setTimeout(function(){ afterChpwStep(); }, 260);
+}
+
+/* 仅「即将过期」分支可用：跳过不算异常，只是把风险留给用户。 */
+function skipChpw(){
+  logIt('密码即将过期 → 用户选择【跳过，直接登录】');
+  S.step=null; S.chpw=null;
+  render();
+  setTimeout(function(){ afterChpwStep(); }, 160);
+}
+
+/* =========================================================
+   v1.0.16 · 二次验证（v1.0.17 起为整页）
+   后台策略决定「要不要验」「允许哪几种方式」，客户端只负责渲染。
+   方式集合里要排掉两样东西：
+     · 与首因素完全相同的方式（输入密码再输一次密码，等于没验）
+     · 首因素已用过生物识别（人脸 + 指纹同属「你是谁」，同一类因素验两遍也等于没验）
+   ========================================================= */
+function secondWays(){
+  /* 二次验证只能用「后台开通了的方式」—— 没开通短信却让用户收短信，那是配置跑偏。
+     策略给的是候选集，开通集是前提，两头都要满足。 */
+  var allow = (S.demo.secondWays || ['sms','face','fp','otp']).filter(function(id){
+    return (S.enabled || []).indexOf(id) >= 0;
+  });
+  var first = S.method;
+  /* 首因素若已是生物识别，二次就不能再用生物识别 ——
+     人脸+指纹都是「你是谁」，同一类因素验两次不构成双因素。 */
+  var firstIsBio = METHODS.some(function(m){ return m.id===first && m.bio; });
+  var out = METHODS.filter(function(m){
+    if(allow.indexOf(m.id) < 0) return false;
+    if(m.id === 'qr') return false;                    /* 扫码不能当第二因素 */
+    if(m.id === first) return false;                   /* 与首因素重复 */
+    if(m.bio && firstIsBio) return false;
+    return true;
+  });
+  /* 兜底：策略配的方式全被排掉了，或后台压根没开通第二种方式。
+     先退一步找「已开通、能当第二因素、又不是首因素」的那个（最常见是账密），
+     实在一个都没有才给短信 —— 宁可让用户多收一条码，也不能把界面渲染成空壳。
+     注：只开账密还要求二次验证，本身就是后台配错的组合，真实产品在策略页会拦住。 */
+  if(!out.length){
+    out = METHODS.filter(function(m){
+      return m.sec && m.id !== first && (S.enabled || []).indexOf(m.id) >= 0;
+    });
+  }
+  if(!out.length){
+    out = METHODS.filter(function(m){ return m.id==='sms'; });
+  }
+  return out;
+}
+
+function secondBody(way){
+  if(way === 'sms'){
+    /* 手机号默认带出该账号在 IAM 档案里的绑定号，可改（与 Windows 版一致） */
+    var prof = fpProfile(S.data.authUser || S.user);
+    return ipt('sePhone','手机号码',icoPhone(),
+             { val:S.data.secPhone || prof.sms })+
+           ipt('seCode','短信验证码',icoShield(),
+             { val:S.data.secCode || '',
+               tail:'<button class="btn btn-secondary" onclick="sendSecSms()">'+
+               '获取验证码</button>' });
+  }
+  if(way === 'otp'){
+    return ipt('seOtp','动态口令',icoKey(), { val:S.data.secOtp || '' });
+  }
+  if(way === 'pw'){
+    return ipt('sePw','当前账号密码',icoLock(),
+             { type:'password', eye:true, val:S.data.secPw || '' });
+  }
+  /* 人脸 / 指纹：与首因素同一套采集区，状态走 S.data.secBio */
+  var st2 = (S.data.secBio && S.data.secBio.st) || 'idle';
+  return '<div class="bio2">'+bioCore(way, st2, true)+'</div>';
+}
+
+/* 二次验证整页。结构与改密页、登录表单保持同一套：
+   品牌区 → 方式切换 → 输入 → 主按钮 → 返回。
+   方式切换直接复用首因素那套 tabs（图标 + 两字），
+   让用户一眼认出「这还是同一套登录方式」，而不是另一套陌生控件。 */
+function secondPage(){
+  var ways = secondWays();
+  var cur = S.second.cur;
+  if(!ways.some(function(m){ return m.id===cur; })) cur = ways[0] ? ways[0].id : 'sms';
+
+  var tabs = ways.length > 1
+    ? '<div class="tabs">'+ways.map(function(m){
+        return '<button class="'+(cur===m.id?'on':'')+'" title="'+esc(m.ai)+'"'+
+          ' onclick="setSecWay(\''+m.id+'\')">'+m.ic()+
+          '<span>'+esc(m.nm)+'</span></button>';
+      }).join('')+'</div>'
+    : '';
+
+  return '<div class="body">'+
+    '<div class="brand" style="gap:6px">'+
+      '<div class="logo-box"><img src="assets/logo-color-128.png"'+
+      ' width="40" height="40" alt="E登录" /></div>'+
+      '<h1 style="font-size:16px">需要二次验证</h1>'+
+      '<p>为了保障您的账户安全，请完成二次验证</p>'+
+    '</div>'+
+    tabs+
+    secondBody(cur)+
+    (S.second.err ? '<div class="errmsg">'+esc(S.second.err)+'</div>' : '')+
+    ((cur==='face'||cur==='fp')
+      ? bioCta(cur, (S.data.secBio && S.data.secBio.st) || 'idle', '验证',
+               'submitSecond()', false, 'simSecBio')
+      : '<button class="btn btn-primary btn-block" onclick="submitSecond()">验证</button>')+
+    '<div class="backrow"><button class="backbtn" onclick="secondBack()">'+
+      '<svg width="11" height="11" viewBox="0 0 12 12" fill="none">'+
+      '<path d="M7.5 2.5L4 6l3.5 3.5" stroke="currentColor" stroke-width="1.5"'+
+      ' stroke-linecap="round" stroke-linejoin="round"/></svg>'+
+      '返回上一级认证登录</button></div>'+
+  '</div>';
+}
+
+function setSecWay(w){
+  S.second.cur = w;
+  S.second.err = null;
+  S.data.secBio = null;
+  logIt('二次验证切换方式 → ' + methodById(w).ai);
+  render();
+}
+var secBioTimer=null;
+function simSecBio(way){
+  clearTimeout(secBioTimer);
+  S.data.secBio = { st:'busy' };
+  logIt('二次验证调起'+(way==='face'?'人脸':'指纹')+'识别');
+  render();
+  secBioTimer = setTimeout(function(){
+    S.data.secBio = { st:'ok' };
+    logIt('二次验证'+(way==='face'?'人脸':'指纹')+'比对通过');
+    render();
+  }, 1000);
+}
+function sendSecSms(){
+  var e = document.getElementById('sePhone');
+  if(!e || !isPhone((e.value||'').trim())){ toast('请输入正确的 11 位手机号码'); return; }
+  S.data.secPhone = (e.value||'').trim();
+  logIt('二次验证 → 下发短信验证码（60 秒倒计时）');
+  toast('验证码已发送，请查收');
+}
+
+function submitSecond(){
+  var cur = S.second.cur;
+  function v(id){ var e=document.getElementById(id); return e ? (e.value||'').trim() : ''; }
+
+  /* 整页重渲染会重建输入框，先把已填的收进状态，渲染时回填 ——
+     否则提示一次「验证码不对」，用户就得再敲一遍。 */
+  S.data.secPhone = v('sePhone') || S.data.secPhone;
+  S.data.secCode  = v('seCode');
+  S.data.secOtp   = v('seOtp');
+  S.data.secPw    = v('sePw');
+
+  if((cur==='face' || cur==='fp')){
+    if(!(S.data.secBio && S.data.secBio.st==='ok')){
+      S.second.err = (cur==='face'?'请先完成人脸识别':'请先完成指纹校验');
+      render(); return;
+    }
+  } else if(cur === 'sms'){
+    if(!v('sePhone')){ S.second.err='请输入手机号码'; render(); return; }
+    if(!isPhone(v('sePhone'))){ S.second.err='请输入正确的 11 位手机号码'; render(); return; }
+    if(!v('seCode')){ S.second.err='请输入短信验证码'; render(); return; }
+  } else if(cur === 'otp'){
+    if(!v('seOtp')){ S.second.err='请输入动态口令'; render(); return; }
+  } else if(cur === 'pw'){
+    if(!v('sePw')){ S.second.err='请输入当前账号密码'; render(); return; }
+  }
+
+  S.second = null;
+  S.data.secBio = null;
+  logIt('二次验证通过 → 继续原流程（不重走首因素认证）');
+  render();
+  setTimeout(function(){ finishAuth(); }, 200);
+}
+
+/* 返回一级：本次二次验证作废，首因素认证结果同时失效，
+   用户需要重新提交首因素 —— 与 Windows 版「返回即作废、不复用」一致。 */
+function secondBack(){
+  S.second = null;
+  S.data.secBio = null;
+  logIt('点【返回上一级认证登录】→ 本次二次验证作废，需重新完成首因素认证');
+  render();
+  toast('已返回上一级，请重新认证');
+}
+
+/* =========================================================
+   v1.0.16 · 认证链（判定顺序的落地）
+   凭据认证通过之后依次判：密码状态 → 二次验证 → 收尾。
+   改密排在二次验证之前；改密成功不直接收尾，而是回到第②步继续判。
+   ========================================================= */
+function startAuthFlow(stage, account){
+  S.data.authStage = stage;              /* 'bind' | 'login' */
+  S.data.authUser = account || S.data.user || S.user || 'zhangsan';
+  S.step = null;
+  S.second = null;
+  S.data.bio = null;
+  S.data.secBio = null;
+
+  /* ① 密码状态。真实环境由服务端在凭据校验通过时一并返回，
+     客户端只按状态渲染，不自己判断密码对不对、过没过期。
+     ⚠️ 只有「账号密码」这一种首因素才走这一步：扫码 / 短信 / 动态口令 /
+     人脸 / 指纹都不提交密码，服务端也就没有密码状态可返回 ——
+     认证链到改密页为止的所有分支，前提都是账密已经验过。 */
+  var isPw = (S.method === 'pw');
+  var st = isPw ? (S.demo.pwdState || 'normal') : 'normal';
+  if(!isPw && S.demo.pwdState && S.demo.pwdState !== 'normal'){
+    logIt('首因素为「'+methodById(S.method).nm+'」，不涉及密码 → 不返回密码状态，跳过改密');
+  }
+  S.data.pwdState = st;
+  if(st === 'initial' || st === 'expired' || st === 'soon'){
+    enterChpw(st);
+    return;
+  }
+  afterChpwStep();
+}
+
+function enterChpw(reason){
+  S.step = 'chpw';
+  S.chpw = { reason:reason, err:null, bad:[] };
+  logIt('密码状态判定 → ' + ({initial:'初始密码，强制改密',
+                             expired:'密码已过期，强制改密',
+                             soon:'即将过期（还剩 '+chpwDays()+' 天），可改可跳过'}[reason]));
+  render();
+}
+
+/* 第②步：二次验证。策略不开就直接收尾。 */
+function afterChpwStep(){
+  if(S.demo.second){
+    var ways = secondWays();
+    S.second = { cur: (methodsHas(ways, S.demo.secondWay) ? S.demo.secondWay : ways[0].id), err:null };
+    logIt('后台策略要求二次验证 → 整页切到验证页（' + ways.map(function(m){ return m.nm; }).join(' / ') + '）');
+    render();
+    return;
+  }
+  finishAuth();
+}
+function methodsHas(list, id){
+  return list.some(function(m){ return m.id === id; });
+}
+
+/* 第③步：收尾。首次绑定写绑定记录，登录建立会话 —— 两条路的终点不同。 */
+function finishAuth(){
+  var stage = S.data.authStage;
+  S.data.authStage = null;
+  if(stage === 'bind') commitBindAndWelcome();
+  else commitLoginAndWelcome();
+}
+
+
+function loginForm(err){
+  if(S.method==='pw'){
+    return ipt('inUser','统一身份用户名',icoUser(),
+             { val:S.data.user||S.user||'', bad:err, user:true })+
+           ipt('inPw','统一身份用户密码',icoLock(),
+             { type:'password', bad:err, eye:true });
+  }
+  if(S.method==='qr'){
+    return '<div class="qrwrap">'+
+      '<div class="qrbox">'+qrSvg()+
+        (S.data.qrExpired ? '<div class="mask"><span>二维码已过期</span>'+
+          '<span class="again" onclick="refreshQr()">点击刷新</span></div>' : '')+
+      '</div>'+
+      '<div class="qrstatus"><span class="spin"></span>等待扫码…</div>'+
+      '<div class="qrnote">请使用手机 <b>E 登录 App</b> 或企业微信扫码<br>二维码有效期 <b>120 秒</b>'+
+      (S.data.qrExpired?'，过期后需重新获取':'')+'</div>'+
+      '<button class="btn btn-secondary" style="height:28px;font-size:11.5px"'+
+      ' onclick="expireQr()">模拟二维码过期</button>'+
+    '</div>';
+  }
+  if(S.method==='sms'){
+    return ipt('inPhone','手机号码',icoPhone())+
+      ipt('inSms','短信验证码',icoShield(),
+        { tail:'<button class="btn btn-secondary" id="smsBtn"'+
+          ' onclick="sendSms()">获取验证码</button>' });
+  }
+  if(S.method==='face' || S.method==='fp'){
+    return bioBox(S.method);
+  }
+  return ipt('inUser','统一身份用户名',icoUser(),
+           { val:S.data.user||S.user||'', user:true })+
+         ipt('inOtp','动态口令',icoKey());
+}
+
+/* 绑定页那行只读展示 = 本机 macOS 账户名（macUser），**不是** IAM 账号。
+   二者是绑定关系的两端：左边这台机器（系统给），右边用户输的统一身份账号。
+   别拿这个值去当「已绑定账号」用 —— v1.0.8 之前就是这么混用的。 */
+function osField(){
+  return '<div class="ipt os">'+
+    '<span class="lead">'+icoLaptop()+'</span>'+
+    '<input class="input" value="'+esc(S.macUser||'—')+'" readonly'+
+    ' title="将关联到该 macOS 本机账户" /></div>';
+}
+
+/* 二维码：21x21 伪随机点阵 */
+function qrSvg(){
+  var cells=[], n=21, seed=7;
+  function rnd(){ seed=(seed*1103515245+12345)&0x7fffffff; return seed/0x7fffffff; }
+  for(var y=0;y<n;y++){ for(var x=0;x<n;x++){
+    var finder=(x<7&&y<7)||(x>n-8&&y<7)||(x<7&&y>n-8);
+    if(finder){
+      var lx=x<7?x:x-(n-7), ly=y<7?y:y-(n-7);
+      var ring=(lx===0||lx===6||ly===0||ly===6);
+      var core=(lx>=2&&lx<=4&&ly>=2&&ly<=4);
+      if(ring||core) cells.push([x,y]);
+    } else if(rnd()>0.52) cells.push([x,y]);
+  }}
+  var s=100/n, rects=cells.map(function(c){
+    return '<rect x="'+(c[0]*s).toFixed(2)+'" y="'+(c[1]*s).toFixed(2)+
+      '" width="'+s.toFixed(2)+'" height="'+s.toFixed(2)+'" fill="'+
+      (S.data.qrExpired?'#B6BCC4':'#1A1D21')+'"/>'; }).join('');
+  return '<svg viewBox="0 0 100 100">'+rects+'</svg>';
+}
+
+/* ---------- 忘记密码：一屏到底（v1.0.5） ---------- */
+/* 进入忘记密码：重置为初始态（渠道=短信，账号按渠道预填，未验证） */
+function resetForgetState(){
+  S.data.remain = 300;
+  S.data.fpChan = 'sms';
+  S.data.fpAcc  = '';
+  S.data.fcode  = '';
+  S.data.fpPw   = '';
+  S.data.fpPw2  = '';
+}
+/* ── 手机号校验（v1.0.10）─────────────────────────────────────
+   口径：11 位国内手机号 —— 1 开头、第二位 3-9、其后 9 位数字。
+   三处共用这一个判定：短信登录框 / 忘记密码手机号渠道 / 忘记密码手填。 */
+function isPhone(v){
+  return /^1[3-9]\d{9}$/.test((v||'').trim());
+}
+
+/* ── 模拟档案表（v1.0.10）──────────────────────────────────────
+   真实环境这些值来自 IAM 档案；原型里用一张表模拟。
+   v1.0.10 起：绑定成功时**自动分配一个手机号**并写进这张表 ——
+   手机号无法从账号名派生，之前留空由用户手填；现在改为发号，
+   短信登录与忘记密码都能用上，且「绑谁返显谁」的口径不变。
+   发号规则（沁定）：138 开头 + 按序编号，第 n 个绑定账号拿 138****000n。
+   同一账号重复绑定拿到同一个号（按表里已有记录返回）。 */
+var FP_PROFILE = {
+  zhangsan:{ sms:'13800000001', email:'zhangsan@corp.com', ding:'zhangsan' }
+};
+var FP_PHONE_SEQ = 1;   /* 内部序号；内置的 zhangsan 不占号池，另用一个固定号 */
+
+function maskPhone(v){
+  v = (v||'').trim();
+  return v.length===11 ? v.slice(0,3)+'****'+v.slice(7) : v;
+}
+
+/* 绑定成功时调用：给这个账号分配一个档案手机号（已分配则原样返回）
+   号段：138 + 8 位序号（10000001 起）→ 共 11 位，天然满足 1[3-9]\d{9}。
+   取值必须与 isPhone 的格式规则自洽，否则档案里发出来的号自己过不了校验。 */
+function issuePhone(iam){
+  iam = (iam||'').trim();
+  if(!iam) return '';
+  if(!FP_PROFILE[iam]){
+    var seq = FP_PHONE_SEQ++;
+    FP_PROFILE[iam] = {
+      sms: '138' + String(10000000 + seq).slice(-8),
+      email: iam + '@corp.com',
+      ding: iam
+    };
+    logIt('为 '+iam+' 分配档案手机号：'+maskPhone(FP_PROFILE[iam].sms));
+  }
+  return FP_PROFILE[iam].sms;
+}
+
+function fpProfile(u){
+  u = (u||'').trim();
+  if(FP_PROFILE[u]) return FP_PROFILE[u];
+  /* 档案里还没有这个账号：邮箱补企业域名、钉钉用账号本身；
+     手机号此时尚未分配（绑定成功那刻才会发），留空不编造 */
+  return { sms:'', email: u ? u+'@corp.com' : '', ding: u || '' };
+}
+function fpChannels(){
+  var p=fpProfile((S.bindIam||'').trim());
+  return {
+    sms:   { lb:'手机号', acc:p.sms,   ph:'请输入手机号码', ico:icoPhone() },
+    email: { lb:'邮箱',   acc:p.email, ph:'请输入邮箱地址', ico:icoMail()  },
+    ding:  { lb:'钉钉',   acc:p.ding,  ph:'请输入钉钉账号', ico:icoUser()  }
+  };
+}
+function forgotPage(){
+  var unlocked = !!S.data.fcode;
+  var chan = S.data.fpChan || 'sms';
+  var CH = fpChannels();
+  var cur = CH[chan] || CH.sms;
+  var acc = (S.data.fpAcc==null || S.data.fpAcc==='') ? cur.acc : S.data.fpAcc;
+  var rem = (S.data.remain==null) ? 298 : S.data.remain;
+  var mm = String(Math.floor(rem/60)).padStart(2,'0');
+  var ss = String(rem%60).padStart(2,'0');
+  var pct = Math.max(0, Math.round(rem/300*100));
+
+  /* 标题 + 返回出口 */
+  var h = '<div class="head">'+
+    '<button class="back" type="button" aria-label="返回登录"'+
+    ' onclick="go(\'loginagain\')">'+
+    '<svg width="14" height="14" viewBox="0 0 14 14" fill="none">'+
+    '<path d="M8.5 3L4.5 7l4 4" stroke="#6B7280" stroke-width="1.5"'+
+    ' stroke-linecap="round" stroke-linejoin="round"/></svg></button>'+
+    '<h1>找回密码</h1></div>';
+
+  /* 限时会话条：认证服务有时限，所有操作必须在一屏内完成。
+     进度条做进卡片底边，省下一行高度（窗口高度受限） */
+  h += '<div class="timer">'+
+    '<svg width="12" height="12" viewBox="0 0 12 12" fill="none">'+
+    '<circle cx="6" cy="6" r="5" stroke="#8A4B00" stroke-width="1.2"/>'+
+    '<path d="M6 3.4V6l2 1.4" stroke="#8A4B00" stroke-width="1.2" stroke-linecap="round"/></svg>'+
+    '<span>请在 <b id="fpTimerText">'+mm+':'+ss+'</b> 内完成全部操作</span>'+
+    '<i class="tbar" id="fpTimerBar" style="width:'+pct+'%"></i></div>';
+
+  /* 渠道：下拉选择（对齐参考图），切换即换账号行图标与预填 */
+  h += '<div class="ipt">'+
+    '<span class="lead">'+cur.ico+'</span>'+
+    '<select class="input selin" id="fpChan" onchange="fpChan(this.value)">'+
+      ['sms','email','ding'].map(function(k){
+        return '<option value="'+k+'"'+(chan===k?' selected':'')+'>'+
+          CH[k].lb+'</option>';
+      }).join('')+
+    '</select>'+
+    '<span class="chev">'+icoChev()+'</span>'+
+  '</div>';
+
+  /* 账号（可编辑，随渠道预填） */
+  h += ipt('fpAcc', cur.ph, cur.ico, { val:acc, user:true });
+
+  /* 验证码：按钮做进输入框右端 */
+  h += ipt('fpCode', '请输入验证码', icoShield(), {
+    val: S.data.fcode || '',
+    code: true,
+    oninput: 'onCodeInput(this.value)',
+    tail: '<button class="codebtn" id="fpBtn" type="button" onclick="askSlider()">'+
+      '<svg width="15" height="15" viewBox="0 0 16 16" fill="none">'+
+      '<path d="M12.2 7.1a5.2 5.2 0 01-8.6 3.5M1.8 6.9a5.2 5.2 0 018.6-3.5"'+
+      ' stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>'+
+      '<path d="M10.4 1.1v2.6H7.8M3.6 12.9v-2.6h2.6" stroke="currentColor"'+
+      ' stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>'+
+      '<span>获取验证码</span></button>'
+  });
+
+  /* 新密码 / 确认新密码：验证通过前置灰不可填，避免乱序操作浪费会话 */
+  h += '<div class="'+(unlocked?'':'locked')+'">'+
+    ipt('fpPw', '请设置新的登录密码', icoLock(), {
+      type:'password', eye:true, info:true,
+      oninput:'checkPolicy(this.value)',
+      tail:'<div class="reqpop" id="fpReq">'+reqPopHtml('')+'</div>' })+
+    ipt('fpPw2', '请再次输入新的登录密码', icoLock(), {
+      type:'password', eye:true,
+      oninput:"checkPolicy(valOf('fpPw'))" })+
+  '</div>';
+
+  /* 提交：三项齐备（验证码通过 + 策略合规 + 两次一致）才可用 */
+  h += '<button class="btn btn-primary btn-block fp-ok" id="fpOk"'+
+    (resetReadyFor(unlocked)?'':' disabled')+
+    ' onclick="doReset()">确定</button>';
+  return h;
+}
+
+/* ---------- 忘记密码：交互 ---------- */
+/* 首渲染时按 state 判定；后续由 checkPolicy 读 DOM 判定 */
+function resetReadyFor(unlocked){
+  return !!(unlocked && S.net!=='off' && policyPass(S.data.fpPw||'') && S.data.fpPw2===S.data.fpPw);
+}
+/* 切换验证渠道：账号行按渠道重新预填，验证码与密码作废重来 */
+function fpChan(k){
+  if((S.data.fpChan||'sms') === k) return;
+  var CH = fpChannels();
+  var accEl = document.getElementById('fpAcc');
+  if(accEl) S.data.fpAcc = accEl.value;
+  S.data.fpChan = k;
+  S.data.fpAcc  = (CH[k]||CH.sms).acc;
+  S.data.fcode  = '';
+  S.data.fpPw   = '';
+  S.data.fpPw2  = '';
+  render();
+  logIt('切换验证渠道：'+(CH[k]||CH.sms).lb);
+}
+/* 密码策略实时反馈：不合规自动展开浮层，合规自动收起 */
+function checkPolicy(v){
+  S.data.fpPw = v || '';
+  S.data.fpPw2 = valOf('fpPw2');
+  var pop = document.getElementById('fpReq');
+  if(pop){
+    pop.innerHTML = reqPopHtml(S.data.fpPw);
+    if(S.data.fpPw.length === 0) pop.classList.remove('show');
+    else pop.classList.toggle('show', !policyPass(S.data.fpPw));
+  }
+  syncResetBtn();
+}
+function syncResetBtn(){
+  var b = document.getElementById('fpOk');
+  if(!b) return;
+  var v1 = S.data.fpPw || '', v2 = valOf('fpPw2');
+  S.data.fpPw2 = v2;
+  b.disabled = !(S.data.fcode && S.net!=='off' && v1 && v1===v2 && policyPass(v1));
+}
+function toggleReq(btn){
+  var box = btn.parentNode, pop = box.querySelector('.reqpop');
+  if(pop) pop.classList.toggle('show');
+}
+/* 提交新密码 */
+function doReset(){
+  var pw = S.data.fpPw || valOf('fpPw');
+  var pw2 = valOf('fpPw2');
+  if(!S.data.fcode){ toast('请先完成验证码校验'); return; }
+  if(S.net==='off'){ toast('网络已断开，无法提交'); return; }
+  if(!pw){ toast('请输入新密码'); return; }
+  if(pw !== pw2){ toast('两次输入的密码不一致'); return; }
+  if(!policyPass(pw)){ toast('新密码不满足密码策略'); return; }
+  logIt('提交新密码 → 重置成功，返回登录页');
+  toast('密码已重置，请用新密码登录');
+  S.data.fcode=''; S.data.fpPw=''; S.data.fpPw2=''; S.data.remain=null;
+  if(fpTimer){ clearInterval(fpTimer); fpTimer=null; }
+  setTimeout(function(){ go('loginagain'); }, 900);
+}
+
+/* 密码策略：规则表 + 合规判定（渲染与按钮禁用态共用同一份规则） */
+function policyRules(v){
+  v = v || '';
+  return [
+    { t:'长度为 8-20 个字符', ok: v.length>=8 && v.length<=20 },
+    { t:'至少包含数字、大写字母、小写字母、特殊字符中的 3 种',
+      ok: ['[0-9]','[A-Z]','[a-z]','[^A-Za-z0-9]'].filter(function(r){
+        return new RegExp(r).test(v); }).length>=3 },
+    { t:'未使用弱口令',
+      ok: v.length>0 && !weakHit(v) }
+  ];
+}
+/* 弱口令判定：整串即弱口令，或弱片段占比过高（>=60%）才判失败。
+   避免 Abcd@1234 这类“含连续数字但整体够强”的密码被误杀。 */
+function weakHit(v){
+  var low = (v||'').toLowerCase();
+  var weakWords = ['password','admin','qwerty','abc123','iloveyou'];
+  if(weakWords.some(function(w){ return low.indexOf(w) >= 0; })) return true;
+  /* 纯数字且重复（如 888888） */
+  if(/^(\d)\1{5,}$/.test(low)) return true;
+  /* 纯数字且连续递增/递减（如 123456 / 654321） */
+  if(/^\d{6,}$/.test(low) && ('0123456789'.indexOf(low) >= 0 || '9876543210'.indexOf(low) >= 0)) return true;
+  /* 弱片段占比过高（>=60%）才判失败 */
+  var segs = ['1234','123456','abcd','0000','1111','6666','8888','000000'];
+  var hit = 0;
+  segs.forEach(function(sg){ if(low.indexOf(sg) >= 0) hit = Math.max(hit, sg.length); });
+  if(hit > 0 && hit / low.length >= 0.6) return true;
+  return false;
+}
+
+/* 密码是否全部通过策略 */
+function policyPass(v){
+  if(!v || v.length===0) return false;
+  return policyRules(v).every(function(r){ return r.ok; });
+}
+
+/* 密码要求浮层内容（未输入 = 灰点；已输入 = ✓ / ✕ 实时反馈） */
+function reqPopHtml(v){
+  v = v || '';
+  var filled = v.length > 0;
+  var mark = function(ok){
+    if(!filled) return '<i></i>';
+    return ok
+      ? '<svg width="7" height="7" viewBox="0 0 7 7" fill="none">'+
+        '<path d="M1.3 3.6l1.5 1.5 2.9-3.2" stroke="#fff" stroke-width="1.4"'+
+        ' stroke-linecap="round" stroke-linejoin="round"/></svg>'
+      : '<svg width="6" height="6" viewBox="0 0 6 6" fill="none">'+
+        '<path d="M1.3 1.3l3.4 3.4M4.7 1.3L1.3 4.7" stroke="#fff" stroke-width="1.3"'+
+        ' stroke-linecap="round"/></svg>';
+  };
+  return '<div class="rt">密码要求</div>'+
+    policyRules(v).map(function(r){
+      return '<div class="pi '+(filled?(r.ok?'ok':'no'):'')+'">'+
+        '<span class="mk">'+mark(r.ok)+'</span><span>'+r.t+'</span></div>';
+    }).join('');
+}
+
+/* ---------- 轨道渲染 ---------- */
+function renderRail(){
+  var curIdx=-1, flat=[];
+  FLOW.forEach(function(g){ g.items.forEach(function(it){ flat.push(it.id); }); });
+  var cur = S.view;
+
+  var h='';
+  FLOW.forEach(function(g){
+    h += '<div class="secname">'+esc(g.sec)+'</div>';
+    g.items.forEach(function(it){
+      var st='';
+      var i = flat.indexOf(it.id);
+      var ci = flat.indexOf(cur);
+      if(it.id===cur) st='cur';
+      else if(ci>i && ci>=0) st='done';
+      h += '<div class="node '+st+'" onclick="goForce(\''+it.id+'\')">'+
+        '<div class="dot"></div><div><div class="nm">'+esc(it.nm)+'</div>'+
+        '<div class="sub">'+esc(it.sub)+'</div></div></div>';
+    });
+  });
+  document.getElementById('railNodes').innerHTML=loc(h);
+
+  document.getElementById('log').innerHTML = loc(S.log.length
+    ? S.log.map(function(l){ return '<div class="li">'+l+'</div>'; }).join('')
+    : '<div class="li" style="color:#9CA3AF">（还没有操作）</div>');
+}
+
+function renderState(){
+  var b=document.getElementById('stBind');
+  /* 这几行都写「原文中文」，翻译统一交给 render() 末尾的 localizeChrome()，
+     这样 locEl 缓存到的 __zh 永远是中文，切回中文才不会卡住 */
+  b.textContent = S.bind ? '已绑定' : '未绑定';
+  b.className = 'v '+(S.bind?'on':'off');
+
+  /* v1.0.8：两个"账号"分开显示 ——
+     macUser 是系统给的只读值；bindIam 是绑定记录，
+     退出页那句「本机已绑定账号：XXX」读的就是它，这块面板可直接核对来源 */
+  var mu=document.getElementById('stMac');
+  if(mu){ mu.textContent = S.macUser || '—'; mu.className = 'v'; }
+
+  var bi=document.getElementById('stBindIam');
+  if(bi){ bi.textContent = S.bindIam || '（无）';
+          bi.className = 'v '+(S.bindIam?'on':'off'); }
+
+  var l=document.getElementById('stLogin');
+  l.textContent = S.login ? '已登录' : '未登录';
+  l.className = 'v '+(S.login?'on':'off');
+
+  document.getElementById('stView').textContent = curName();
+
+  var nm={ok:'正常',weak:'较弱',off:'已断开',re:'重连中'};
+  var nt=document.getElementById('stNet');
+  nt.textContent = nm[S.net];
+  nt.className = 'v '+(S.net==='ok'?'on':'off');
+
+  Array.prototype.forEach.call(document.querySelectorAll('#netPick button'), function(b2){
+    b2.classList.toggle('on', b2.getAttribute('data-net')===S.net);
+  });
+}
+function curName(){
+  if(S.step === 'chpw') return '修改密码页';
+  if(S.second) return '二次验证页';
+  for(var i=0;i<FLOW.length;i++){ for(var j=0;j<FLOW[i].items.length;j++){
+    if(FLOW[i].items[j].id===S.view) return FLOW[i].items[j].nm; } }
+  return '—';
+}
+
+
+/* ---------- 往外层推「现在停在哪一页」（v1.0.14）----------
+   说明页（E登录_Mac版_交互说明.html）把 72 条说明搬到了 iframe 外面，
+   index 则只剩一个铺满的原型。两页都需要知道用户在轨道上点到了哪 ——
+   否则「重载 / 交互说明 / 在新标签打开」都会落回首页，等于白点。
+
+   为什么由里往外推、而不是外层来读：
+   iframe 走 file:// 时是不透明源，外层碰 frame.contentWindow.location
+   会直接抛 SecurityError。所以只能原型自己往外说。
+
+   只在真的被嵌入时发；独立打开时 window.parent === window，直接返回。
+   全程 try/catch —— 通知失败绝不该影响原型本身。 */
+/* 改密页 / 二次验证页是「整页推进的步骤页」，宿主 S.view 仍是 bind 或 loginagain，
+   但对外要报自己的名字 —— 否则外层可交互 PRD 会把它当成宿主页，章节跳回上一节。
+   与「本页交互说明」的 notesKey() 用同一条判断，两处口径必须一致。 */
+function viewNode(){
+  if(S.step === 'chpw') return 'chpw';
+  if(S.second) return 'second';
+  return S.view;
+}
+function notifyHost(){
+  try{
+    if(window.parent === window) return;
+    window.parent.postMessage({ t:'e-login-view', node:viewNode(), name:curName() }, '*');
+  }catch(e){}
+}
+
+/* v1.0.15：外层「可交互 PRD」反向驱动原型的唯一入口。
+   外层点导航 / 点交互点编号时，调 ELogin.go('settings') 直接把原型切过去，
+   而不是给它换一个 URL 重载 —— 重载会丢掉当前演示状态，也会闪一下。
+
+   两个动作分开是有原因的：
+     passTo()  让守卫放行。g o() 本身会拦「未绑定不能进设置」「未登录不能进门户」，
+               但外层是从文档里点过来的，用户明确要看那一页，不是误触。
+     go()      照常走一遍，所以视图名归一、轨道高亮、状态面板都是真的。 */
+window.ELogin = {
+  go: function(v){
+    try{
+      if(!v) return false;
+      /* 认证链的两个步骤页没有独立视图 —— 它们是绑在宿主页上的整页推进。
+         外层点 §3.10 / §3.11 时直接送到这两步，省得研发自己从登录页点进去。 */
+      if(v === 'chpw' || v === 'second'){
+        S.bind = true;
+        if(!S.bindIam) commitBind('zhangsan', true);
+        S.login = false; S.user = S.bindIam || 'zhangsan';
+        S.view = 'loginagain';
+        S.data.authUser = S.bindIam || 'zhangsan';
+        S.data.authStage = 'login';
+        S.method = 'pw';
+        if(v === 'chpw'){
+          S.second = null;
+          enterChpw(S.demo.pwdState === 'normal' ? 'soon' : S.demo.pwdState);
+        }else{
+          S.step = null; S.chpw = null;
+          S.demo.pwdState = 'normal';
+          S.second = { cur:'sms', err:null };
+          render();
+        }
+        return true;
+      }
+      var deep = ['settings','apps','exitok','loginagain','panel','panel-off','panel-off-new','forgot',
+                  'cancel1','cancel2','cancel3','menubar'];
+      if(deep.indexOf(v) >= 0){
+        S.bind = true;
+        if(!S.bindIam) commitBind('zhangsan', true);
+      }
+      if(['settings','apps','exitok','panel','panel-off','panel-off-new'].indexOf(v) >= 0){
+        S.login = (v === 'panel-off' || v === 'panel-off-new') ? false : true;
+        S.user = S.bindIam || 'zhangsan';
+      }
+      if(v === 'loginagain'){ S.login = false; S.user = S.bindIam || 'zhangsan'; }
+      if(v === 'menubar'){ S.login = true; S.user = S.bindIam || 'zhangsan'; }
+      if(v === 'forgot'){ S.view = 'forgot'; }
+      go(v);
+      return true;
+    }catch(e){ return false; }
+  },
+  /* 只报当前在哪，不改变任何状态 —— 给外层做初始对齐用 */
+  where: function(){ return { node:viewNode(), name:curName() }; }
+};
+
+/* ---------- 交互动作 ---------- */
+/* 轨道节点 = 演示跳转通道：自动补齐该页所需的最小前置状态，不走守卫。
+   目的：演示时点任意节点都可达，同时不出现「未登录却显示已登录面板」的矛盾。 */
+function goForce(v){
+  var needLogin = ['menubar','panel','apps','settings','exitok'];
+  var needBind  = ['menubar','panel','apps','settings','exitok','loginagain','forgot',
+                   'cancel1','cancel2','cancel3'];
+
+  if(needBind.indexOf(v) >= 0 && !S.bind){
+    S.bind = true;
+    if(!S.user) S.user = 'zhangsan';
+    /* 跳转通道也要把绑定记录补上，否则退出页会因为没记录而跳过账号比对 */
+    if(!S.bindIam) commitBind(S.user, true);
+    logIt('演示跳转：自动补上「已绑定 ' + S.bindIam + '」');
+  }
+  if(needLogin.indexOf(v) >= 0 && !S.login){
+    S.login = true;
+    logIt('演示跳转：自动补上「已登录」');
+  }
+  if(v === 'panel-off'){ S.login = false; }
+  if(v === 'forgot' && S.view !== 'forgot'){ resetForgetState(); startFpTimer(); }
+
+  S.view = v; S.modal = null; S.data.errMsg = null; S.data.cancelErr = null;
+  S.data.loginErr = null; S.data.canUnbind = false;
+  logIt('进入「' + curName() + '」');
+  render();
+  notifyHost();
+}
+
+function go(v){
+  /* panel-off-new 只是嵌入模式用的「无绑定记录的未登录面板」别名，
+     渲染层没有这个 case，进 render 前归一成 panel-off。
+     真正的分流发生在模板里：读 S.bindIam 决定按钮文案与去向。 */
+  if(v==='panel-off-new'){ v='panel-off'; }
+  if(v==='panel' && !S.login){ v='panel-off'; }
+  if(v==='panel-off' && S.login){ v='panel'; }
+  if(v==='settings' || v==='apps'){
+    if(!S.bind){ toast('还没有绑定账号，先完成绑定'); return; }
+  }
+  /* 应用门户需要 IAM 会话；设置是本地配置，未登录也能进（与 03 页「未登录态面板只留登录+设置」一致） */
+  if(v==='apps' && !S.login){ toast('当前未登录，请先登录'); return; }
+  if(v==='forgot' && !S.bind){ toast('还没有绑定账号'); return; }
+  if(v==='forgot' && S.view!=='forgot'){ resetForgetState(); startFpTimer(); }
+  /* 认证链的中间态只属于「当前这一步」。一旦离开这一页（点轨道节点跳走、
+     走自动演示、改完密码回登录页），改密 / 二次验证的上下文与半截的生物识别
+     结果都该作废 —— 否则 S.step / S.second 还挂着，render 会把整页内容
+     又画成上一步那一屏，人已经到了别的页却看到改密页。
+     与「关闭窗口 = 放弃本次认证」是同一条规则，只是出口不同。 */
+  if(S.step || S.second){
+    clearTimeout(bioTimer); clearTimeout(secBioTimer);
+    S.step=null; S.chpw=null; S.second=null;
+    S.data.bio=null; S.data.secBio=null;
+  }
+  S.view=v; S.modal=null; S.data.errMsg=null;
+  S.data.loginErr=null; S.data.canUnbind=false;
+  logIt('进入「'+curName()+'」');
+  render();
+  notifyHost();
+}
+function closeModal(){ S.modal=null; render(); }
+function askExit(){ S.modal='exit'; logIt('点【退出登录】，弹二次确认'); render(); }
+function askCancel(){
+  S.data.cancelFrom='panel'; S.data.cancelErr=null;
+  S.modal='cancel'; logIt('点【注销绑定账号】，弹二次确认'); render();
+}
+/* 认证失败态下的解绑入口（v1.0.7）—— 专治「原绑定用户离职」这条死锁：
+   此刻用户未登录、也拿不到原账号的 IAM 密码，但他刚提交的那次登录
+   已由 IAM 完成凭据认证，证明了「来者是合法员工」。
+   所以这条路不再重复验证密码，确认即解绑。 */
+function askCancelFromLock(){
+  S.data.cancelFrom='lock'; S.data.cancelErr=null;
+  S.modal='cancel';
+  logIt('被拦后点【注销绑定账号】→ 弹二次确认（凭据已认证，无需再验密码）');
+  render();
+}
+/* 菜单栏图标点击：展开 / 收起下拉面板（macOS 原生交互）
+   已登录     → 已登录面板（功能全开）
+   已绑定未登录 → 未登录面板（只留「登录统一身份」「设置」，可原地登录）
+   未绑定     → 提示先完成绑定
+   注：面板是浮层，与主窗口是否展开无关，窗口关掉后同样能点开 */
+function onMenubarClick(e){
+  if(e) e.stopPropagation();
+  if(!S.bind){ toast('尚未绑定账号'); return; }
+  var target = S.login ? 'panel' : 'panel-off';
+  if(S.view===target){ S.view='menubar'; logIt('再次点击图标，收起下拉面板'); }
+  else {
+    S.view=target;
+    logIt(S.login ? '点击菜单栏 E 登录图标，打开下拉面板'
+                  : '点击菜单栏 E 登录图标，打开未登录态面板');
+  }
+  render();
+}
+
+/* ---------- 红绿灯：模拟真窗口行为 ---------- */
+
+/* 决定“关闭窗口后回到哪里”：已绑定收进菜单栏，未绑定回弹窗并可从 Dock 重新唤起 */
+function winClose(e){
+  if(e) e.stopPropagation();
+  var w=document.querySelector('.win');
+  if(w){ w.classList.add('closing'); }
+  logIt('点【关闭】：窗口收起');
+  /* 关掉的是登录 / 绑定这类认证窗口时，记住它 ——
+     从 Dock 再点开应该把同一个窗口原样叫回来（从头开始），
+     而不是先弹一个菜单栏面板让人再点一次。
+     「设置」这类非认证窗口不记，重开还是走下面的常规分流。 */
+  var authViews = ['bind','bindfail','loginagain','cancel','cancel2','cancel3'];
+  S.data.winBack = (authViews.indexOf(S.view) >= 0) ? S.view : null;
+  setTimeout(function(){
+    if(S.bind){
+      S.view='menubar'; S.winOpen=false;
+      toast('窗口已关闭，可从菜单栏图标重新打开');
+    } else {
+      /* 未绑定：关闭后进入“桌面空白”状态，可从 Dock 图标重新唤起 */
+      S.view='deskblank'; S.winOpen=false;
+      toast('已关闭，可点 Dock 上的 E 登录图标重新打开');
+    }
+    /* 关闭 = 放弃这次认证。认证链上的中间态（改密 / 二次验证）与
+       已经采集到一半的生物识别结果一并作废 —— 否则从 Dock 重新唤起时
+       窗口还停在改密页上，用户看到的是「上次没做完的那一步」。
+       真实客户端同理：窗口销毁，进程内的认证上下文跟着丢。 */
+    S.step=null; S.chpw=null; S.second=null;
+    S.data.bio=null; S.data.secBio=null;
+    S.data.pwdState=null;
+    /* 正在跑的生物识别定时器也要掐掉，否则窗口关了它还在跑，
+       回头重新打开时突然自己变成「识别通过」 */
+    clearTimeout(bioTimer); clearTimeout(secBioTimer);
+    render();
+  }, 160);
+}
+
+/* 最小化：缩到 Dock（窗口隐藏 + Dock 图标出现“最小化中”指示） */
+function winMin(e){
+  if(e) e.stopPropagation();
+  var w=document.querySelector('.win');
+  if(w){ w.classList.add('minishing'); }
+  logIt('点【最小化】：窗口缩入 Dock');
+  setTimeout(function(){
+    S.winOpen=false;
+    S.view='menubar';
+    toast('窗口已最小化到 Dock');
+    render();
+  }, 220);
+}
+
+/* 最大化 / 还原：切换铺满桌面与原尺寸 */
+function winMax(e){
+  if(e) e.stopPropagation();
+  S.winMax = !S.winMax;
+  logIt(S.winMax ? '点【最大化】：窗口铺满桌面' : '点【最大化】：还原窗口尺寸');
+  var w=document.querySelector('.win');
+  if(w){ w.classList.toggle('maxed', S.winMax); }
+}
+
+/* 拖动标题栏移动窗口 */
+function dragWinStart(e){
+  if(e.target.classList.contains('lights') || e.target.tagName==='I') return;
+  var w=document.querySelector('.win');
+  if(!w || w.classList.contains('maxed')) return;
+  var r=w.getBoundingClientRect();
+  var desk=document.querySelector('.desk').getBoundingClientRect();
+  var offX=e.clientX-r.left, offY=e.clientY-r.top;
+
+  w.style.position='absolute';
+  w.style.left=(r.left-desk.left)+'px';
+  w.style.top=(r.top-desk.top)+'px';
+  w.style.transform='none';
+  w.style.margin='0';
+
+  function move(ev){
+    var nx=ev.clientX-desk.left-offX, ny=ev.clientY-desk.top-offY;
+    nx=Math.max(0, Math.min(nx, desk.width-r.width));
+    ny=Math.max(0, Math.min(ny, desk.height-r.height));
+    w.style.left=nx+'px'; w.style.top=ny+'px';
+  }
+  function up(){
+    document.removeEventListener('mousemove',move);
+    document.removeEventListener('mouseup',up);
+  }
+  document.addEventListener('mousemove',move);
+  document.addEventListener('mouseup',up);
+  e.preventDefault();
+}
+
+/* 从 Dock / 菜单栏重新唤起窗口 */
+function reopenWin(){
+  if(S.data.winBack){
+    /* 关的是认证窗口 → 原样叫回来；中间态（改密 / 二次验证）在关闭时已作废，
+       所以带回来的是这个窗口的初始形态，不是上次没做完的那一步。 */
+    S.view = S.data.winBack;
+    S.data.winBack = null;
+  }
+  else if(S.bind && S.login){ S.view='panel'; }
+  else if(S.bind){ S.view='menubar'; }
+  else { S.view='bind'; }
+  S.winOpen=true; S.winMax=false;
+  logIt('从 Dock 图标重新打开窗口');
+  render();
+}
+
+function toggleSw(el){
+  el.classList.toggle('on');
+  var on=el.classList.contains('on');
+  logIt('切换开关 '+el.id+' → '+(on?'开':'关'));
+  if(el.id==='swClose' && !on) { /* noop */ }
+}
+
+function setMethod(m){
+  S.method=m;
+  logIt('切换登录方式 → '+methodById(m).ai);
+  if(m==='qr'){ S.data.qrExpired=false; }
+  /* 换方式就把上一次的生物识别结果清掉 —— 否则切到指纹时还带着人脸「已通过」，
+     主按钮会莫名其妙亮着，用户以为不用验就能提交。 */
+  if(m!=='face' && m!=='fp'){ S.data.bio=null; }
+  render();
+  if(m==='qr') startQrTimer();
+}
+var qrTimer=null;
+function startQrTimer(){
+  clearTimeout(qrTimer);
+  qrTimer=setTimeout(function(){
+    if(S.method==='qr' && !S.data.qrExpired){
+      expireQr(true);
+    }
+  }, 120000);
+}
+function expireQr(silent){
+  S.data.qrExpired=true;
+  if(!silent) logIt('模拟二维码过期');
+  else logIt('二维码 120 秒到期，就地盖遮罩');
+  render();
+}
+function refreshQr(){
+  S.data.qrExpired=false; logIt('点【点击刷新】，重新获取二维码');
+  render(); startQrTimer();
+}
+function sendSms(){
+  var p=document.getElementById('inPhone');
+  if(!p || !p.value){ toast('请先填写手机号码'); return; }
+  /* v1.0.10：手机号渠道下做格式校验（邮箱/钉钉不套用手机号规则） */
+  if((S.data.fpChan||'sms')==='sms' && !isPhone(p.value)){
+    toast('请输入正确的 11 位手机号码'); return;
+  }
+  askSlider();
+}
+
+/* ===== 滑块防人机 ===== */
+var sliderResolve=null;
+function askSlider(){
+  logIt('点【获取验证码】，弹出滑块防人机校验');
+  var d=document.getElementById('desk');
+  var ov=document.createElement('div');
+  ov.className='overlay'; ov.id='sliderOv';
+  ov.innerHTML='<div class="dialog" style="width:300px"><div class="dbody" style="gap:14px">'+
+    '<h3 style="font-size:13.5px">安全验证</h3>'+
+    '<div class="slider" id="sl"><div class="fill"></div>'+
+    '<span class="track">向右拖动滑块完成验证</span>'+
+    '<div class="thumb" id="thumb">'+
+    '<svg width="16" height="16" viewBox="0 0 16 16" fill="none">'+
+    '<path d="M6 4l4 4-4 4" stroke="#007AFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'+
+    '</div></div>'+
+    '<div class="hint" style="text-align:center">拖动到最右侧即通过</div>'+
+  '</div></div>';
+  d.appendChild(ov);
+  dragInit();
+}
+function dragInit(){
+  var sl=document.getElementById('sl');
+  var th=document.getElementById('thumb');
+  var fl=sl.querySelector('.fill');
+  var track=sl.querySelector('.track');
+  if(!sl) return;
+  var max=sl.clientWidth-46;
+  var dragging=false, startX=0;
+
+  function down(e){
+    dragging=true;
+    startX=(e.touches?e.touches[0].clientX:e.clientX);
+    th.style.transition='none'; fl.style.transition='none';
+    document.addEventListener('mousemove',move);
+    document.addEventListener('mouseup',up);
+    document.addEventListener('touchmove',move,{passive:false});
+    document.addEventListener('touchend',up);
+  }
+  function move(e){
+    if(!dragging) return;
+    e.preventDefault&&e.preventDefault();
+    var x=(e.touches?e.touches[0].clientX:e.clientX);
+    var dx=Math.max(0, Math.min(max, x-startX));
+    th.style.left=(2+dx)+'px';
+    fl.style.width=(2+dx)+'px';
+    if(dx>max*0.55) track.textContent=loc('松开完成验证');
+    else track.textContent=loc('向右拖动滑块完成验证');
+  }
+  function up(){
+    if(!dragging) return;
+    dragging=false;
+    document.removeEventListener('mousemove',move);
+    document.removeEventListener('mouseup',up);
+    document.removeEventListener('touchmove',move);
+    document.removeEventListener('touchend',up);
+    var cur=parseFloat(th.style.left)||2;
+    if(cur> max*0.9){
+      sl.classList.add('done');
+      track.textContent=loc('验证通过');
+      th.innerHTML='<svg width="16" height="16" viewBox="0 0 16 16" fill="none">'+
+        '<path d="M3.5 8.4l3.2 3.2 5.8-6.4" stroke="#34C759" stroke-width="1.8"'+
+        ' stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      logIt('滑块拖动通过');
+      setTimeout(function(){
+        var ov=document.getElementById('sliderOv'); if(ov) ov.remove();
+        onSliderPass();
+      }, 420);
+    } else {
+      th.style.transition='left .2s'; fl.style.transition='width .2s';
+      th.style.left='2px'; fl.style.width='0';
+      track.textContent=loc('向右拖动滑块完成验证');
+      logIt('滑块未拖到位，校验失败并重置');
+    }
+  }
+  th.addEventListener('mousedown',down);
+  th.addEventListener('touchstart',down,{passive:true});
+}
+
+function onSliderPass(){
+  if(S.view==='forgot'){
+    S.data.remain = S.data.remain || 298;
+    logIt('校通过，下发验证码，按钮进入 59 秒倒计时');
+    startCountdown('fpBtn');
+    toast('验证码已发送（演示：请输入 123456）');
+  } else {
+    logIt('校验通过，下发短信验证码，按钮进入倒计时');
+    startCountdown('smsBtn');
+    toast('验证码已发送（演示：请输入 123456）');
+  }
+}
+
+/* 59 秒重发倒计时 */
+/* 忘忘密码页：业务总倒计时（300 秒），每秒递减并重渲染顶部提示条 */
+var fpTimer = null;
+function startFpTimer(){
+  if(fpTimer){ clearInterval(fpTimer); fpTimer = null; }
+  fpTimer = setInterval(function(){
+    if(S.view !== 'forgot'){ clearInterval(fpTimer); fpTimer = null; return; }
+    if(S.data.remain == null) S.data.remain = 300;
+    S.data.remain--;
+    if(S.data.remain <= 0){
+      S.data.remain = 0;
+      clearInterval(fpTimer); fpTimer = null;
+      S.data.fcode = '';
+      toast('操作超时，请重新发起');
+      logIt('忘密码操作超时，已重置');
+      render();
+      return;
+    }
+    /* 只更新倒计时文字，避免整页重渲染导致输入失焦 */
+    var box = document.getElementById('fpTimerText');
+    if(box){
+      var mm = String(Math.floor(S.data.remain/60)).padStart(2,'0');
+      var ss = String(S.data.remain%60).padStart(2,'0');
+      box.textContent = mm + ':' + ss;
+    }
+    var bar = document.getElementById('fpTimerBar');
+    if(bar) bar.style.width = Math.max(0, Math.round(S.data.remain/300*100)) + '%';
+  }, 1000);
+}
+
+function startCountdown(btnId){
+  var btn=document.getElementById(btnId);
+  if(!btn) return;
+  /* 按钮可能是「图标 + 文字」结构（做进输入框的验证码按钮），只改文字，别把图标冲掉 */
+  function label(b){ return b.querySelector('span') || b; }
+  var n=59;
+  btn.disabled=true;
+  label(btn).textContent=loc(n+'s 后重发');
+  var t=setInterval(function(){
+    n--;
+    var b=document.getElementById(btnId);
+    if(!b){ clearInterval(t); return; }
+    if(n<=0){ clearInterval(t); b.disabled=false; label(b).textContent=loc('获取验证码'); return; }
+    label(b).textContent=loc(n+'s 后重发');
+  },1000);
+}
+
+/* 验证码输入 → 解锁新密码表单（一屏式：不跳步，只解锁） */
+function onCodeInput(v){
+  if(v.length>=6){
+    if(v==='123456'){
+      S.data.fcode=v;
+      logIt('验证码校验通过，就地解锁新密码表单');
+      renderKeepPw();
+    } else if(v.length===6){
+      S.data.fcode='';
+      toast('验证码不正确');
+      logIt('验证码填错，提示重填（不清空输入）');
+    }
+  } else {
+    if(S.data.fcode){ S.data.fcode=''; renderKeepPw(); }
+  }
+}
+/* 重渲染忘记密码页：把已填的密码原样写回，避免解锁切换时丢输入 */
+function renderKeepPw(){
+  var p1 = valOf('fpPw'), p2 = valOf('fpPw2');
+  S.data.fpPw = p1; S.data.fpPw2 = p2;
+  render();
+  var e1 = document.getElementById('fpPw');
+  var e2 = document.getElementById('fpPw2');
+  if(e1 && p1) e1.value = p1;
+  if(e2 && p2) e2.value = p2;
+  syncResetBtn();
+}
+/* 表单输入变化时：重算主按钮禁用态（不整页重渲染，避免输入框失焦） */
+/* 同步主按钮禁用态 */
+function syncMainBtn(){
+  var main = document.querySelector('.btn-primary.btn-block');
+  if(main) main.disabled = (S.net==='off') || !bindReady();
+}
+
+/* 绑定按钮可用性：按当前登录方式各自判定必填项。
+   账密 = 账号 + 密码；扫码 = 二维码未过期；
+   短信 = 手机号 + 验证码；动态口令 = 账号 + 口令。
+   （绑定场景下密码是已设置的存量密码，不做策略校验） */
+function bindReady(){
+  function val(id){ var e=document.getElementById(id); return e ? (e.value||'').trim() : ''; }
+
+  if(S.method === 'pw'){
+    return !!(val('inUser') && val('inPw'));
+  }
+  if(S.method === 'qr'){
+    return !S.data.qrExpired;          /* 二维码有效即可提交（模拟已扫） */
+  }
+  if(S.method === 'sms'){
+    return !!(isPhone(val('inPhone')) && val('inSms'));
+  }
+  if(S.method === 'otp'){
+    return !!(val('inUser') && val('inOtp'));
+  }
+  if(S.method === 'face' || S.method === 'fp'){
+    var b = S.data.bio || {};
+    return b.kind === S.method && b.st === 'ok';   /* 必须本方式比对通过 */
+  }
+  return false;
+}
+/* 账号输入：同步状态并刷新主按钮态；改了账号就撤掉上一次的登录失败提示 */
+function onUserInput(v){
+  /* 只有账号框（ipt 的 user:true）才带值调用，才更新「上次用的账号」。
+     密码 / 验证码 / 口令 / 改密这些框调用时是空参，
+     以前这里照样 S.data.user = v，等于把账号冲成空串 ——
+     改密页敲一下新密码，绑定记录和「您好，XXX」就都丢了。 */
+  if(v !== undefined){ S.data.user = v || ''; }
+  if(S.data.loginErr){
+    S.data.loginErr = null;
+    S.data.canUnbind = false;
+    var eb = document.querySelector('.win.auth .body>.errmsg');
+    if(eb) eb.parentNode.removeChild(eb);
+    /* 解绑入口是随失败态一起渲染出来的，摘错误条时必须一并摘掉，
+       否则改了账号按钮还挂在那儿（漏这个 -> v1.0.7 实测发现） */
+    var ub = document.querySelector('.win.auth .footrow .lnk.danger');
+    if(ub) ub.parentNode.removeChild(ub);
+    Array.prototype.forEach.call(
+      document.querySelectorAll('.win.auth .input.bad'), function(el){
+        el.classList.remove('bad');
+      });
+  }
+  var main = document.querySelector('.win.auth .btn-primary.btn-block');
+  if(!main) return;
+  /* 只有「首因素凭据表单」的主按钮才由输入驱动（边输边解锁）。
+     改密页 / 二次验证页 / 忘记密码页的主按钮各有自己的必填校验，
+     不能被 bindReady() 联动禁用 —— 那条判定读的是首因素那几个输入框
+     （inUser / inPw / inPhone / inSms / inOtp），这些页面上根本没有它们，
+     一算就是 false，按钮会被永久禁用：输入新密码反而把「确定」点灰了。
+     人脸 / 指纹页的主按钮是「开始识别」，同理不归这里管。 */
+  if(S.step==='chpw' || S.second || S.view==='forgot') return;
+  if(S.method==='face' || S.method==='fp') return;
+  main.disabled = (S.net==='off') || !bindReady();
+}
+
+/* ---------- 动作 ---------- */
+/* ── 绑定记录的唯二写入口（v1.0.8）────────────────────────────────
+   「本机已绑定账号」要有可追溯的来源，就不能散落在各处直接赋值。
+   写入只走 commitBind、清空只走 commitUnbind，别处一律不准直接改 S.bindIam。
+   quiet=true 用于演示跳转通道（它自己已有一条日志，不必重复）。 */
+function commitBind(iam, quiet){
+  S.bindIam = iam || '';
+  /* v1.0.10：绑定成功同时为该账号分配档案手机号（幂等，重复绑定拿同一个号） */
+  if(S.bindIam) issuePhone(S.bindIam);
+  if(!quiet) logIt('绑定记录写入 → 本机已绑定账号：'+S.bindIam);
+}
+function commitUnbind(){
+  var old = S.bindIam;
+  S.bindIam = '';
+  logIt('绑定记录清除 → 解除了 '+old);
+}
+
+function doBind(){
+  function val(id){ var e=document.getElementById(id); return e ? (e.value||'').trim() : ''; }
+
+  /* 按当前登录方式校验必填项 */
+  if(S.method==='pw'){
+    if(!val('inUser')){ toast('请输入统一身份账号'); return; }
+    if(!val('inPw')){ toast('请输入密码'); return; }
+    S.data.user=val('inUser');
+  } else if(S.method==='qr'){
+    if(S.data.qrExpired){ toast('二维码已过期，请刷新后重试'); return; }
+  } else if(S.method==='sms'){
+    if(!val('inPhone')){ toast('请输入手机号码'); return; }
+    if(!isPhone(val('inPhone'))){ toast('请输入正确的 11 位手机号码'); return; }
+    if(!val('inSms')){ toast('请输入验证码'); return; }
+    S.data.user = S.user || S.bindIam || 'zhangsan';
+  } else if(S.method==='otp'){
+    if(!val('inUser')){ toast('请输入统一身份账号'); return; }
+    if(!val('inOtp')){ toast('请输入动态口令'); return; }
+    S.data.user=val('inUser');
+  }
+
+  if(S.net==='off'){ toast('网络已断开，无法提交'); return; }
+
+  /* v1.0.16：校验必填只代表「表单填完了」，不代表认证通过。
+     真正的凭据认证（IAM 回答对不对）通过之后，还要按判定顺序
+     继续过密码状态与二次验证 —— 见 startAuthFlow。 */
+  startAuthFlow('bind', S.data.user || 'zhangsan');
+}
+
+/* 首次绑定的收尾：写绑定记录 + 成功提示 + 2 秒后收进菜单栏。
+   抽出来是因为它现在是认证链的终点，不再由 doBind 直接调。 */
+function commitBindAndWelcome(){
+  S.user = S.data.authUser || S.data.user || 'zhangsan';
+  S.bind=true; S.login=true;
+  /* ★ 绑定记录的唯一写入口 —— 「本机已绑定账号」从此有了来源 */
+  commitBind(S.user);
+  logIt('绑定校验通过 → 窗口内提示成功 → 约 2 秒后自动关闭');
+
+  /* 窗口内成功提示（不跳独立成功页） */
+  var d=document.getElementById('desk');
+  var w=d.querySelector('.win');
+  if(w){
+    var ov=document.createElement('div');
+    ov.className='overlay';
+    ov.innerHTML='<div class="dialog" style="width:250px"><div class="dbody" style="gap:0">'+
+      '<div class="tickbox"><div class="tick">'+
+      '<svg width="26" height="26" viewBox="0 0 24 24" fill="none">'+
+      '<path d="M5.5 12.4l4.4 4.4 8.6-9.2" stroke="#34C759" stroke-width="2.2"'+
+      ' stroke-linecap="round" stroke-linejoin="round"/></svg></div>'+
+      '<div class="tt">绑定成功</div></div></div></div>';
+    d.appendChild(ov);
+  }
+  renderMenuBar();
+  setTimeout(function(){
+    logIt('窗口关闭，收进菜单栏；图标点亮为 logo 原色');
+    S.view='menubar'; render();
+  }, 1800);
+}
+
+function doLogin(){
+  function val(id){ var e=document.getElementById(id); return e ? (e.value||'').trim() : ''; }
+
+  if(S.method==='pw'){
+    if(!val('inUser')){ toast('请输入统一身份账号'); return; }
+    if(!val('inPw')){ toast('请输入密码'); return; }
+    S.data.user=val('inUser');
+  } else if(S.method==='qr'){
+    if(S.data.qrExpired){ toast('二维码已过期，请刷新后重试'); return; }
+  } else if(S.method==='sms'){
+    if(!val('inPhone')){ toast('请输入手机号码'); return; }
+    if(!isPhone(val('inPhone'))){ toast('请输入正确的 11 位手机号码'); return; }
+    if(!val('inSms')){ toast('请输入验证码'); return; }
+    S.data.user = S.user || S.bindIam || 'zhangsan';
+  } else if(S.method==='otp'){
+    if(!val('inUser')){ toast('请输入统一身份账号'); return; }
+    if(!val('inOtp')){ toast('请输入动态口令'); return; }
+    S.data.user=val('inUser');
+  }
+
+  if(S.net==='off'){ toast('网络已断开，无法登录'); return; }
+
+  /* ── 退出后登录页的登录判定，拆成两层（v1.0.7）─────────────
+     第①层「凭据认证」：账号密码对不对，由 IAM 服务端回答。
+       原型无法真的调 IAM，这里视为已通过（真实客户端在此步换取 token）。
+     第②层「账号比对」：凭据对了，再看是不是本机绑定的那个账号 ——
+       本机 OS 账号与 IAM 账号是 1:1 绑定，换个账号登进来会和绑定关系自相矛盾。
+     拆两层的意义：第②层失败时，我们已经知道「来者是合法员工，只是不是本机绑定的那位」，
+       而这正是「原绑定用户离职、电脑转交他人」的死锁场景 ——
+       凭据既然已经认证过，就可以放出一条自助解绑的出路，无需再验任何东西。
+     反过来，若第①层就失败，则只报凭据错误，绝不透露本机绑定了谁。
+
+     「本机已绑定账号」读的是 S.bindIam —— 本机绑定记录里的那个统一身份账号，
+     由 commitBind（绑定成功）/ commitUnbind（注销成功）唯二维护。
+     它为空表示这台机器还没有绑定记录，此时**不做账号比对**（没记录可比，不凭空拦人）。 */
+  S.data.canUnbind=false;
+  if(S.view==='loginagain' && S.bindIam){
+    var acc=(S.data.user||'').trim();
+    if(acc && acc!==S.bindIam){
+      S.data.canUnbind=true;                /* 凭据已通过 → 开放自助解绑 */
+      S.data.loginErr='登录失败，本机已绑定账号：'+S.bindIam;
+      logIt('凭据认证通过，但 '+acc+' 不是本机绑定账号 '+S.bindIam+' → 开放自助解绑');
+      render();
+      return;
+    }
+  }
+  S.user=S.data.user||S.user||'zhangsan';
+
+  /* v1.0.16：账号比对通过只说明「对的人」，还要过密码状态与二次验证。
+     注意判定顺序 —— 账号比对排在改密/二次验证之前：
+     账号都不对的人，让他改完密再验一遍二次验证，纯属白折腾。 */
+  startAuthFlow('login', S.data.user||S.user);
+}
+
+/* 退出后登录的收尾：建立 IAM 会话，窗口收起。 */
+function commitLoginAndWelcome(){
+  S.user = S.data.authUser || S.data.user || S.user || 'zhangsan';
+  S.bind=true; S.login=true;
+  logIt('登录成功 → 窗口自动关闭 → 图标点亮为已登录');
+  toast('登录成功');
+  setTimeout(function(){ S.view='menubar'; render(); }, 900);
+}
+
+function doExit(){
+  S.modal=null; S.login=false; S.data.loginErr=null; S.data.canUnbind=false;
+  logIt('确认退出：清 IAM 会话与浏览器单点态，保留绑定关系');
+  S.view='loginagain';
+  render();
+  setTimeout(function(){ toast('已退出登录'); }, 200);
+}
+
+function doCancel(){
+  var fromLock=(S.data.cancelFrom==='lock');
+  /* 死锁路径不重复验证：来者已在登录页通过 IAM 凭据认证 */
+  if(!fromLock){
+    var pw=document.getElementById('cancelPw');
+    if(!pw || !pw.value){ S.data.cancelErr='请输入当前账号密码'; render(); return; }
+  }
+  S.modal=null;
+  /* ★ 绑定记录的唯一清空点 */
+  commitUnbind();
+  logIt(fromLock ? '确认注销 → 解除绑定、清本地凭证与 IAM 会话'
+                 : '身份验证通过 → 解除绑定、清本地凭证与 IAM 会话');
+  S.bind=false; S.login=false; S.user='';
+  S.data={};
+  S.view='cancel3';
+  render();
+}
+
+function toCancel2(){
+  /* lock 路径不该出现密码输入步骤（见上）—— 万一有别的入口摸进来，这里兜住 */
+  if(S.data.cancelFrom==='lock'){ doCancel(); return; }
+  S.modal='cancel2'; S.data.cancelErr=null;
+  logIt('点【确认注销】→ 进入身份验证');
+  render();
+  setTimeout(function(){ var el=document.getElementById('cancelPw'); if(el) el.focus(); }, 60);
+}
+
+function openApp(name){
+  logIt('点「'+name+'」，以单点方式在浏览器打开');
+  toast('已通过单点登录打开「'+name+'」');
+  S.view='apps'; renderMenuBar();
+}
+
+/* ---------- 网络切换 ---------- */
+document.getElementById('netPick').addEventListener('click', function(e){
+  var b=e.target.closest('button'); if(!b) return;
+  var n=b.getAttribute('data-net');
+  S.net=n;
+  var nm={ok:'正常',weak:'较弱',off:'已断开',re:'重连中'};
+  logIt('网络状态切到「'+nm[n]+'」');
+  render();
+});
+
+/* ---------- v1.0.16 认证策略演示开关 ---------- */
+document.getElementById('pwdPick').addEventListener('click', function(e){
+  var b=e.target.closest('button'); if(!b) return;
+  var v=b.getAttribute('data-pwd');
+  S.demo.pwdState = v;
+  Array.prototype.forEach.call(this.querySelectorAll('button'), function(x){
+    x.classList.toggle('on', x===b);
+  });
+  logIt('演示：密码状态设为「'+({normal:'正常',initial:'初始密码',
+    expired:'已过期',soon:'即将过期'}[v])+'」');
+});
+/* 剩余天数 N：只影响「即将过期」那一句提示，其余两支不读它 */
+document.getElementById('daysPick').addEventListener('click', function(e){
+  var b=e.target.closest('button'); if(!b) return;
+  S.demo.pwdDays = parseInt(b.getAttribute('data-days'), 10) || 3;
+  Array.prototype.forEach.call(this.querySelectorAll('button'), function(x){
+    x.classList.toggle('on', x===b);
+  });
+  logIt('演示：密码剩余天数 N = '+S.demo.pwdDays+' 天');
+});
+document.getElementById('secPick').addEventListener('click', function(e){
+  var b=e.target.closest('button'); if(!b) return;
+  S.demo.second = (b.getAttribute('data-sec') === '1');
+  Array.prototype.forEach.call(this.querySelectorAll('button'), function(x){
+    x.classList.toggle('on', x===b);
+  });
+  logIt('演示：二次验证策略 = '+(S.demo.second?'开':'关'));
+});
+document.getElementById('mthPick').addEventListener('click', function(e){
+  var b=e.target.closest('button'); if(!b) return;
+  var n=b.getAttribute('data-mth');
+  S.enabled = MTH_PRESETS[n].slice();
+  Array.prototype.forEach.call(this.querySelectorAll('button'), function(x){
+    x.classList.toggle('on', x===b);
+  });
+  /* 当前选中的方式可能刚被后台关掉了 —— 归回第一个开通的方式，别让界面停在空白表单上 */
+  if(S.enabled.indexOf(S.method) < 0) S.method = S.enabled[0];
+  logIt('演示：后台开通 '+n+' 种认证方式 → '+
+        S.enabled.map(function(id){ return methodById(id).nm; }).join(' / '));
+  render();
+});
+
+/* ---------- 工具 ---------- */
+function resetAll(){
+  S.bind=false; S.login=false; S.view='bind'; S.method='pw';
+  /* 复位 = 回到「这台机器还没有绑定记录」，macUser 仍由"系统"给出 */
+  S.user=''; S.macUser='zhangsan'; S.bindIam='';
+  S.net='ok'; S.modal=null; S.data={}; S.log=[];
+  /* v1.0.16：认证链上的中间态也要一起清 —— 否则「重来一遍」后
+     窗口还停在改密页或二次验证页上，跟 reset 的语义不符 */
+  S.step=null; S.chpw=null; S.second=null;
+  S.demo = { pwdState:'normal', second:false, pwdDays:3,
+             secondWays:['sms','face','fp','otp'], secondWay:'sms' };
+  S.enabled = MTH_PRESETS['6'].slice();
+  /* 演示开关的按钮高亮也得跟着回到默认，不然状态与按钮对不上 */
+  var pick = function(sel, attr, val){
+    var root = document.querySelector(sel); if(!root) return;
+    Array.prototype.forEach.call(root.querySelectorAll('button'), function(b){
+      b.classList.toggle('on', b.getAttribute(attr) === val);
+    });
+  };
+  pick('#pwdPick','data-pwd','normal');
+  pick('#daysPick','data-days','3');
+  pick('#secPick','data-sec','0');
+  pick('#mthPick','data-mth','6');
+
+  logIt('重置：回到首次绑定');
+  render();
+  toast('已重置到初始状态');
+}
+
+function autoPlay(){
+  resetAll();
+  var seq = [
+    /* ① 首次绑定：直接推进状态并走绑定动画 */
+    { t: 600,  run: function(){ go('bind'); } },
+    { t: 900,  run: function(){
+        S.data.user='zhangsan'; S.user='zhangsan';
+        S.bind=true; S.login=true;
+        commitBind(S.user);            /* 与 doBind() 走同一个写入口 */
+        logIt('完成统一身份认证 → 绑定成功、IAM 会话建立');
+        toast('绑定成功');
+      } },
+    { t: 1100, run: function(){ S.view='menubar'; S.winOpen=false; 
+        logIt('窗口收起 → 菜单栏图标点亮为已登录'); render(); } },
+    /* ② 菜单栏常驻 → 下拉面板 */
+    { t: 900,  run: function(){ S.winOpen=true; go('panel'); } },
+    /* ③ 访问应用门户：浏览器侧自动单点 */
+    { t: 1300, run: function(){ go('apps'); logIt('经浏览器访问门户 → 自动单点，无需再输密码'); } },
+    /* ④ 设置 */
+    { t: 1300, run: function(){ go('panel'); } },
+    { t: 900,  run: function(){ go('settings'); } },
+    /* ⑤ 退出登录（保留绑定）→ 换人登录页 */
+    { t: 1300, run: function(){ go('panel'); } },
+    { t: 900,  run: function(){ askExit(); } },
+    { t: 1000, run: function(){ doExit(); } },
+    { t: 1500, run: function(){ go('loginagain'); } },
+    /* ⑥ 退出页只认绑定账号：换个账号会被拦下（v1.0.6） */
+    { t: 1400, run: function(){
+        S.data.user='lisi'; render();
+        var pw=document.getElementById('inPw');
+        if(pw){ pw.value='any'; pw.dispatchEvent(new Event('input')); }
+        logIt('演示：改用 lisi 登录，看拦截效果');
+      } },
+    { t: 1200, run: function(){ doLogin(); } },
+    /* ⑦ 死锁路径：被拦下后可自助解绑（v1.0.7）——原绑定用户已离职 */
+    { t: 1700, run: function(){
+        askCancelFromLock();
+        logIt('演示：原绑定用户已离职 → 走自助解绑'); } },
+    { t: 1300, run: function(){ doCancel(); } },
+    /* ⑧ 解绑后新用户完成绑定 → 绑定记录易主
+       （v1.0.8 之前这里得手动塞 S.osUser='lisi'，因为绑定流程压根不写它 —— 那个 hack 已删） */
+    { t: 2100, run: function(){
+        S.user='lisi'; S.data.user='lisi';
+        S.bind=true; S.login=true;
+        commitBind(S.user);            /* 与 doBind() 走同一个写入口 */
+        go('panel');
+        logIt('lisi 完成绑定 → 本机绑定记录已变为 lisi'); } },
+    /* ⑨ 已登录态从菜单栏面板注销（走密码验证那条路径） */
+    { t: 1400, run: function(){ askCancel(); } },
+    { t: 1000, run: function(){ toCancel2(); } },
+    { t: 1000, run: function(){ logIt('自动演示结束'); toast('演示完成'); } }
+  ];
+  var i=0;
+  logIt('开始自动演示全流程');
+  function next(){
+    if(i>=seq.length) return;
+    var step=seq[i++];
+    step.run();
+    setTimeout(next, step.t);
+  }
+  setTimeout(next, 400);
+}
+
+/* ---------- 时钟 ---------- */
+function tick(){
+  var d=new Date();
+  document.getElementById('mbClock').textContent =
+    d.getHours()+':'+String(d.getMinutes()).padStart(2,'0');
+}
+tick(); setInterval(tick, 20000);
+
+/* ---------- 启动 ---------- */
+/* 本文件就是「联动原型本体」（v1.0.17 起）。
+   原先它叫 linked-prototype.html，被一个 11.9 KB 的 index.html「壳」
+   用 <iframe> 装着 —— 那个壳除了转发什么都没有，已删除。
+   现在独立打开这个文件，就是完整形态：桌面原型 + 流程轨道 + 状态面板
+   + 操作日志 + 本页交互说明浮层。
+
+   嵌入模式（v1.0.9 · 供交互说明页 iframe 调用）
+   参数：
+     ?embed=1            嵌入式形态：收掉工具条与调试入口，默认收起右侧流程轨道
+     ?rail=1             配合 embed=1 用：轨道**展开**（说明页靠它看/点流程轨道）
+     ?node=<视图名>      直接跳到该节点（视图名见 go() 的 switch）
+   不带参数时行为与独立打开完全一致。
+
+   四种组合：
+     独立打开                      轨道展开 · 工具条在 · 日志在
+     ?embed=1                     轨道收起 · 工具条藏 · 日志在
+     ?embed=1&rail=1              轨道展开 · 工具条藏 · 日志在   ← 交互说明页用这个
+     ?embed=1&rail=1&node=settings 同上 + 直达设置页
+
+   v1.0.14：被嵌入时，每次换页会向外层 postMessage 一条
+     { t:'e-login-view', node:<视图名>, name:<中文名> }
+   交互说明页据此知道用户停在哪，右栏与跳转才不会落回首页。
+   独立打开不发（window.parent === window）。 */
+function bootFromQuery(){
+  var q = new URLSearchParams(location.search);
+  if(q.get('embed')==='1'){
+    document.documentElement.classList.add('embedded');
+    /* v1.0.13：把「嵌入形态」与「轨道是否收起」拆开。
+       以前 embed=1 顺手就把轨道折了，导致嵌入页里看不到轨道。
+       现在 rail=1 表示「嵌入形态但轨道展开」—— 交互说明页要的就是这个：
+       左侧直接用联动轨道跳流程，右侧仍是那 72 条说明，两边互不影响。 */
+    var keepRail = (q.get('rail') === '1');
+    if(keepRail){
+      /* 打上标记，让「收起轨道」按钮在嵌入形态下也放行 ——
+         轨道能收起，就得能再展开，不然收起来就回不去了。 */
+      document.documentElement.classList.add('rail-on');
+    }else{
+      document.getElementById('shell').classList.add('folded');
+    }
+    logIt('嵌入模式启动：' + (keepRail ? '流程轨道已展开' : '流程轨道已收起'));
+  }
+  var node = q.get('node');
+  if(node){
+    /* 认证链的两个步骤页（v1.0.21）：?node=chpw / ?node=second
+       它们没有独立视图，靠 ELogin.go 里那段「补前置状态 + 进步骤」的分支直达。
+       可交互 PRD 点 §3.10 / §3.11 时走的就是这条。 */
+    if(node === 'chpw' || node === 'second'){
+      window.ELogin.go(node);
+      setTimeout(function(){
+        /* 二次验证页没有专属类名，靠「返回上一级」按钮 + S.second 认它 */
+        var ok = (node === 'chpw')
+          ? !!document.querySelector('.chpw')
+          : !!(S.second && document.querySelector('.backbtn'));
+        logIt('嵌入模式直达认证链步骤 → ' + node + (ok ? '（已渲染）' : '（警告：未渲染出内容）'));
+      }, 0);
+      return;
+    }
+    /* 有些节点有前置条件（如 panel 需要已登录），直接 go() 会被守卫拦下。
+       这里按节点补上必要的演示前置状态，让研发点进来看得到东西。 */
+    var needBind  = ['menubar','panel','panel-off','apps','settings','exitok','loginagain','forgot',
+                     'cancel','cancel2','cancel3','bind','bindfail'];
+    var needLogin = ['panel','apps','settings','exitok'];
+    if(needBind.indexOf(node)>=0){
+      S.bind = true;
+      if(!S.bindIam) commitBind('zhangsan', true);   /* 走唯一写入口 */
+    }
+    if(needLogin.indexOf(node)>=0){ S.login = true; S.user = S.bindIam || 'zhangsan'; }
+    if(node==='loginagain'){ S.login = false; S.user = S.bindIam || 'zhangsan'; }
+    /* 两种「未登录面板」要分开直达（v1.0.10 起该形态按有无绑定记录分流）：
+       panel-off      —— 已绑定但退出登录（有记录，面板出现「登录统一身份」）
+       panel-off-new  —— 全新机器，从未绑定过（无记录，面板出现「关联统一身份账号」）
+       后者必须先清掉绑定记录，否则 commitBind 补上的 zhangsan 会把它变成前者。 */
+    if(node==='panel-off'){
+      S.login = false; S.user = '';
+      if(!S.bindIam) commitBind('zhangsan', true);
+    }
+    if(node==='panel-off-new'){
+      S.bind = true; S.bindIam = ''; S.login = false; S.user = '';
+    }
+    if(node==='bind'){ S.bind=false; S.bindIam=''; S.login=false; S.user=''; }
+    if(node==='bindfail'){ S.bind=false; S.bindIam=''; S.login=false; S.user=''; S.view='bindfail'; render(); }
+    else { go(node); }
+    /* 直达后自检：确认渲染确实发生（研发/回归都能从日志看到） */
+    setTimeout(function(){
+      var hasWin = !!document.querySelector('.win, .pop');
+      logIt('嵌入模式直达节点 → '+node+(hasWin?'（已渲染）':'（警告：未渲染出内容）'));
+    }, 0);
+  }
+}
+bootFromQuery();
+logIt('原型启动：当前未绑定，等待首次绑定');
+render();
+/* v1.0.14：开场就把落点告诉外层。带 ?node= 直达时，bootFromQuery 已经把
+   S.view 设好了，所以这一条就是「我现在停在这一页」的第一句话。 */
+notifyHost();
+</script>
+<!-- 本页交互说明（v1.0.12）：右侧滑出的浮层，不再是布局里的一栏。
+     挂 body 下而不是 .shell 下 —— .shell 是 flex 容器，留在里面会被压/被裁。
+     内容按「当前界面」自动刷新：切界面时 render() 会调 renderNotes()。 -->
+<div class="notes-mask" id="notesMask" onclick="closeNotes()" data-page-node-id="vqIcQdDz8nPpfLaSzq27AG"></div>
+<aside class="notes" id="notes" role="dialog" aria-label="本页交互说明" data-page-node-id="X5hROoLVQgeeXhWATMTmrH">
+  <div class="notes-h" data-page-node-id="pjB7l65CqwhGIgDkKyskSn">
+    <div class="t" data-page-node-id="LBhutSPQUeZQtqYItz5Jjd">
+      <h2 data-page-node-id="UJiEszFrckCKLwD4io3D1i">本页交互说明</h2>
+      <p id="notesSub" data-page-node-id="IGEoRHazeQAeW2jtMhwx3F">—</p>
+    </div>
+    <button class="fold" onclick="closeNotes()" title="关闭（Esc）" data-page-node-id="Rbcp5VQMbRgkQWHzQhi2IU">&#10005;</button>
+  </div>
+  <div class="notes-b" id="notesBody" data-page-node-id="7Nh50CzY3pIBRhnjd7N7Pe"></div>
+</aside>
+
+</body>
+</html>
